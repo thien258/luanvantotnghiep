@@ -37,6 +37,20 @@
 
                 <td><img src="{{ $object->image }}" width="150" alt=""></td>
                 <td>{{$object->price}}</td>
+
+                <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16">
+                        <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z" />
+                    </svg>
+                    {{ $object->concentration?->concentration ?? 'Trống' }}
+                </td>
+
+                <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16">
+                        <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z" />
+                    </svg>
+                    {{ $object->volume?->name ?? 'Trống' }}
+                </td>
                 <td>
                     @if($object->status==1)
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check-circle" viewBox="0 0 16 16">
@@ -50,9 +64,6 @@
                     </svg>
                     @endif
                 </td>
-                <td>{{$object->concentration}}</td>
-                <td>{{$object->stock}}</td>
-                <td>{{$object->volume}}</td>
 
                 <td><a href=" {{ route('admin.product.edit',['product' =>$object->id]) }}  "><i class="fa-solid fa-pen-to-square text-warning"></i></a></td>
                 <td><a href="{{route('admin.product.destroy',['product'=>$object->id])}}" title="Delete {{$object->name}}" onclick="event.preventDefault();window.confirm('Bạn đã chắc chắn xóa '+ '{{$object->name}}' +' chưa?') ?document.getElementById('product-delete-{{ $object->id }}').submit() :0;" class="btn btn-danger"><i class="far fa-trash-alt"></i>

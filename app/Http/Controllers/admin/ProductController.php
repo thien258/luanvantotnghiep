@@ -4,6 +4,8 @@ namespace App\Http\Controllers\admin;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Concentration;
+use App\Models\Volume;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -23,7 +25,9 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('admin.product.add', compact('categories'));
+        $concentrations = Concentration::all();
+        $volumes = Volume::all();
+        return view('admin.product.add', compact('categories', 'concentrations', 'volumes'));
     }
     public function store(Request $request)
     {
@@ -33,9 +37,9 @@ class ProductController extends Controller
             'decription' => $request->decription,
             'price' => $request->price,
             'status' => $request->status,
-            'concentration' => $request->concentration,
             'stock' => $request->stock,
-            'volume' => $request->volume,
+            'idConcentration' => $request->idConcentration, 
+            'idVolume' => $request->idVolume,
             'idCategory' => $request->idCategory,
 
         ]);
@@ -49,7 +53,9 @@ class ProductController extends Controller
     {
         $product = Product::find($id);
         $categories = Category::all();
-        return view('admin.product.edit', compact('product','categories'));
+        $concentrations = Concentration::all();
+        $volumes = Volume::all();
+        return view('admin.product.edit', compact('product','categories','concentrations','volumes'));
     }
     public function update(Request $request, $id)
     {
@@ -60,9 +66,9 @@ class ProductController extends Controller
             'decription' => $request->decription,
             'price' => $request->price,
             'status' => $request->status,
-            'concentration' => $request->concentration,
+            'idConcentration' => $request->idConcentration,
             'stock' => $request->stock,
-            'volume' => $request->volume,
+            'idVolume' => $request->idVolume,
             'idCategory' => $request->idCategory,
         ]);
         if ($product)

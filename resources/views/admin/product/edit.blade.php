@@ -19,18 +19,30 @@
         <label for="image" class="form-label">image</label>
         <input type="text" class="form-control" id="image" name="image" value="{{$product->image}}">
       </div>
-      <div class="mb-3">
-        <label for="concentration" class="form-label">Concentration</label>
-        <input type="text" class="form-control" id="concentration" name="concentration" value="{{$product->concentration}}">
-      </div>
+    <div class="mb-3">
+                <label for="idConcentration" name='idConcentration' class="form-label">Concentration</label>
+                <select name="idConcentration" class='form-control'>
+                    @forelse($concentrations as $concentration)
+                    <option value="{{ $concentration->id }}">{{ $concentration->concentration  }}</option>
+                    @empty
+                    <option>Không có concentration</option>
+                    @endforelse
+                </select>
+            </div>
       <div class="mb-3">
         <label for="stock" class="form-label">Stock</label>
         <input type="number" class="form-control" id="stock" name="stock" value="{{$product->stock}}">
       </div>
-      <div class="mb-3">
-        <label for="volume" class="form-label">Volume</label>
-        <input type="text" class="form-control" id="volume" name="volume" value="{{$product->volume}}">
-      </div>
+    
+             <div class="mb-3">
+                <label for="idVolume" name='idVolume' class="form-label">Volume</label>
+                <select name="idVolume" class='form-control'>
+                    @forelse($volumes as $volume)
+                    <option value="{{ $volume->id }}">{{ $volume->name  }}</option>
+                    @empty
+                    <option>Không có volume</option>
+                    @endforelse
+                </select>
       <div class="mb-3">
         <label for="price" class="form-label">price</label>
         <input type="number" class="form-control" id="price" name="price" value="{{$product->price}}">

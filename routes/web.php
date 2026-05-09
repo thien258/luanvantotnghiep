@@ -1,5 +1,7 @@
 <?php
 use App\Http\Controllers\admin\CategoryController;
+use App\Http\Controllers\admin\ConcentrationController;
+use App\Http\Controllers\admin\VolumeController;
 use App\Http\Controllers\admin\FooterController;
 use App\Http\Controllers\admin\TitleController;
 use App\Http\Controllers\admin\ProductController;
@@ -16,6 +18,8 @@ use Illuminate\Support\Facades\Auth;
 
         Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('category', CategoryController::class);
+            Route::resource('concentration', ConcentrationController::class);
+            Route::resource('volume', VolumeController::class);
 
             Route::get('/', [App\Http\Controllers\admin\AdminController::class, 'index'])
                 ->name('dashboard');

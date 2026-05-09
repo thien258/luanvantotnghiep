@@ -7,9 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $table="products";
-      protected $fillable=["id","title",'image','decription','price','status','concentration','stock','volume','idCategory'];
+      protected $fillable=["id","title",'image','decription','price','status','idConcentration','stock','idVolume','idCategory'];
     public function category(){
         return $this->belongsTo('App\Models\Category','idCategory','id');
+    }
+    public function concentration(){
+        return $this->belongsTo('App\Models\Concentration','idConcentration','id');
+    }
+    public function volume(){
+        return $this->belongsTo('App\Models\Volume','idVolume','id');
     }
   public function comment(){
 return $this->hasMany('App\Models\Comment','idProduct','id');

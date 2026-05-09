@@ -68,12 +68,15 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Login Screens:</h6>
                         <a class="collapse-item" href="{{route('admin.category.index')}}">Category</a>
+                        <a class="collapse-item" href="{{route('admin.concentration.index')}}">Concentration</a>
+                        <a class="collapse-item" href="{{route('admin.volume.index')}}">Volume</a>
                         <a class="collapse-item" href="{{route('admin.product.index')}}">product</a>
                         <a class="collapse-item" href="{{ route('admin.contacts.index') }}">Contact</a>
                         <!-- <a class="collapse-item" href="{{ route('admin.user.index') }}">User</a> -->
                         <a class="collapse-item" href="{{ route('admin.orders.index') }}">Order</a>
                         <a class="collapse-item" href="{{ route('admin.footer.index') }}">footer</a>
                         <a class="collapse-item" href="{{ route('admin.title.index') }}">title</a>
+                
 
                     </div>
                 </div>

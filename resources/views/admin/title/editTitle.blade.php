@@ -11,7 +11,7 @@
                 </div>
 
                 <div class="card-body">
-                    <form action="{{ route('admin.title.update', $title->id) }}" method="POST">
+                    <form action="{{ route('admin.title.update', $title->idTitle) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -38,7 +38,7 @@
                                    value="{{ $title->button }}">
                         </div>
 
-                
+            
 
                         <div class="text-end">
                             <button type="submit" class="btn btn-success">

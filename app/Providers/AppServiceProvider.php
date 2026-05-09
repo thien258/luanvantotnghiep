@@ -9,6 +9,7 @@ use App\Models\Footer;
 use App\Models\Product;        
 
 
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -25,8 +26,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
            View::share('categories', Category::where('status', 1)->get());
+        
     View::composer('*', function ($view) {
         $view->with('footer', Footer::first()); // Lấy 1 footer duy nhất
+  
     });
     }
 }

@@ -36,10 +36,10 @@
 
 					<div class="mb-4 py-3 border-top border-bottom">
 						<div class="text-uppercase small tracking-widest text-muted mb-2">
-							Concentration: <span class="text-dark fw-bold ms-2">{{$product->concentration}}</span>
+							Concentration: <span class="text-dark fw-bold ms-2">{{$product->concentration->concentration}}</span>
 						</div>
 						<div class="text-uppercase small tracking-widest text-muted">
-							Volume: <span class="text-dark fw-bold ms-2">{{$product->volume}} ml</span>
+							Volume: <span class="text-dark fw-bold ms-2">{{$product->volume->name}}</span>
 						</div>
 					</div>
 
@@ -108,11 +108,6 @@
 </div>
 @endforelse
 
-<section class="py-5 bg-dark text-white text-center">
-	<div class="container py-3">
-		<h3 class="text-uppercase fw-bold mb-2">Winter Sale Event</h3>
-		<p class="text-muted mb-0">Up to 50% Off on all signature fragrances.</p>
-	</div>
-</section>
+
 
 @endsection
