@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Auth;
    Route::resource('contact', ContactController::class);
    Route::resource('loves',LoveController::class);
    Route::resource('order', OrderController::class)->middleware('auth');
-   Route::resource('show-products', ProductShowController::class);
+   Route::get('/show-products', [HomeController::class, 'showProducts'])->name('show_products');
 Route::resource('comments', App\Http\Controllers\CommentController::class);
 Route::get('/', [App\Http\Controllers\HomeController::class,'index'])->name('welcome');
 Route::get('/category_product/{category}', [App\Http\Controllers\HomeController::class,'category_product'])->name('category_product');

@@ -44,28 +44,23 @@
           </div>
         </div>
 
-        <div class="mb-5">
+   <div class="mb-5">
           <p class="text-uppercase fw-bold small mb-3">Nồng độ</p>
+          
+          @foreach($all_concentrations as $concentration)
           <div class="form-check mb-2">
-            <input class="form-check-input rounded-0 border-dark" type="checkbox" value="" id="concExtrait">
-            <label class="form-check-label text-muted small" for="concExtrait">Extrait de Parfum (20-30%)</label>
+            <input class="form-check-input rounded-0 border-dark" 
+                   type="checkbox" 
+                   name="concentrations[]" 
+                   value="{{ $concentration->id }}" 
+                   id="conc_{{ $concentration->id }}"
+                   {{ (is_array(request('concentrations')) && in_array($concentration->id, request('concentrations'))) ? 'checked' : '' }}>
+            <label class="form-check-label text-muted small" for="conc_{{ $concentration->id }}">
+                {{ $concentration->concentration }}
+            </label>
           </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input rounded-0 border-dark" type="checkbox" value="" id="concEDP">
-            <label class="form-check-label text-muted small" for="concEDP">Eau de Parfum (EDP) (15-20%)</label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input rounded-0 border-dark" type="checkbox" value="" id="concEDT">
-            <label class="form-check-label text-muted small" for="concEDT">Eau de Toilette (EDT)(5-15%)</label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input rounded-0 border-dark" type="checkbox" value="" id="concEDT">
-            <label class="form-check-label text-muted small" for="concEDT">Eau de Cologne (EDC) (3-8%)</label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input rounded-0 border-dark" type="checkbox" value="" id="concEDT">
-            <label class="form-check-label text-muted small" for="concEDT">Eau Fraiche (0-3%)</label>
-          </div>
+          @endforeach
+          
         </div>
 
         <button type="submit" class="btn btn-dark w-100 rounded-0 text-uppercase fw-bold py-2">Áp dụng</button>
