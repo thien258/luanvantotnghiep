@@ -41,11 +41,24 @@
 
 							<li class="nav-item submenu dropdown">
 								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-									aria-expanded="false">Shop</a>
+									aria-expanded="false">Category</a>
 								<ul class="dropdown-menu">
 									@forelse($categories as $object)
 									<li class="nav-item">
 										<a href="{{ route('category_product',['category'=>$object->id]) }}">{{ $object->name }}</a>
+									</li>
+									@empty
+									<h1>not datahere</h1>
+									@endforelse
+								</ul>
+							</li>
+							<li class="nav-item submenu dropdown">
+								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+									aria-expanded="false">Brand</a>
+								<ul class="dropdown-menu">
+									@forelse($brands as $object)
+									<li class="nav-item">
+										<a href="{{ route('brand_product',['brand'=>$object->id]) }}">{{ $object->name }}</a>
 									</li>
 									@empty
 									<h1>not datahere</h1>

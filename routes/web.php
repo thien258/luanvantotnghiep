@@ -1,5 +1,8 @@
 <?php
+
+use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\CategoryController;
+
 use App\Http\Controllers\admin\ConcentrationController;
 use App\Http\Controllers\admin\VolumeController;
 use App\Http\Controllers\admin\FooterController;
@@ -18,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 
         Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('category', CategoryController::class);
+            Route::resource('brand', BrandController::class);
             Route::resource('concentration', ConcentrationController::class);
             Route::resource('volume', VolumeController::class);
 
@@ -39,7 +43,8 @@ Route::resource('comments', App\Http\Controllers\CommentController::class);
 Route::get('/', [App\Http\Controllers\HomeController::class,'index'])->name('welcome');
 Route::get('/category_product/{category}', [App\Http\Controllers\HomeController::class,'category_product'])->name('category_product');
 Route::get('/category_product/single_product/{category}', [App\Http\Controllers\HomeController::class,'single_product'])->name('single_product');
-
+Route::get('/brand_product/{brand}', [App\Http\Controllers\HomeController::class,'brand_product'])->name('brand_product');
+Route::get('/brand_product/single_product/{brand}', [App\Http\Controllers\HomeController::class,'single_product'])->name('single_product');
 
 Route::get('/register', function () {
     return view('register');

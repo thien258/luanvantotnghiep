@@ -15,56 +15,44 @@
       </div>
 
       <form action="" method="GET">
-        <div class="mb-5">
-          <p class="text-uppercase fw-bold small mb-3">Thương hiệu</p>
-          <div class="form-check mb-2">
-            <input class="form-check-input rounded-0 border-dark" type="checkbox" value="" id="brandChanel">
-            <label class="form-check-label text-muted small" for="brandChanel">Chanel</label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input rounded-0 border-dark" type="checkbox" value="" id="brandDior">
-            <label class="form-check-label text-muted small" for="brandDior">Dior</label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input rounded-0 border-dark" type="checkbox" value="" id="brandGucci" checked>
-            <label class="form-check-label text-muted small" for="brandGucci">Gucci</label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input rounded-0 border-dark" type="checkbox" value="" id="brandLeLabo">
-            <label class="form-check-label text-muted small" for="brandLeLabo">Le Labo</label>
-          </div>
+        @if(!isset($category) && isset($categories))
+    <div class="mb-5">
+        <p class="text-uppercase fw-bold small mb-3">Danh mục</p>
+        @foreach($categories as $cat)
+        <div class="form-check mb-2">
+            <input class="form-check-input rounded-0 border-dark" type="checkbox" name="categories[]" value="{{ $cat->id }}" id="cat_{{ $cat->id }}" {{ (is_array(request('categories')) && in_array($cat->id, request('categories'))) ? 'checked' : '' }}>
+            <label class="form-check-label text-muted small" for="cat_{{ $cat->id }}">{{ $cat->name }}</label>
         </div>
+        @endforeach
+    </div>
+    @endif
 
-        <div class="mb-5">
-          <p class="text-uppercase fw-bold small mb-3">Mức giá tối đa</p>
-          <input type="range" class="form-range" min="0" max="10000000" id="priceRange">
-          <div class="d-flex justify-content-between mt-2">
-            <span class="small fw-bold">0đ</span>
-            <span class="small fw-bold">10.000.000đ</span>
-          </div>
+    {{-- LỌC THƯƠNG HIỆU: Chỉ hiện nếu KHÔNG PHẢI đang ở trang thương hiệu --}}
+    @if(!isset($brand) && isset($all_brands))
+    <div class="mb-5">
+        <p class="text-uppercase fw-bold small mb-3">Thương hiệu</p>
+        @foreach($all_brands as $b)
+        <div class="form-check mb-2">
+            <input class="form-check-input rounded-0 border-dark" type="checkbox" name="brands[]" value="{{ $b->id }}" id="brand_{{ $b->id }}" {{ (is_array(request('brands')) && in_array($b->id, request('brands'))) ? 'checked' : '' }}>
+            <label class="form-check-label text-muted small" for="brand_{{ $b->id }}">{{ $b->name }}</label>
         </div>
+        @endforeach
+    </div>
+    @endif
 
-   <div class="mb-5">
-          <p class="text-uppercase fw-bold small mb-3">Nồng độ</p>
-          
-          @foreach($all_concentrations as $concentration)
-          <div class="form-check mb-2">
-            <input class="form-check-input rounded-0 border-dark" 
-                   type="checkbox" 
-                   name="concentrations[]" 
-                   value="{{ $concentration->id }}" 
-                   id="conc_{{ $concentration->id }}"
-                   {{ (is_array(request('concentrations')) && in_array($concentration->id, request('concentrations'))) ? 'checked' : '' }}>
-            <label class="form-check-label text-muted small" for="conc_{{ $concentration->id }}">
-                {{ $concentration->concentration }}
-            </label>
-          </div>
-          @endforeach
-          
+    {{-- LỌC NỒNG ĐỘ: Luôn hiện --}}
+    <div class="mb-5">
+        <p class="text-uppercase fw-bold small mb-3">Nồng độ</p>
+        @foreach($all_concentrations as $concentration)
+        <div class="form-check mb-2">
+            <input class="form-check-input rounded-0 border-dark" type="checkbox" name="concentrations[]" value="{{ $concentration->id }}" id="conc_{{ $concentration->id }}" {{ (is_array(request('concentrations')) && in_array($concentration->id, request('concentrations'))) ? 'checked' : '' }}>
+            <label class="form-check-label text-muted small" for="conc_{{ $concentration->id }}">{{ $concentration->concentration }}</label>
         </div>
+        @endforeach
+    </div>
 
-        <button type="submit" class="btn btn-dark w-100 rounded-0 text-uppercase fw-bold py-2">Áp dụng</button>
-      </form>
+    <button type="submit" class="btn btn-dark w-100 rounded-0 text-uppercase fw-bold py-2">Áp dụng</button>
+</form>
     </div>
 
     <div class="col-lg-9">

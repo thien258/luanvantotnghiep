@@ -58,6 +58,16 @@
                     </select>
                 </div>
                 <div class="mb-3">
+                    <label for="idBrand" name='idBrand' class="form-label">Brand</label>
+                    <select name="idBrand" class='form-control'>
+                        @forelse($brands as $brand)
+                        <option value="{{ $brand->id }}">{{ $brand->name  }}</option>
+                        @empty
+                        <option>Không có brand</option>
+                        @endforelse
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label for="status" name='status' class="form-label">status</label>
                     <select name="status" class='form-control'>
                         <option value="1">ON</option>

@@ -4,11 +4,15 @@
 <div class="container">
     <div class="row">
 
-        <form action="{{route('admin.category.store')  }}" method="POST">
+        <form action="{{route('admin.brand.store')  }}" method="POST">
             @csrf()
             <div class="mb-3">
-                <label for="email" class="form-label">Category</label>
+                <label for="email" class="form-label">brand</label>
                 <input type="text" class="form-control" id="name" name="name" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">image</label>
+                <input type="text" class="form-control" id="image" name="image" aria-describedby="emailHelp">
             </div>
           
             <div class="mb-3">
@@ -21,7 +25,7 @@
 
 
             <button type="submit" class="btn btn-primary">Submit</button>
-            <a href="{{ route('admin.category.index') }} " class='btn btn-secondary'>BACK</a>
+            <a href="{{ route('admin.brand.index') }} " class='btn btn-secondary'>BACK</a>
         </form>
 
     </div>

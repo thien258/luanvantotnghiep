@@ -8,6 +8,7 @@ use App\Models\Contact;
 
 class ContactAdminController extends Controller
 {
+
     //
      public function index()
     {

@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Concentration;
 use App\Models\Volume;
+use App\Models\Brand;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,10 @@ class ProductController extends Controller
         $categories = Category::all();
         $concentrations = Concentration::all();
         $volumes = Volume::all();
-        return view('admin.product.add', compact('categories', 'concentrations', 'volumes'));
+      
+        $brands = Brand::all();
+
+        return view('admin.product.add', compact('categories', 'concentrations', 'volumes', 'brands'));
     }
     public function store(Request $request)
     {
@@ -41,7 +45,7 @@ class ProductController extends Controller
             'idConcentration' => $request->idConcentration, 
             'idVolume' => $request->idVolume,
             'idCategory' => $request->idCategory,
-
+            'idBrand' => $request->idBrand,
         ]);
         if ($product)
             return redirect()->route('admin.product.index');
@@ -55,7 +59,8 @@ class ProductController extends Controller
         $categories = Category::all();
         $concentrations = Concentration::all();
         $volumes = Volume::all();
-        return view('admin.product.edit', compact('product','categories','concentrations','volumes'));
+        $brands = Brand::all();
+        return view('admin.product.edit', compact('product','categories','concentrations','volumes', 'brands'));
     }
     public function update(Request $request, $id)
     {
@@ -70,6 +75,7 @@ class ProductController extends Controller
             'stock' => $request->stock,
             'idVolume' => $request->idVolume,
             'idCategory' => $request->idCategory,
+            'idBrand' => $request->idBrand,
         ]);
         if ($product)
             return redirect()->route('admin.product.index');

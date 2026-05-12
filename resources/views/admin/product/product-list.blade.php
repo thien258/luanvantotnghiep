@@ -10,14 +10,15 @@
                 <th scope="col">Title</th>
                 <th scope="col">Decription</th>
                 <th scope="col">Category</th>
+                <th scope="col">Brand</th>
                 <th scope="col">Image</th>
                 <th scope="col">Price</th>
                 <th scope="col">Concentration</th>
                 <th scope="col">Stock</th>
                 <th scope="col">Volume</th>
                 <th scope="col">Status</th>
-                <th scope="col">Edit</th>
-                <th scope="col">Delete</th>
+                <th scope="col">Option</th>
+             
 
             </tr>
         </thead>
@@ -29,26 +30,24 @@
                 <td>{{$object->title}}</td>
                 <td>{{$object->decription}}</td>
                 <td>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16">
-                        <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z" />
-                    </svg>
+
                     {{$object->category->name}}
                 </td>
+               <td>
+        {{-- Thêm dấu ?-> để nếu không có brand thì in ra chữ 'Trống' thay vì báo lỗi --}}
+        {{ $object->brand?->name ?? 'Trống' }}
+    </td>
 
                 <td><img src="{{ $object->image }}" width="150" alt=""></td>
                 <td>{{$object->price}}</td>
 
                 <td>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16">
-                        <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z" />
-                    </svg>
+
                     {{ $object->concentration?->concentration ?? 'Trống' }}
                 </td>
-
+                <td>{{$object->stock}}</td>
                 <td>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16">
-                        <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z" />
-                    </svg>
+
                     {{ $object->volume?->name ?? 'Trống' }}
                 </td>
                 <td>
@@ -64,14 +63,33 @@
                     </svg>
                     @endif
                 </td>
+                <td class="text-center">
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenu{{ $object->id }}" data-toggle="dropdown" aria-expanded="false">      ...
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="dropdownMenu{{ $object->id }}">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('admin.product.edit',['product' =>$object->id]) }}">
+                                    <i class="fa-solid fa-pen-to-square text-warning me-2"></i> Chỉnh sửa
+                                </a>
+                            </li>
 
-                <td><a href=" {{ route('admin.product.edit',['product' =>$object->id]) }}  "><i class="fa-solid fa-pen-to-square text-warning"></i></a></td>
-                <td><a href="{{route('admin.product.destroy',['product'=>$object->id])}}" title="Delete {{$object->name}}" onclick="event.preventDefault();window.confirm('Bạn đã chắc chắn xóa '+ '{{$object->name}}' +' chưa?') ?document.getElementById('product-delete-{{ $object->id }}').submit() :0;" class="btn btn-danger"><i class="far fa-trash-alt"></i>
-                        <form action="{{ route('admin.product.destroy', ['product' => $object->id]) }}" method="post" id="product-delete-{{ $object->id }}">
-                            {{ csrf_field() }}
-                            {{ method_field('delete') }}
-                        </form>
-                    </a></td>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" onclick="event.preventDefault(); if(confirm('Bạn có chắc chắn muốn xóa sản phẩm: {{ $object->title }}?')) { document.getElementById('product-delete-{{ $object->id }}').submit(); }">
+                                    <i class="far fa-trash-alt me-2"></i> Xóa
+                                </a>
+                                <form action="{{ route('admin.product.destroy', ['product' => $object->id]) }}" method="post" id="product-delete-{{ $object->id }}" class="d-none">
+                                    {{ csrf_field() }}
+                                    {{ method_field('delete') }}
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
             </tr>
             @empty
             <tr>

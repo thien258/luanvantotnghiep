@@ -9,10 +9,6 @@
       <label for="email" class="form-label">Category</label>
       <input type="text" class="form-control" value="{{$category->name}}" id="name" name="name" aria-describedby="emailHelp">
     </div>
-    <div class="mb-3">
-      <label for="image" class="form-label">Image</label>
-      <input type="text" class="form-control" value="{{$category->image}}" id="image" name="image" aria-describedby="emailHelp">
-    </div>
 
 
     <select name="status"  class='form-control'>

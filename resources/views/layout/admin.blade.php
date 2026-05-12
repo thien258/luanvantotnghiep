@@ -42,6 +42,12 @@
                     <span>Category</span>
                 </a>
             </li>
+            <li class="nav-item {{ request()->routeIs('admin.brand.index') ? 'active font-weight-bold' : '' }}">
+                <a class="nav-link text-dark" href="{{route('admin.brand.index')}}">
+                    <i class="fa-solid fa-tag text-dark mr-3"></i>
+                    <span>Brand</span>
+                </a>
+            </li>
 
             <li class="nav-item {{ request()->routeIs('admin.concentration.index') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{route('admin.concentration.index')}}">
