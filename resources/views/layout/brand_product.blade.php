@@ -32,20 +32,7 @@
           <div class="mb-5">
           <p class="text-uppercase fw-bold small mb-3">Nồng độ</p>
           
-          @foreach($all_concentrations as $concentration)
-          <div class="form-check mb-2">
-            <input class="form-check-input rounded-0 border-dark" 
-                   type="checkbox" 
-                   name="concentrations[]" 
-                   value="{{ $concentration->id }}" 
-                   id="conc_{{ $concentration->id }}"
-                   {{ (is_array(request('concentrations')) && in_array($concentration->id, request('concentrations'))) ? 'checked' : '' }}>
-            <label class="form-check-label text-muted small" for="conc_{{ $concentration->id }}">
-                {{ $concentration->concentration }}
-            </label>
-          </div>
-          @endforeach
-          
+         
         </div>
 
         <button type="submit" class="btn btn-dark w-100 rounded-0 text-uppercase fw-bold py-2">Áp dụng</button>

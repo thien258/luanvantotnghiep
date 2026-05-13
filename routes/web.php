@@ -52,7 +52,7 @@ Route::get('/register', function () {
 
 
 
-Auth::routes();
+Auth::routes(['verify'=>true]);
 Route::get('logout',[HomeController::class,'logout'])->name('logout');
 
 Route::post('/logout', [HomeController::class, 'logout'])->name('logouts');

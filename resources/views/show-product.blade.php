@@ -11,7 +11,7 @@
     <div class="col-lg-3 pe-lg-5 mb-5 mb-lg-0">
       <div class="d-flex justify-content-between align-items-end border-bottom pb-2 mb-4">
         <span class="text-uppercase fw-bold small tracking-widest">Bộ lọc</span>
-        <a href="#" class="text-muted small text-decoration-none">Xóa bộ lọc</a>
+        <a href="{{ url()->current() }}" class="text-muted small text-decoration-none">Xóa bộ lọc</a>
       </div>
 
       <form action="" method="GET">

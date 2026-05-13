@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\VerifiesEmails;
+use Illuminate\Support\Facades\Auth;
 
 class VerificationController extends Controller
 {
@@ -25,7 +26,7 @@ class VerificationController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/login';
 
     /**
      * Create a new controller instance.
@@ -38,4 +39,12 @@ class VerificationController extends Controller
         $this->middleware('signed')->only('verify');
         $this->middleware('throttle:6,1')->only('verify', 'resend');
     }
+    protected function verified(Request $request)
+{
+    // Đăng xuất người dùng để họ có thể thực hiện đăng nhập lại
+    Auth::logout(); 
+
+    // Chuyển hướng về trang login kèm thông báo thành công
+    return redirect()->route('login')->with('status', 'Tài khoản của bạn đã được xác thực thành công. Vui lòng đăng nhập.');
+}
 }

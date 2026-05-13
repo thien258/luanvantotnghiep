@@ -142,13 +142,9 @@ class HomeController extends Controller
             $query->whereIn('idBrand', $request->brands);
         }
 
-
         $products = $query->get();
-
-       
         $title = Title::all();
         $footers = Footer::all();
-
         // 5. Trả về đúng cái file show-product mà ông đang làm
         return view('show-product', compact('all_concentrations', 'all_brands', 'categories', 'products', 'title', 'footers'));
     }
