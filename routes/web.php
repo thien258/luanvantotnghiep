@@ -16,6 +16,7 @@ use App\Http\Controllers\LoveController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductShowController;
 use App\Http\Controllers\admin\UserController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -55,4 +56,4 @@ Route::get('/register', function () {
 Auth::routes(['verify'=>true]);
 Route::get('logout',[HomeController::class,'logout'])->name('logout');
 
-Route::post('/logout', [HomeController::class, 'logout'])->name('logouts');
+// Route::post('/logout', [HomeController::class, 'logout'])->name('logouts');
