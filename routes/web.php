@@ -19,6 +19,7 @@ use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ProfileController;
 
         Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('category', CategoryController::class);
@@ -55,5 +56,7 @@ Route::get('/register', function () {
 
 Auth::routes(['verify'=>true]);
 Route::get('logout',[HomeController::class,'logout'])->name('logout');
-
+Route::middleware('auth')->group(function () {
+    Route::resource('profile', ProfileController::class);
+});
 // Route::post('/logout', [HomeController::class, 'logout'])->name('logouts');

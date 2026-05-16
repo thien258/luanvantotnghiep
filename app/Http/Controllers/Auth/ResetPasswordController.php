@@ -30,6 +30,8 @@ class ResetPasswordController extends Controller
     protected $redirectTo = '/login';
     protected function resetPassword($user, $password)
     {
+        // Thêm dòng này để mách cho VS Code biết $user là Model User nhé:
+        /** @var \App\Models\User $user */
         // Đặt lại mật khẩu cho user
       $user->update([
         'password' => Hash::make($password),
