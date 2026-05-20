@@ -13,6 +13,10 @@
       <label for="email" class="form-label">Image</label>
       <input type="text" class="form-control" value="{{$brand->image}}" id="image" name="image" aria-describedby="emailHelp">
     </div>
+    <div class="mb-3">
+      <label for="email" class="form-label">Description</label>
+      <input type="text" class="form-control" value="{{$brand->descrip}}" id="descrip" name="descrip" aria-describedby="emailHelp">
+    </div>
 
 
     <select name="status"  class='form-control'>

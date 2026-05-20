@@ -8,7 +8,7 @@ class Brand extends Model
 {
     //
     protected $table="brands";
-    protected $fillable=["id","name",'image','status'];
+    protected $fillable=["id","name",'image','descrip','status'];
     public function product(){
         return $this->hasMany('App\Models\Product','idBrand','id');
     }

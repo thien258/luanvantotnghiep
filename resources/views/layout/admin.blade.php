@@ -89,6 +89,13 @@
                     <span>Title</span>
                 </a>
             </li>
+            <li class="nav-item {{ request()->routeIs('admin.user.index') ? 'active font-weight-bold' : '' }}">
+                <a class="nav-link text-dark" href="{{ route('admin.user.index') }}">
+                    <i class="fa-solid fa-user text-dark mr-3"></i>
+                    <span>User</span>
+                </a>
+            </li>
+            </li>
 
             <li class="nav-item {{ request()->routeIs('admin.footer.index') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{ route('admin.footer.index') }}">
@@ -124,13 +131,7 @@
 
                     <ul class="navbar-nav ml-auto align-items-center">
 
-                        <li class="nav-item mr-4 d-none d-sm-block">
-                            <div class="d-flex align-items-center border-bottom border-dark pb-1">
-                                <i class="fa-solid fa-magnifying-glass text-dark mr-2"></i>
-                                <input type="text" class="border-0 bg-transparent text-dark shadow-none" placeholder="Tìm kiếm..." aria-label="Search" outline="none">
-                            </div>
-                        </li>
-
+                     
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle text-dark" href="#" id="alertsDropdown" role="button" data-toggle="dropdown">
                                 <i class="fa-regular fa-bell h5 mb-0"></i>
@@ -191,6 +192,9 @@
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
     <script src="js/sb-admin-2.min.js"></script>
+	<script src="{{ asset('js/editProduct.js') }}"></script>
+		<script src="{{ asset('js/addProduct.js') }}"></script>
+        <script src="{{ asset('js/adminProduct_search.js') }}"></script>
 
 </body>
 

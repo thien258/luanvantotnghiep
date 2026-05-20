@@ -10,6 +10,7 @@
                 <th scope="col">#</th>
                 <th scope="col">Name</th>
                 <th scope="col">image</th>
+                <th scope="col">Description</th>
                 <th scope="col">Status</th>
                 <th scope="col">Option</th>
             </tr>
@@ -22,7 +23,7 @@
                 <td>
                     <img src="{{ $object->image }}" alt="{{ $object->name }}" width="80" class="rounded shadow-sm">
                 </td>
-
+                <td>{{ $object->descrip }}</td>
                 <td>
                     @if($object->status==1)
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="green" class="bi bi-check-circle-fill" viewBox="0 0 16 16">

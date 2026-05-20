@@ -5,14 +5,14 @@ namespace App\Http\Controllers\admin;
 use App\Models\Brand;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\View;
 class BrandController extends Controller
 {
       public function __construct()
     {
       $this->middleware('auth');
         $brands= Brand::orderBy( 'id','desc')->get();
-        view()->share('brands',$brands);
+        View::share('brands',$brands);
     }
     /**
      * Display a listing of the resource.
@@ -42,6 +42,7 @@ class BrandController extends Controller
         $brand=Brand::create([
             'name'=>$request->name,
            'image' => $request->image??'',
+            'descrip' => $request->descrip,
             'status'=>$request->status,
             
         ]);
@@ -80,6 +81,7 @@ class BrandController extends Controller
         $brand->update([
             'name'=>$request->name,
             'image'=>$request->image,
+            'descrip'=>$request->descrip,
             'status'=>$request->status,
         ]);
         if ($brand)          

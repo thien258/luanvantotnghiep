@@ -5,7 +5,7 @@
 <div class="container py-5">
 
 <div class="text-center mb-5 pb-3 border-bottom">
-  <h2 class="display-5 text-dark mb-3" style="font-family: serif;">Sản phẩm nổi bật {{ $brand->name }}</h2>
+  <h2 class="display-5 text-dark mb-3" style="font-family: serif;"> {{ $brand->descrip }}</h2>
   <p class="text-muted">Lựa chọn hoàn hảo dành riêng cho bạn</p>
 </div>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 use App\Models\Category;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 
 class CategoryController extends Controller
 {
@@ -11,7 +12,7 @@ class CategoryController extends Controller
     {
       $this->middleware('auth');
         $categories= Category::orderBy( 'id','desc')->get();
-        view()->share('categories',$categories);
+        View::share('categories',$categories);
     }
          public function index(){
             $categories=Category::all();

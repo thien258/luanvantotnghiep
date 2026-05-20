@@ -16,7 +16,7 @@
 		<link rel="stylesheet" href="vendors/owl-carousel/owl.carousel.min.css">
 
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+		<meta name="csrf-token" content="{{ csrf_token() }}">
 
 		<link rel="stylesheet" href="css/style.css">
 	</head>
@@ -48,7 +48,7 @@
 											<a href="{{ route('category_product',['category'=>$object->id]) }}">{{ $object->name }}</a>
 										</li>
 										@empty
-										<h1>not datahere</h1>
+										<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
 										@endforelse
 									</ul>
 								</li>
@@ -61,29 +61,53 @@
 											<a href="{{ route('brand_product',['brand'=>$object->id]) }}">{{ $object->name }}</a>
 										</li>
 										@empty
-										<h1>not datahere</h1>
+										<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
 										@endforelse
 									</ul>
 								</li>
+
+								{{-- FORM TÌM KIẾM ĐÃ ĐƯỢC CHỈNH LẠI KÍCH THƯỚC ĐỂ TRÁNH RỚT DÒNG --}}
+								<li class="nav-item d-flex align-items-center mx-2">
+									<form action="{{ route('home.search') }}" method="GET" class="m-0 position-relative">
+										<div class="position-relative">
+											<input type="text" name="keyword" id="search-input"
+												class="form-control form-control-sm shadow-none border-dark rounded-0"
+												placeholder="Tìm kiếm..."
+												value="{{ request('keyword') }}"
+												required autocomplete="off"
+												style="padding-right: 25px; width: 160px; height: 34px; font-size: 13px;">
+
+											<i class="fa-solid fa-magnifying-glass position-absolute text-muted"
+												style="top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 12px;">
+											</i>
+										</div>
+
+										<div id="search-suggestions" class="dropdown-menu w-100 p-0 shadow-sm border mt-1"
+											style="display: none; position: absolute; top: 100%; left: 0; z-index: 1050; border-radius: 0;">
+										</div>
+									</form>
+								</li>
+
 								<li class="nav-item submenu dropdown">
 									<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
 										aria-expanded="false">Pages</a>
 									<ul class="dropdown-menu">
 										<li class="nav-item"> <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a></li>
 										<li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Register</a></li>
-
 									</ul>
 								</li>
-								<li class="nav-item "><a class="nav-link" href="{{route('contact.index')}}">contact</a></li>
-								<li class="nav-item active"><a class="nav-link" href="{{route('loves.index')}}"><i class="fa-solid fa-heart"></i></a></li>
+								<li class="nav-item "><a class="nav-link" href="{{route('contact.index')}}">Contact</a></li>
+								<li class="nav-item active"><a class="nav-link" href="{{route('carts.index')}}"><i class="fa-solid fa-shopping-cart"></i></a></li>
+
 								@if(Auth::check())
 								<li class="nav-item submenu dropdown">
 									<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-										<i class="fa-solid fa-user" style="font-size: 16px;"></i> <span class="ml-1">{{ Auth::user()->name }}</span> </a>
+										<i class="fa-solid fa-user" style="font-size: 15px;"></i> <span class="ml-1">{{ Auth::user()->name }}</span>
+									</a>
 									<ul class="dropdown-menu dropdown-menu-right" style="right: 0; left: auto;">
 										<li class="nav-item">
 											<a class="nav-link" href="{{ route('profile.index') }}">
-												<i class="fa-solid fa-id-card mr-2"></i> Hồ sơ của tôi
+												<i class="fa-solid fa-id-card mr-2"></i> Hồ sơ
 											</a>
 										</li>
 										<li class="nav-item">
@@ -98,7 +122,6 @@
 									</ul>
 								</li>
 								@endif
-
 							</ul>
 
 
@@ -185,6 +208,10 @@
 		<script src="vendors/jquery.ajaxchimp.min.js"></script>
 		<script src="vendors/mail-script.js"></script>
 		<script src="js/main.js"></script>
+		<script src="{{ asset('js/single_product.js') }}"></script>
+		<script src="{{ asset('js/cart.js') }}"></script>
+		<script src="{{ asset('js/live-search.js') }}"></script>
+
 	</body>
 
 	</html>

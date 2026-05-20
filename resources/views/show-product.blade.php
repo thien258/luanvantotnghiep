@@ -3,10 +3,24 @@
 
 <div class="container py-5">
   <div class="text-center mb-5 pb-3 border-bottom">
+    {{-- 1. Xử lý biệt lập cho trang Thương hiệu --}}
+    @if(isset($brand))
+    <h2 class="display-5 text-dark mb-3" style="font-family: serif;">{{ $brand->name }}</h2>
+    <p class="text-muted">{{ $brand->descrip ?? 'Lựa chọn hoàn hảo dành riêng cho bạn' }}</p>
+    @endif
+
+    {{-- 2. Xử lý biệt lập cho trang Danh mục --}}
+    @if(isset($category))
+    <h2 class="display-5 text-dark mb-3" style="font-family: serif;">{{ $category->name }}</h2>
+    <p class="text-muted">Những sản phẩm thuộc danh mục {{ $category->name }}</p>
+    @endif
+
+    {{-- 3. Xử lý biệt lập cho trang Tất cả sản phẩm (Mặc định) --}}
+    @if(!isset($brand) && !isset($category))
     <h2 class="display-5 text-dark mb-3" style="font-family: serif;">Bộ sưu tập</h2>
     <p class="text-muted">Khám phá những kiệt tác hương thơm được tinh tuyển, mang đậm dấu ấn nghệ thuật và sự xa xỉ thầm lặng.</p>
+    @endif
   </div>
-
   <div class="row">
     <div class="col-lg-3 pe-lg-5 mb-5 mb-lg-0">
       <div class="d-flex justify-content-between align-items-end border-bottom pb-2 mb-4">
@@ -16,43 +30,43 @@
 
       <form action="" method="GET">
         @if(!isset($category) && isset($categories))
-    <div class="mb-5">
-        <p class="text-uppercase fw-bold small mb-3">Danh mục</p>
-        @foreach($categories as $cat)
-        <div class="form-check mb-2">
+        <div class="mb-5">
+          <p class="text-uppercase fw-bold small mb-3">Danh mục</p>
+          @foreach($categories as $cat)
+          <div class="form-check mb-2">
             <input class="form-check-input rounded-0 border-dark" type="checkbox" name="categories[]" value="{{ $cat->id }}" id="cat_{{ $cat->id }}" {{ (is_array(request('categories')) && in_array($cat->id, request('categories'))) ? 'checked' : '' }}>
             <label class="form-check-label text-muted small" for="cat_{{ $cat->id }}">{{ $cat->name }}</label>
+          </div>
+          @endforeach
         </div>
-        @endforeach
-    </div>
-    @endif
+        @endif
 
-    {{-- LỌC THƯƠNG HIỆU: Chỉ hiện nếu KHÔNG PHẢI đang ở trang thương hiệu --}}
-    @if(!isset($brand) && isset($all_brands))
-    <div class="mb-5">
-        <p class="text-uppercase fw-bold small mb-3">Thương hiệu</p>
-        @foreach($all_brands as $b)
-        <div class="form-check mb-2">
+        {{-- LỌC THƯƠNG HIỆU: Chỉ hiện nếu KHÔNG PHẢI đang ở trang thương hiệu --}}
+        @if(!isset($brand) && isset($all_brands))
+        <div class="mb-5">
+          <p class="text-uppercase fw-bold small mb-3">Thương hiệu</p>
+          @foreach($all_brands as $b)
+          <div class="form-check mb-2">
             <input class="form-check-input rounded-0 border-dark" type="checkbox" name="brands[]" value="{{ $b->id }}" id="brand_{{ $b->id }}" {{ (is_array(request('brands')) && in_array($b->id, request('brands'))) ? 'checked' : '' }}>
             <label class="form-check-label text-muted small" for="brand_{{ $b->id }}">{{ $b->name }}</label>
+          </div>
+          @endforeach
         </div>
-        @endforeach
-    </div>
-    @endif
+        @endif
 
-    {{-- LỌC NỒNG ĐỘ: Luôn hiện --}}
-    <div class="mb-5">
-        <p class="text-uppercase fw-bold small mb-3">Nồng độ</p>
-        @foreach($all_concentrations as $concentration)
-        <div class="form-check mb-2">
+        {{-- LỌC NỒNG ĐỘ: Luôn hiện --}}
+        <div class="mb-5">
+          <p class="text-uppercase fw-bold small mb-3">Nồng độ</p>
+          @foreach($all_concentrations as $concentration)
+          <div class="form-check mb-2">
             <input class="form-check-input rounded-0 border-dark" type="checkbox" name="concentrations[]" value="{{ $concentration->id }}" id="conc_{{ $concentration->id }}" {{ (is_array(request('concentrations')) && in_array($concentration->id, request('concentrations'))) ? 'checked' : '' }}>
             <label class="form-check-label text-muted small" for="conc_{{ $concentration->id }}">{{ $concentration->concentration }}</label>
+          </div>
+          @endforeach
         </div>
-        @endforeach
-    </div>
 
-    <button type="submit" class="btn btn-dark w-100 rounded-0 text-uppercase fw-bold py-2">Áp dụng</button>
-</form>
+        <button type="submit" class="btn btn-dark w-100 rounded-0 text-uppercase fw-bold py-2">Áp dụng</button>
+      </form>
     </div>
 
     <div class="col-lg-9">
@@ -92,7 +106,7 @@
                 </a>
               </h5>
 
-              <p class="text-secondary mb-0 fs-5">{{ number_format($product->price) }}đ</p>
+              <p class="text-secondary mb-0 fs-5">{{ number_format($product->variants->first()?->price ?? 0) }}đ</p>
             </div>
           </div>
         </div>
