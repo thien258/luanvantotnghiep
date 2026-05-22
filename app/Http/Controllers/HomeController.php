@@ -11,6 +11,7 @@ use App\Models\Title;
 use App\Models\Concentration;
 use App\Models\Love;
 use App\Models\Product;
+use App\Models\Volume;
 use Illuminate\Support\Facades\View;
 
 class HomeController extends Controller
@@ -68,6 +69,7 @@ class HomeController extends Controller
         // lọc nồng dộ
         $all_concentrations = Concentration::where('status', '1')->get();
         $all_brands = Brand::where('status', '1')->get();
+        $all_volumes = Volume::where('status', '1')->get();
         $query = Product::where([
             ['idCategory', '=', $id],
             ['status', '=', '1']
@@ -79,10 +81,19 @@ class HomeController extends Controller
         if ($request->has('brands') && is_array($request->brands)) {
             $query->whereIn('idBrand', $request->brands);
         }
-
+        if ($request->has('volumes') && is_array($request->volumes)) {
+            $query->whereHas('variants', function ($q) use ($request) {
+                $q->whereIn('idVolume', $request->volumes);
+            });
+            $query->with(['variants' => function ($q) use ($request) {
+                $q->whereIn('idVolume', $request->volumes);
+            }]);
+        } else {
+            $query->with('variants');
+        }
         $products = $query->get();
-        // 5. Trả về đúng cái file show-product mà ông đang làm
-        return view('show-product', compact('all_concentrations', 'all_brands', 'products', 'category', 'title', 'footers'));
+    
+        return view('show-product', compact('all_concentrations', 'all_brands', 'all_volumes', 'products', 'category', 'title', 'footers'));
     }
     public function brand_product(Request $request, $id)
     {
@@ -90,7 +101,7 @@ class HomeController extends Controller
         $title = Title::all();
         $footers = Footer::all();
 
-
+        $all_volumes = Volume::where('status', '1')->get();
         $all_concentrations = Concentration::where('status', '1')->get();
         $categories = Category::where('status', '1')->get();
 
@@ -99,18 +110,22 @@ class HomeController extends Controller
             ['status', '=', '1']
         ]);
 
-        // Logic bộ lọc kép
+
         if ($request->has('concentrations') && is_array($request->concentrations)) {
             $query->whereIn('idConcentration', $request->concentrations);
         }
         if ($request->has('categories') && is_array($request->categories)) {
             $query->whereIn('idCategory', $request->categories);
         }
-
+        if ($request->has('volumes') && is_array($request->volumes)) {
+            $query->whereHas('variants', function ($q) use ($request) {
+                $q->whereIn('idVolume', $request->volumes);
+            });
+        }
         $products = $query->get();
 
 
-        return view('show-product', compact('all_concentrations', 'categories', 'products', 'brand', 'title', 'footers'));
+        return view('show-product', compact('all_concentrations', 'all_volumes', 'categories', 'products', 'brand', 'title', 'footers'));
     }
     public function single_product($id)
     {
@@ -130,6 +145,7 @@ class HomeController extends Controller
 
         $all_concentrations = Concentration::where('status', '1')->get();
         $all_brands = Brand::where('status', '1')->get();
+        $all_volumes = Volume::where('status', '1')->get();
         // 2. Khởi tạo Query lấy sản phẩm
         $query = Product::where('status', 1);
 
@@ -143,12 +159,26 @@ class HomeController extends Controller
         if ($request->has('brands') && is_array($request->brands)) {
             $query->whereIn('idBrand', $request->brands);
         }
+        if ($request->has('volumes') && is_array($request->volumes)) {
+            $query->whereHas('variants', function ($q) use ($request) {
+                $q->whereIn('idVolume', $request->volumes);
+            });
+            // THÊM ĐOẠN NÀY: Ép Laravel chỉ load đúng những biến thể dung tích được tích chọn
+            $query->with(['variants' => function ($q) use ($request) {
+                $q->whereIn('idVolume', $request->volumes);
+            }]);
+        } else {
+            // Nếu không lọc dung tích thì cứ load bình thường
+            $query->with('variants');
+        }
+
+
 
         $products = $query->get();
         $title = Title::all();
         $footers = Footer::all();
         // 5. Trả về đúng cái file show-product mà ông đang làm
-        return view('show-product', compact('all_concentrations', 'all_brands', 'categories', 'products', 'title', 'footers'));
+        return view('show-product', compact('all_concentrations', 'all_brands', 'all_volumes', 'categories', 'products', 'title', 'footers'));
     }
     public function suggest(Request $request)
     {
@@ -180,16 +210,16 @@ class HomeController extends Controller
     }
     public function search(Request $request)
     {
-     $keyword = $request->keyword;
+        $keyword = $request->keyword;
 
         // 1. Tìm sản phẩm giống từ khóa
         $products = Product::where('title', 'LIKE', "%{$keyword}%")
-                           ->where('status', 1)
-                           ->with('variants.volume')
-                           ->paginate(12);
+            ->where('status', 1)
+            ->with('variants.volume')
+            ->paginate(12);
 
         // 2. LẤY THÊM DỮ LIỆU CHO HEADER VÀ FOOTER (Giống hệt các hàm khác của ông)
-        $brands = Brand::where('status', '1')->get(); 
+        $brands = Brand::where('status', '1')->get();
         $title = Title::all();
         $footers = Footer::all();
 

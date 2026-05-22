@@ -9,10 +9,12 @@ use App\Http\Controllers\admin\FooterController;
 use App\Http\Controllers\admin\TitleController;
 use App\Http\Controllers\admin\ProductController;
 use App\Http\Controllers\admin\ContactAdminController;
+use App\Http\Controllers\admin\homeController as AdminHomeController;
 use App\Http\Controllers\admin\OrderAdminController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\omeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductShowController;
 use App\Http\Controllers\admin\UserController;
@@ -36,6 +38,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('user', UserController::class);
     Route::resource('footer', FooterController::class);
     Route::resource('title', TitleController::class);
+    Route::resource('home', AdminHomeController::class);
 });
 Route::resource('contact', ContactController::class);
 Route::resource('carts', CartController::class);
@@ -50,9 +53,12 @@ Route::get('/category_product/single_product/{category}', [App\Http\Controllers\
 Route::get('/brand_product/{brand}', [App\Http\Controllers\HomeController::class, 'brand_product'])->name('brand_product');
 Route::get('/brand_product/single_product/{brand}', [App\Http\Controllers\HomeController::class, 'single_product'])->name('single_product');
 
-Route::get('/register', function () {
+Route::get('/register', function () {   
     return view('register');
 })->name('register');
+
+
+
 
 
 
@@ -61,4 +67,5 @@ Route::get('logout', [HomeController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::resource('profile', ProfileController::class);
 });
+
 // Route::post('/logout', [HomeController::class, 'logout'])->name('logouts');

@@ -64,7 +64,17 @@
           </div>
           @endforeach
         </div>
-
+        @if(isset($all_volumes))
+        <div class="mb-5">
+          <p class="text-uppercase fw-bold small mb-3">Dung tích</p>
+          @foreach($all_volumes as $vol)
+          <div class="form-check mb-2">
+            <input class="form-check-input rounded-0 border-dark" type="checkbox" name="volumes[]" value="{{ $vol->id }}" id="vol_{{ $vol->id }}" {{ (is_array(request('volumes')) && in_array($vol->id, request('volumes'))) ? 'checked' : '' }}>
+            <label class="form-check-label text-muted small" for="vol_{{ $vol->id }}">{{ $vol->name }}</label>
+          </div>
+          @endforeach
+        </div>
+        @endif
         <button type="submit" class="btn btn-dark w-100 rounded-0 text-uppercase fw-bold py-2">Áp dụng</button>
       </form>
     </div>
@@ -74,14 +84,14 @@
       <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2">
         <span class="text-muted small">Hiển thị {{ $products->count() }} sản phẩm</span>
 
-        <div class="d-flex align-items-center">
+        <!-- <div class="d-flex align-items-center">
           <span class="text-uppercase small fw-bold me-2">Sắp xếp:</span>
           <select class="form-select form-select-sm rounded-0 border-dark w-auto shadow-none">
             <option>Mới nhất</option>
             <option>Giá tăng dần</option>
             <option>Giá giảm dần</option>
           </select>
-        </div>
+        </div> -->
       </div>
 
       <div class="row d-flex flex-wrap">
