@@ -1,104 +1,142 @@
 document.addEventListener('DOMContentLoaded', function() {
-        // ========================================================
-        // PHẦN 1: LOGIC CHECKBOX VÀ TÍNH TỔNG TIỀN
-        // ========================================================
-        const checkboxes = document.querySelectorAll('.cart-item-checkbox');
-        const displaySubtotal = document.getElementById('display-subtotal');
-        const displayVat = document.getElementById('display-vat');
-        const displayTotal = document.getElementById('display-total');
-        const displayCount = document.getElementById('display-count');
-        const btnCheckout = document.getElementById('btn-checkout');
-        const formCheckout = document.getElementById('form-checkout');
-        const hiddenInputsContainer = document.getElementById('hidden-cart-inputs');
+    // ========================================================
+    // PHẦN 1: LOGIC CHECKBOX VÀ TÍNH TỔNG TIỀN (REAL-TIME CLIENT)
+    // ========================================================
+    const checkboxes = document.querySelectorAll('.cart-item-checkbox');
+    const displaySubtotal = document.getElementById('display-subtotal');
+    const displayVat = document.getElementById('display-vat');
+    const displayTotal = document.getElementById('display-total');
+    const displayCount = document.getElementById('display-count');
+    const btnCheckout = document.getElementById('btn-checkout');
+    const formCheckout = document.getElementById('form-checkout');
+    const hiddenInputsContainer = document.getElementById('hidden-cart-inputs');
 
-        // Hàm tính toán và cập nhật giao diện
-        function calculateTotal() {
-            let subtotal = 0;
-            let count = 0;
-            
-            // Xóa hết các input ẩn cũ
+    function calculateTotal() {
+        let subtotal = 0;
+        let count = 0;
+        
+        if (hiddenInputsContainer) {
             hiddenInputsContainer.innerHTML = '';
-
-            checkboxes.forEach(function(checkbox) {
-                if (checkbox.checked) {
-                    let price = parseInt(checkbox.getAttribute('data-price'));
-                    let quantity = parseInt(checkbox.getAttribute('data-quantity'));
-                    let cartId = checkbox.value;
-
-                    subtotal += (price * quantity);
-                    count++;
-
-                    // Sinh ra một input ẩn chứa ID giỏ hàng để mang qua trang Thanh Toán
-                    hiddenInputsContainer.innerHTML += `<input type="hidden" name="selected_carts[]" value="${cartId}">`;
-                }
-            });
-
-            let vat = subtotal * 0.10;
-            let grandTotal = subtotal + vat;
-
-            // Hiển thị ra màn hình (Định dạng tiền Việt Nam)
-            displaySubtotal.innerText = subtotal.toLocaleString('vi-VN') + 'đ';
-            displayVat.innerText = vat.toLocaleString('vi-VN') + 'đ';
-            displayTotal.innerText = grandTotal.toLocaleString('vi-VN') + 'đ';
-            displayCount.innerText = count;
-
-            // Mở khóa nút thanh toán nếu có ít nhất 1 món được chọn
-            if (count > 0) {
-                btnCheckout.disabled = false;
-            } else {
-                btnCheckout.disabled = true;
-            }
         }
 
-        // Gắn sự kiện click cho từng checkbox
         checkboxes.forEach(function(checkbox) {
-            checkbox.addEventListener('change', calculateTotal);
+            if (checkbox.checked) {
+                let rawPrice = checkbox.getAttribute('data-price') || "0";
+                let rawQty = checkbox.getAttribute('data-quantity') || "1";
+
+                // Lọc sạch các ký tự lạ, ép về kiểu số thuần túy để tính toán
+                let price = parseInt(rawPrice.replace(/\D/g, '')) || 0;
+                let quantity = parseInt(rawQty) || 1;
+                let cartId = checkbox.value;
+
+                subtotal += (price * quantity);
+                count++;
+
+                if (hiddenInputsContainer) {
+                    hiddenInputsContainer.innerHTML += `<input type="hidden" name="selected_carts[]" value="${cartId}">`;
+                }
+            }
         });
 
-        // Bấm nút thanh toán thì submit cái form ẩn
+        let vat = subtotal * 0.10; // Thuế VAT 10%
+        let grandTotal = subtotal + vat;
+
+        // Đổ dữ liệu định dạng tiền tệ vi-VN ra màn hình
+        if (displaySubtotal) displaySubtotal.innerText = subtotal.toLocaleString('vi-VN') + 'đ';
+        if (displayVat) displayVat.innerText = vat.toLocaleString('vi-VN') + 'đ';
+        if (displayTotal) displayTotal.innerText = grandTotal.toLocaleString('vi-VN') + 'đ';
+        if (displayCount) displayCount.innerText = count;
+
+        if (btnCheckout) {
+            btnCheckout.disabled = (count === 0);
+        }
+    }
+
+    // Lắng nghe sự kiện khi tích chọn hoặc bỏ tích sản phẩm
+    checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', calculateTotal);
+    });
+
+    if (btnCheckout && formCheckout) {
         btnCheckout.addEventListener('click', function() {
             if (!this.disabled) {
                 formCheckout.submit();
             }
         });
+    }
 
-        // Chạy hàm tính toán lần đầu lúc mới load trang
-        calculateTotal();
+    // Chạy tính toán tổng tiền lần đầu khi vừa tải xong trang
+    calculateTotal();
 
-        // ========================================================
-        // PHẦN 2: XỬ LÝ NÚT TĂNG GIẢM SỐ LƯỢNG (KHÔNG AJAX, KHÔNG LOAD TRANG)
-        // ========================================================
-        const qtyButtons = document.querySelectorAll('.btn-qty-change');
+    // ========================================================
+    // PHẦN 2: XỬ LÝ NÚT TĂNG GIẢM SỐ LƯỢNG ĐỒNG BỘ REAL-TIME (AJAX)
+    // ========================================================
+    const qtyButtons = document.querySelectorAll('.btn-qty-change');
 
-        qtyButtons.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                let action = this.getAttribute('data-action');
-                let cartId = this.getAttribute('data-id');
-                
-                // Tìm ô hiển thị số lượng và cái checkbox của món hàng này
-                let inputQty = document.getElementById('qty-' + cartId);
-                let checkbox = document.querySelector(`.cart-item-checkbox[value="${cartId}"]`);
+    qtyButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            // Đảm bảo bốc đúng thuộc tính của nút kể cả khi click lệch vào icon bên trong
+            let targetBtn = this.closest('.btn-qty-change');
+            if (!targetBtn) return;
 
-                let currentQty = parseInt(inputQty.value);
+            let action = targetBtn.getAttribute('data-action');
+            let cartId = targetBtn.getAttribute('data-id');
+            
+            let inputQty = document.getElementById('qty-' + cartId);
+            let checkbox = document.querySelector(`.cart-item-checkbox[value="${cartId}"]`);
+            
+            if (!inputQty) return;
+            let currentQty = parseInt(inputQty.value) || 1;
 
-                // Nếu bấm + thì tăng, bấm - thì giảm (tối thiểu là 1)
-                if (action === 'up') {
-                    currentQty++;
-                } else if (action === 'down' && currentQty > 1) {
-                    currentQty--;
+            if (action === 'up') {
+                let maxStock = parseInt(targetBtn.getAttribute('data-stock')) || 0;
+
+                if (maxStock > 0 && currentQty >= maxStock) {
+                    alert('Số lượng trong kho không đủ để tăng tiếp!');
+                    return; 
                 }
+                currentQty++;
+            } else if (action === 'down') {
+                if (currentQty > 1) {
+                    currentQty--;
+                } else {
+                    return;
+                }
+            }
 
-                // 1. Cập nhật con số mới ra màn hình
-                inputQty.value = currentQty;
-                
-                // 2. Cập nhật con số vào checkbox để hàm tính tiền bên trên nhận diện được
+            // 1. Cập nhật số lượng hiển thị tức thì ngoài màn hình Client
+            inputQty.value = currentQty;
+            
+            if (checkbox) {
                 checkbox.setAttribute('data-quantity', currentQty);
+                checkbox.checked = true; // Tự động tích chọn dòng đó khi bấm tăng/giảm số lượng giống Shopee
+            }
+            
+            // Tính lại tiền mặt Client
+            calculateTotal();
 
-                // 3. Khách đã bấm đổi số lượng thì tự động tick xanh món đó luôn cho tiện
-                checkbox.checked = true;
-
-                // 4. Gọi lại hàm tính tổng tiền để cột bên phải tự động nhảy số
-                calculateTotal();
+            // 2. 🌟 ĐÃ FIX: Bắn request ngầm bọc kèm ID chuẩn xác lên Server
+            fetch(`/carts/${cartId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    change: action
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // Nếu backend kiểm tra thấy kho hết hoặc dính lỗi bảo mật
+                    alert('Cập nhật kho hàng thất bại hoặc vượt quá tồn kho hiện tại!');
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi kết nối hệ thống ngầm, vui lòng thử lại!');
             });
         });
+    });
 });

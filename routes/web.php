@@ -1,71 +1,74 @@
-<?php
+    <?php
 
-use App\Http\Controllers\admin\BrandController;
-use App\Http\Controllers\admin\CategoryController;
+    use App\Http\Controllers\admin\BrandController;
+    use App\Http\Controllers\admin\CategoryController;
 
-use App\Http\Controllers\admin\ConcentrationController;
-use App\Http\Controllers\admin\VolumeController;
-use App\Http\Controllers\admin\FooterController;
-use App\Http\Controllers\admin\TitleController;
-use App\Http\Controllers\admin\ProductController;
-use App\Http\Controllers\admin\ContactAdminController;
-use App\Http\Controllers\admin\homeController as AdminHomeController;
-use App\Http\Controllers\admin\OrderAdminController;
-use App\Http\Controllers\ContactController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\omeController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProductShowController;
-use App\Http\Controllers\admin\UserController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\ProfileController;
+    use App\Http\Controllers\admin\ConcentrationController;
+    use App\Http\Controllers\admin\VolumeController;
+    use App\Http\Controllers\admin\FooterController;
+    use App\Http\Controllers\admin\TitleController;
+    use App\Http\Controllers\admin\ProductController;
+    use App\Http\Controllers\admin\ContactAdminController;
+    use App\Http\Controllers\admin\FestivalController;
+    use App\Http\Controllers\admin\OrderAdminController;
+    use App\Http\Controllers\ContactController;
+    use App\Http\Controllers\HomeController;
+    use App\Http\Controllers\CartController;
+    use App\Http\Controllers\omeController;
+    use App\Http\Controllers\OrderController;
+    use App\Http\Controllers\ProductShowController;
+    use App\Http\Controllers\admin\UserController;
+    use App\Http\Controllers\Auth\ForgotPasswordController;
+    use Illuminate\Support\Facades\Route;
+    use Illuminate\Support\Facades\Auth;
+    use App\Http\Controllers\ProfileController;
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('category', CategoryController::class);
-    Route::resource('brand', BrandController::class);
-    Route::resource('concentration', ConcentrationController::class);
-    Route::resource('volume', VolumeController::class);
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::resource('category', CategoryController::class);
+        Route::resource('brand', BrandController::class);
+        Route::resource('concentration', ConcentrationController::class);
+        Route::resource('volume', VolumeController::class);
+        Route::resource('festival', FestivalController::class);
 
-    Route::get('/', [App\Http\Controllers\admin\AdminController::class, 'index'])
-        ->name('dashboard');
-    Route::get('/product-suggest', [App\Http\Controllers\admin\ProductController::class, 'suggest'])->name('product.suggest');
-    Route::resource('product', ProductController::class);
-    Route::resource('contacts', ContactAdminController::class);
-    Route::resource('orders', OrderAdminController::class);
-    Route::resource('user', UserController::class);
-    Route::resource('footer', FooterController::class);
-    Route::resource('title', TitleController::class);
-    Route::resource('home', AdminHomeController::class);
-});
-Route::resource('contact', ContactController::class);
-Route::resource('carts', CartController::class);
-Route::resource('order', OrderController::class)->middleware('auth');
-Route::get('/show-products', [HomeController::class, 'showProducts'])->name('show_products');
-Route::resource('comments', App\Http\Controllers\CommentController::class);
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('welcome');
-Route::get('/search', [App\Http\Controllers\HomeController::class, 'search'])->name('home.search');
-Route::get('/search-suggest', [App\Http\Controllers\HomeController::class, 'suggest'])->name('search.suggest');
-Route::get('/category_product/{category}', [App\Http\Controllers\HomeController::class, 'category_product'])->name('category_product');
-Route::get('/category_product/single_product/{category}', [App\Http\Controllers\HomeController::class, 'single_product'])->name('single_product');
-Route::get('/brand_product/{brand}', [App\Http\Controllers\HomeController::class, 'brand_product'])->name('brand_product');
-Route::get('/brand_product/single_product/{brand}', [App\Http\Controllers\HomeController::class, 'single_product'])->name('single_product');
-
-Route::get('/register', function () {   
-    return view('register');
-})->name('register');
+        Route::get('/', [App\Http\Controllers\admin\AdminController::class, 'index'])
+            ->name('dashboard');
+        Route::get('/product-suggest', [App\Http\Controllers\admin\ProductController::class, 'suggest'])->name('product.suggest');
+        Route::resource('product', ProductController::class);
+        Route::resource('contacts', ContactAdminController::class);
+        Route::resource('orders', OrderAdminController::class);
+        Route::resource('user', UserController::class);
+        Route::resource('footer', FooterController::class);
+        Route::resource('title', TitleController::class);
+    });
+    Route::resource('contact', ContactController::class);
+    Route::resource('carts', CartController::class);
+    Route::resource('order', OrderController::class)->middleware('auth');
+    Route::get('/show-products', [HomeController::class, 'showProducts'])->name('show_products');
+    Route::resource('comments', App\Http\Controllers\CommentController::class);
+    Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('welcome');
+    Route::get('/search', [App\Http\Controllers\HomeController::class, 'search'])->name('home.search');
+    Route::get('/search-suggest', [App\Http\Controllers\HomeController::class, 'suggest'])->name('search.suggest');
+    Route::get('/category_product/{category}', [App\Http\Controllers\HomeController::class, 'category_product'])->name('category_product');
+    Route::get('/brand_product/{brand}', [App\Http\Controllers\HomeController::class, 'brand_product'])->name('brand_product');
+    Route::get('/festival_product/{festival}', [App\Http\Controllers\HomeController::class, 'festival_product'])->name('festival_product');
 
 
 
+    Route::get('/product/{id}', [App\Http\Controllers\HomeController::class, 'single_product'])->name('single_product');
+
+    Route::get('/register', function () {
+        return view('register');
+    })->name('register');
 
 
 
-Auth::routes(['verify' => true]);
-Route::get('logout', [HomeController::class, 'logout'])->name('logout');
-Route::middleware('auth')->group(function () {
-    Route::resource('profile', ProfileController::class);
-});
 
-// Route::post('/logout', [HomeController::class, 'logout'])->name('logouts');
+
+
+    Auth::routes(['verify' => true]);
+    Route::get('logout', [HomeController::class, 'logout'])->name('logout');
+    Route::middleware('auth')->group(function () {
+        Route::resource('profile', ProfileController::class);
+    });
+
+    // Route::post('/logout', [HomeController::class, 'logout'])->name('logouts');

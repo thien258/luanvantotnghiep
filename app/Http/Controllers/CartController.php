@@ -31,7 +31,7 @@ class CartController extends Controller
             return back()->with('error', 'Sản phẩm này trong kho không đủ số lượng!');
         }
 
-        // ✅ ĐÃ FIX: Đổi từ 'idProduct' sang 'idPV' cho khớp database của ông
+
         $existingCart = Cart::where('idUser', Auth::id())
             ->where('idPV', $idVariant)
             ->first();
@@ -42,7 +42,7 @@ class CartController extends Controller
             }
             $existingCart->increment('quantity', $quantityToAdd);
         } else {
-            // ✅ ĐÃ FIX: Lưu đúng tên cột 'idPV'
+
             Cart::create([
                 'idUser'   => Auth::id(),
                 'idPV'     => $idVariant,
@@ -72,8 +72,19 @@ class CartController extends Controller
                 // Đút ngược thông tin vào biến $item->variant để không phải sửa file Blade view nhiều lần
                 $item->variant = $item->productVariant;
 
-                // Tính toán tổng tiền dựa trên giá của biến thể
-                $totalPrice += $item->productVariant->price * $item->quantity;
+                $originalPrice = $item->productVariant->price;
+                $productCha = $item->productVariant->product;
+
+                // 🌟 Tính toán giá thực tế sau khi đi qua bộ lọc Lễ hội của Product cha
+                $finalPrice = ($productCha && method_exists($productCha, 'getDiscountedPrice'))
+                    ? $productCha->getDiscountedPrice($originalPrice)
+                    : $originalPrice;
+
+                // 4. Găm cái giá bán thực tế này vào đối tượng $item để ngoài file Blade chỉ việc gọi $item->final_price ra dùng
+                $item->final_price = $finalPrice;
+
+                // 5. 🌟 ĐÃ SỬA: Chỉ cộng dồn duy nhất giá đã giảm nhân với số lượng vào tổng tiền hóa đơn
+                $totalPrice += $finalPrice * $item->quantity;
             }
         }
 
@@ -81,30 +92,28 @@ class CartController extends Controller
     }
     public function update(Request $request, $id)
     {
-      $cart = Cart::findOrFail($id);
+        $cart = Cart::findOrFail($id);
 
-    // 1. NẾU KHÁCH BẤM NÚT ĐỔI DUNG TÍCH (Thanh Navigation)
-   if ($request->has('newIdVariant')) {
-        
-        // SỬA CHÍNH XÁC THÀNH idPV NHƯ TRONG DATABASE
-        $cart->idPV = $request->newIdVariant; 
-        
-        $cart->save();
-        return back()->with('status', 'Đã chuyển sang dung tích mới!');
-   }
-    // 2. NẾU KHÁCH BẤM NÚT TĂNG/GIẢM SỐ LƯỢNG (+ / -)
-    if ($request->has('change')) {
-        if ($request->change == 'up') {
-            $cart->quantity++;
-        } elseif ($request->change == 'down' && $cart->quantity > 1) {
-            $cart->quantity--;
+        // 1. NẾU KHÁCH BẤM NÚT ĐỔI DUNG TÍCH (Thanh Navigation)
+        if ($request->has('newIdVariant')) {
+
+            // SỬA CHÍNH XÁC THÀNH idPV NHƯ TRONG DATABASE
+            $cart->idPV = $request->newIdVariant;
+
+            $cart->save();
+            return back()->with('status', 'Đã chuyển sang dung tích mới!');
         }
-        $cart->save();
+        // 2. NẾU KHÁCH BẤM NÚT TĂNG/GIẢM SỐ LƯỢNG (+ / -)
+        if ($request->has('change')) {
+            if ($request->change == 'up') {
+                $cart->quantity++;
+            } elseif ($request->change == 'down' && $cart->quantity > 1) {
+                $cart->quantity--;
+            }
+            $cart->save();
+            return back();
+        }
+
         return back();
-    }
-
-    return back();
-
-        
     }
 }

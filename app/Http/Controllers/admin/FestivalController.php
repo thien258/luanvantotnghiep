@@ -1,28 +1,27 @@
 <?php
 
 namespace App\Http\Controllers\admin;
-use App\Models\Volume;
+use App\Models\Festival;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
-class VolumeController extends Controller
+class FestivalController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-      public function __construct()
+    public function __construct()
     {
       $this->middleware('auth');
-        $volumes= Volume::orderBy( 'id','desc')->get();
-        View::share('volumes',$volumes);
+      $fetivals= Festival::orderBy( 'id','desc')->get();
+      view::share('festivals',$fetivals);
     }
-
     public function index()
     {
         //
-        $volumes=Volume::all();
-        return view('admin.volume.volume-list',compact('volumes'));
+        $festivals= Festival::all();
+        return view('admin.festival.festival-list',compact('festivals'));
     }
 
     /**
@@ -31,7 +30,8 @@ class VolumeController extends Controller
     public function create()
     {
         //
-        return view('admin.volume.add');
+        
+        return view('admin.festival.add');
     }
 
     /**
@@ -40,14 +40,17 @@ class VolumeController extends Controller
     public function store(Request $request)
     {
         //
-        $volume = Volume::create([
+        $festival = Festival::create([
             'name' => $request->name,
+            'discount' => $request->discount,
             'status' => $request->status,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
         ]);
-        if ($volume) 
-             return redirect()->route('admin.volume.index');
+        if ($festival)          
+               return redirect()->route('admin.festival.index');
         else {
-            return back();
+            return back();        
         }
     }
 
@@ -57,7 +60,6 @@ class VolumeController extends Controller
     public function show(string $id)
     {
         //
-
     }
 
     /**
@@ -66,8 +68,8 @@ class VolumeController extends Controller
     public function edit(string $id)
     {
         //
-        $volume = Volume::find($id);
-        return view('admin.volume.edit', compact('volume'));
+        $festival = Festival::find($id);
+        return view('admin.festival.edit', compact('festival'));
     }
 
     /**
@@ -76,13 +78,16 @@ class VolumeController extends Controller
     public function update(Request $request, string $id)
     {
         //
-        $volume = Volume::find($id);
-        $volume->update([
+        $festival = Festival::find($id);
+        $festival->update([
             'name' => $request->name,
+            'discount' => $request->discount,
             'status' => $request->status,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
         ]);
-        if ($volume)
-            return redirect()->route('admin.volume.index');
+        if ($festival)
+            return redirect()->route('admin.festival.index');
         else {
             return back();
         }
@@ -93,13 +98,12 @@ class VolumeController extends Controller
      */
     public function destroy(string $id)
     {
-        //
-        $volume = Volume::find($id);
-        $volume->delete();
-       if ($volume)
-            return redirect()->route('admin.volume.index');
+        //  
+        $festival = Festival::find($id);
+        $festival->delete();
+       if ($festival)            return redirect()->route('admin.festival.index');
         else {
-            return back();
+            return back();        
         }
     }
 }

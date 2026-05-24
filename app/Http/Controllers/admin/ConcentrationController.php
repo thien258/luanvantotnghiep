@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 use App\Models\Concentration;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 
 class ConcentrationController extends Controller
 {
@@ -14,7 +15,7 @@ class ConcentrationController extends Controller
     {
       $this->middleware('auth');
         $concentrations= Concentration::orderBy( 'id','desc')->get();
-        view()->share('concentrations',$concentrations);
+        View::share('concentrations',$concentrations);
     }
     public function index()
     {

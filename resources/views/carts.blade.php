@@ -22,9 +22,9 @@
             @forelse($carts as $cart)
             @if($cart->variant)
             @php
-            // Kiểm tra tồn kho
-            $isOutOfStock = ($cart->variant->stock <= 0 || $cart->variant->product?->status == 0);
-                @endphp
+                // Kiểm tra tồn kho
+                $isOutOfStock = ($cart->variant->stock <= 0 || $cart->variant->product?->status == 0);
+            @endphp
 
                 <div class="row pb-4 mb-4 border-bottom align-items-center">
 
@@ -34,8 +34,10 @@
                         {{-- Ô Checkbox để JS tính tiền --}}
                         <input type="checkbox" class="form-check-input cart-item-checkbox me-3 border-dark shadow-none"
                             value="{{ $cart->id }}"
-                            data-price="{{ $cart->variant->price }}"
+                            {{-- 🌟 ĐÃ SỬA: Đổi sang găm giá đã giảm để JS tính chuẩn tiền lễ hội --}}
+                            data-price="{{ $cart->final_price ?? $cart->variant->price }}"
                             data-quantity="{{ $cart->quantity }}"
+                            data-stock="{{ $cart->variant->stock }}"
                             {{ $isOutOfStock ? 'disabled' : '' }}
                             style="transform: scale(1.3); cursor: pointer; margin-top: 0;">
 
@@ -61,9 +63,23 @@
                             </form>
                         </div>
 
-                        <p class="text-danger fw-bold mb-2">{{ number_format($cart->variant->price) }}đ</p>
+                        {{-- 🌟 ĐÃ SỬA: Hiển thị giá giảm đỏ rực kèm giá gốc gạch ngang mờ --}}
+                        <div class="mb-2">
+                            @if(isset($cart->final_price) && $cart->final_price < $cart->variant->price)
+                                <p class="text-danger fw-bold mb-0 d-inline-block me-2" style="font-size: 16px;">
+                                    {{ number_format($cart->final_price) }}đ
+                                </p>
+                                <span class="text-muted text-decoration-line-through small" style="font-size: 13px;">
+                                    {{ number_format($cart->variant->price) }}đ
+                                </span>
+                            @else
+                                <p class="text-danger fw-bold mb-0" style="font-size: 16px;">
+                                    {{ number_format($cart->variant->price) }}đ
+                                </p>
+                            @endif
+                        </div>
 
-                        {{-- 2. THANH SỔ XUỐNG DUNG TÍCH (Chỉ hiện tên, không hiện giá) --}}
+                        {{-- 2. THANH SỔ XUỐNG DUNG TÍCH --}}
                         <form action="{{ route('carts.update', $cart->id) }}" method="POST" class="mb-2">
                             @csrf @method('PUT')
                             <div class="d-flex align-items-center gap-2">
@@ -94,20 +110,20 @@
 
                                 <input type="text" id="qty-{{ $cart->id }}" class="form-control text-center border-0 bg-white fw-bold" value="{{ $cart->quantity }}" readonly>
 
-                                <button type="button" class="btn btn-light border-0 px-2 fw-bold btn-qty-change" data-id="{{ $cart->id }}" data-action="up" {{ $isOutOfStock ? 'disabled' : '' }}>+</button>
+                                <button type="button" class="btn btn-light border-0 px-2 fw-bold btn-qty-change" data-id="{{ $cart->id }}" data-action="up" data-stock="{{ $cart->variant->stock }}" {{ $isOutOfStock ? 'disabled' : '' }}>+</button>
                             </div>
                         </div>
                     </div>
                 </div>
-                @endif
-                @empty
+            @endif
+            @empty
                 <div class="text-center py-5 border-bottom">
                     <h5 class="text-muted fw-normal">Giỏ hàng của bạn đang trống.</h5>
                 </div>
-                @endforelse
+            @endforelse
         </div>
 
-        {{-- 4. CỘT TÓM TẮT ĐƠN HÀNG (Có các ID để JS tự tính) --}}
+        {{-- 4. CỘT TÓM TẮT ĐƠN HÀNG --}}
         <div class="col-lg-5">
             <div class="bg-light p-4 p-md-5 rounded border sticky-top" style="top: 20px;">
                 <h4 class="fw-bold text-dark mb-4">Tóm tắt đơn hàng</h4>
@@ -127,7 +143,7 @@
                     <span class="fs-3 fw-bold text-danger" id="display-total">0đ</span>
                 </div>
 
-                {{-- FORM THANH TOÁN (Chỉ lấy những món được tích xanh) --}}
+                {{-- FORM THANH TOÁN --}}
                 <form action="{{ route('carts.store') }}" method="POST" id="form-checkout">
                     @csrf
                     <div id="hidden-cart-inputs"></div>

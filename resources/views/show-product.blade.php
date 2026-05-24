@@ -3,20 +3,9 @@
 
 <div class="container py-5">
   <div class="text-center mb-5 pb-3 border-bottom">
-    {{-- 1. Xử lý biệt lập cho trang Thương hiệu --}}
-    @if(isset($brand))
-    <h2 class="display-5 text-dark mb-3" style="font-family: serif;">{{ $brand->name }}</h2>
-    <p class="text-muted">{{ $brand->descrip ?? 'Lựa chọn hoàn hảo dành riêng cho bạn' }}</p>
-    @endif
-
-    {{-- 2. Xử lý biệt lập cho trang Danh mục --}}
-    @if(isset($category))
-    <h2 class="display-5 text-dark mb-3" style="font-family: serif;">{{ $category->name }}</h2>
-    <p class="text-muted">Những sản phẩm thuộc danh mục {{ $category->name }}</p>
-    @endif
-
-    {{-- 3. Xử lý biệt lập cho trang Tất cả sản phẩm (Mặc định) --}}
-    @if(!isset($brand) && !isset($category))
+    @hasSection('product_header_zone')
+    @yield('product_header_zone')
+    @else
     <h2 class="display-5 text-dark mb-3" style="font-family: serif;">Bộ sưu tập</h2>
     <p class="text-muted">Khám phá những kiệt tác hương thơm được tinh tuyển, mang đậm dấu ấn nghệ thuật và sự xa xỉ thầm lặng.</p>
     @endif
@@ -96,10 +85,20 @@
 
       <div class="row d-flex flex-wrap">
         @forelse($products as $product)
+        @php
+        $originalPrice = $product->variants->first()?->price ?? 0;
+        $maxDiscount = ($product->festivals) ? $product->festivals->where('status', 1)->max('discount') ?? 0 : 0;
+        $finalPrice = method_exists($product, 'getDiscountedPrice') ? $product->getDiscountedPrice($originalPrice) : $originalPrice;
+        @endphp
         <div class="col-12 col-md-6 col-lg-4 mb-4">
           <div class="card border-0 h-100 text-center bg-transparent d-flex flex-column">
-
-            <a href="{{ route('single_product', ['category'=>$product->id]) }}" class="text-decoration-none">
+            @if($maxDiscount > 0)
+            <span class="badge bg-danger text-white position-absolute fw-bold px-3 py-2 shadow-sm"
+              style="top: 15px; left: 15px; z-index: 5; font-size: 13px; border-radius: 0 10px 10px 10px;">
+              <i class="fa-solid fa-fire me-1"></i> Gợi ý -{{ $maxDiscount }}%
+            </span>
+            @endif
+            <a href="{{ route('single_product', ['id'=>$product->id]) }}" class="text-decoration-none">
               <div class="ratio ratio-1x1 bg-light mb-3 rounded-1">
                 <img src="{{ $product->image }}"
                   class="object-fit-contain p-4 w-100 h-100"
@@ -108,15 +107,26 @@
             </a>
 
             <div class="card-body p-0 d-flex flex-column flex-grow-1">
-              <p class="text-muted text-uppercase small mb-1 fw-bold tracking-widest">AROMA</p>
+
 
               <h5 class="card-title mb-3 flex-grow-1">
-                <a href="{{ route('single_product', ['category'=>$product->id]) }}" class="text-decoration-none text-dark fs-5 fw-bold">
+                <a href="{{ route('single_product', ['id'=>$product->id]) }}" class="text-decoration-none text-dark fs-5 fw-bold">
                   {{ $product->title }}
                 </a>
               </h5>
 
-              <p class="text-secondary mb-0 fs-5">{{ number_format($product->variants->first()?->price ?? 0) }}đ</p>
+              @if($finalPrice < $originalPrice)
+                <p class="mb-0 fs-5">
+                <span class="text-danger fw-bold fs-4 me-2">{{ number_format($finalPrice) }}đ</span>
+
+                <span class="text-muted small" style="text-decoration: line-through; color: #6c757d; font-size: 14px;">
+                  {{ number_format($originalPrice) }}đ
+                </span>
+                </p>
+                @else
+                {{-- Nếu sản phẩm ĐÉO có giảm giá: Chỉ hiện 1 giá gốc màu đen bình thường --}}
+                <p class="text-dark mb-0 fs-5 fw-bold">{{ number_format($originalPrice) }}đ</p>
+                @endif
             </div>
           </div>
         </div>

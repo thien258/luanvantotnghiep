@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Concentration;
 use App\Models\Volume;
 use App\Models\Brand;
+use App\Models\Festival;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ProductVariant;
@@ -30,10 +31,10 @@ class ProductController extends Controller
         $categories = Category::all();
         $concentrations = Concentration::all();
         $volumes = Volume::all();
-
+       $festivals = Festival::where('status', 1)->get();
         $brands = Brand::all();
 
-        return view('admin.product.add', compact('categories', 'concentrations', 'volumes', 'brands'));
+        return view('admin.product.add', compact('categories', 'concentrations', 'volumes', 'brands', 'festivals'));
     }
     public function store(Request $request)
     {
@@ -62,6 +63,9 @@ class ProductController extends Controller
                     }
                 }
             }
+            if (($request->has('idFestival')) && is_array($request->idFestival)) {
+                $product->festivals()->attach($request->idFestival);
+            }
 
             return redirect()->route('admin.product.index');
         } else {
@@ -77,7 +81,10 @@ class ProductController extends Controller
         $concentrations = Concentration::all();
         $volumes = Volume::all();
         $brands = Brand::all();
-        return view('admin.product.edit', compact('product', 'categories', 'concentrations', 'volumes', 'brands'));
+        $festivals = Festival::where('status', 1)->get();
+
+        $selectedFestivalIds = $product->festivals()->pluck('festivals.id')->toArray();
+        return view('admin.product.edit', compact('product', 'categories', 'concentrations', 'volumes', 'brands', 'festivals', 'selectedFestivalIds'));
     }
     public function update(Request $request, $id)
     {
@@ -115,6 +122,8 @@ class ProductController extends Controller
                 }
             }
         }
+        $festivalIds = $request->input('idFestival', []);
+        $product->festivals()->sync($festivalIds);
 
         return redirect()->route('admin.product.index');
     }
@@ -127,6 +136,7 @@ class ProductController extends Controller
             return back()->with('error', 'Sản phẩm không tồn tại.');
         }
         ProductVariant::where('idProduct', $product->id)->delete();
+        
         $product->delete();
 
         return redirect()->route('admin.product.index');

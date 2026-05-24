@@ -76,6 +76,23 @@
                         </div>
                         @endforeach
                     </div>
+
+                    <div class="mt-4">
+                        <h6 class="fw-bold mb-3 text-secondary border-bottom pb-2">3. Chương trình Lễ hội / Giảm giá</h6>
+                        <p class="small text-muted mb-2">Tích chọn các lễ hội muốn áp dụng cho sản phẩm này.</p>
+                        <div class="d-flex flex-wrap gap-2 border p-3 bg-light rounded" style="max-height: 180px; overflow-y: auto;">
+                            @forelse($festivals as $festival)
+                            <div class="form-check w-100 mb-2">
+                                <input class="form-check-input" type="checkbox" name="idFestival[]" value="{{ $festival->id }}" id="fest_{{ $festival->id }}" style="cursor: pointer;">
+                                <label class="form-check-label text-dark fw-bold" for="fest_{{ $festival->id }}" style="cursor: pointer;">
+                                    {{ $festival->name }} <span class="text-danger">(-{{ $festival->discount }}%)</span>
+                                </label>
+                            </div>
+                            @empty
+                            <span class="text-muted small"><em>Không có lễ hội nào đang kích hoạt.</em></span>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-4 text-center">
@@ -90,5 +107,5 @@
 
 @endsection
 @section('script')
-    <script src="{{ asset('js/addProduct.js') }}"></script>
+<script src="{{ asset('js/addProduct.js') }}"></script>
 @endsection

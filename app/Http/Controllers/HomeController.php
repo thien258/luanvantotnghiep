@@ -9,9 +9,10 @@ use App\Models\Brand;
 use App\Models\Footer;
 use App\Models\Title;
 use App\Models\Concentration;
-use App\Models\Love;
+use App\Models\Festival;
 use App\Models\Product;
 use App\Models\Volume;
+
 use Illuminate\Support\Facades\View;
 
 class HomeController extends Controller
@@ -91,9 +92,9 @@ class HomeController extends Controller
         } else {
             $query->with('variants');
         }
-        $products = $query->get();
-    
-        return view('show-product', compact('all_concentrations', 'all_brands', 'all_volumes', 'products', 'category', 'title', 'footers'));
+        $products = $query->with(['variants', 'festivals'])->get();
+
+        return view('layout.category_product', compact('all_concentrations', 'all_brands', 'all_volumes', 'products', 'category', 'title', 'footers'));
     }
     public function brand_product(Request $request, $id)
     {
@@ -122,10 +123,10 @@ class HomeController extends Controller
                 $q->whereIn('idVolume', $request->volumes);
             });
         }
-        $products = $query->get();
+        $products = $query->with(['variants', 'festivals'])->get();
 
 
-        return view('show-product', compact('all_concentrations', 'all_volumes', 'categories', 'products', 'brand', 'title', 'footers'));
+        return view('layout.brand_product', compact('all_concentrations', 'all_volumes', 'categories', 'products', 'brand', 'title', 'footers'));
     }
     public function single_product($id)
     {
@@ -172,9 +173,7 @@ class HomeController extends Controller
             $query->with('variants');
         }
 
-
-
-        $products = $query->get();
+       $products = $query->with(['variants', 'festivals'])->get();
         $title = Title::all();
         $footers = Footer::all();
         // 5. Trả về đúng cái file show-product mà ông đang làm
@@ -226,4 +225,36 @@ class HomeController extends Controller
         // 3. Trả về view kèm theo đầy đủ "hành trang"
         return view('search_result', compact('products', 'keyword', 'brands', 'title', 'footers'));
     }
+    public function festival_product(Request $request, $id)
+    {
+        $festival = Festival::find($id);
+        $title = Title::all();
+        $footers = Footer::all();
+
+        $all_volumes = Volume::where('status', '1')->get();
+        $all_concentrations = Concentration::where('status', '1')->get();
+        $categories = Category::where('status', '1')->get();
+
+        $query = Product::where([
+            ['status', '=', '1']
+        ])->whereHas('festivals', function ($q) use ($id) {
+            $q->where('festivals.id', $id);
+        });
+
+        if ($request->has('concentrations') && is_array($request->concentrations)) {
+            $query->whereIn('idConcentration', $request->concentrations);
+        }
+        if ($request->has('categories') && is_array($request->categories)) {
+            $query->whereIn('idCategory', $request->categories);
+        }
+        if ($request->has('volumes') && is_array($request->volumes)) {
+            $query->whereHas('variants', function ($q) use ($request) {
+                $q->whereIn('idVolume', $request->volumes);
+            });
+        }
+        $products = $query->with(['variants', 'festivals'])->get();
+
+        return view('layout.festival_product', compact('festival', 'all_concentrations', 'all_volumes', 'categories', 'products', 'title', 'footers'));
+    }
+    
 }

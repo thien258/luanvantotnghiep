@@ -65,6 +65,19 @@
 										@endforelse
 									</ul>
 								</li>
+								<li class="nav-item submenu dropdown">
+									<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+										aria-expanded="false">Festival</a>
+									<ul class="dropdown-menu">
+										@forelse($festivals as $object)
+										<li class="nav-item">
+											<a href="{{ route('festival_product',['festival'=>$object->id]) }}">{{ $object->name }}</a>
+										</li>
+										@empty
+										<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
+										@endforelse
+									</ul>
+								</li>
 
 								{{-- FORM TÌM KIẾM ĐÃ ĐƯỢC CHỈNH LẠI KÍCH THƯỚC ĐỂ TRÁNH RỚT DÒNG --}}
 								<li class="nav-item d-flex align-items-center mx-2">
@@ -208,9 +221,7 @@
 		<script src="vendors/jquery.ajaxchimp.min.js"></script>
 		<script src="vendors/mail-script.js"></script>
 		<script src="js/main.js"></script>
-		<script src="{{ asset('js/single_product.js') }}"></script>
-		<script src="{{ asset('js/cart.js') }}"></script>
-		<script src="{{ asset('js/live-search.js') }}"></script>
+		@yield('script')
 
 	</body>
 
