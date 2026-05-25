@@ -20,11 +20,16 @@
     <div class="row g-5">
         <div class="col-lg-7">
             @forelse($carts as $cart)
-            {{-- 🌟 ĐÃ FIX: Đối chiếu chuẩn xác theo mối quan hệ productVariant của Model Cart --}}
+            {{-- 🌟 Đối chiếu chuẩn xác theo mối quan hệ productVariant của Model Cart --}}
             @if($cart->productVariant)
             @php
+                $variant = $cart->productVariant;
                 // Kiểm tra trạng thái tồn kho thực tế
-                $isOutOfStock = ($cart->productVariant->stock <= 0 || $cart->productVariant->product?->status == 0);
+                $isOutOfStock = ($variant->stock <= 0 || $variant->product?->status == 0);
+                
+                // Lấy giá chuẩn từ bộ não Model ProductVariant
+                $originalPrice = $variant->price;
+                $finalPrice = $variant->final_price; 
             @endphp
 
                 <div class="row pb-4 mb-4 border-bottom align-items-center">
@@ -34,14 +39,14 @@
                         {{-- Ô Checkbox chứa dữ liệu giá giảm để JS tự động bốc đi tính tổng --}}
                         <input type="checkbox" class="form-check-input cart-item-checkbox me-3 border-dark shadow-none"
                             value="{{ $cart->id }}"
-                            data-price="{{ $cart->final_price ?? $cart->productVariant->price }}"
+                            data-price="{{ $finalPrice }}" 
                             data-quantity="{{ $cart->quantity }}"
-                            data-stock="{{ $cart->productVariant->stock }}"
+                            data-stock="{{ $variant->stock }}"
                             {{ $isOutOfStock ? 'disabled' : '' }}
                             style="transform: scale(1.3); cursor: pointer; margin-top: 0;">
 
                         <div class="position-relative bg-light d-flex align-items-center justify-content-center rounded border" style="width: 85px; height: 85px; overflow: hidden;">
-                            <img src="{{ $cart->productVariant->product?->image }}" class="img-fluid {{ $isOutOfStock ? 'opacity-25' : '' }}" style="max-height: 100%; object-fit: contain;">
+                            <img src="{{ $variant->product?->image }}" class="img-fluid {{ $isOutOfStock ? 'opacity-25' : '' }}" style="max-height: 100%; object-fit: contain;">
 
                             @if($isOutOfStock)
                             <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background-color: rgba(255, 255, 255, 0.4); z-index: 10;">
@@ -55,7 +60,7 @@
                     <div class="col-8 col-md-9">
                         <div class="d-flex justify-content-between mb-1">
                             <h5 class="fw-bold {{ $isOutOfStock ? 'text-muted text-decoration-line-through' : 'text-dark' }} mb-0">
-                                {{ $cart->productVariant->product?->title }}
+                                {{ $variant->product?->title }}
                             </h5>
                             <form action="{{ route('carts.destroy', $cart->id) }}" method="POST" onsubmit="return confirm('Xóa sản phẩm này khỏi giỏ hàng?')">
                                 @csrf @method('DELETE')
@@ -63,18 +68,18 @@
                             </form>
                         </div>
 
-                        {{-- Khối hiển thị Đơn giá (Hỗ trợ gạch ngang giá gốc nếu dính lễ hội giảm giá) --}}
+                        {{-- Khối hiển thị Đơn giá --}}
                         <div class="mb-2">
-                            @if(isset($cart->final_price) && $cart->final_price < $cart->productVariant->price)
+                            @if($finalPrice < $originalPrice)
                                 <p class="text-danger fw-bold mb-0 d-inline-block me-2" style="font-size: 16px;">
-                                    {{ number_format($cart->final_price) }}đ
+                                    {{ number_format($finalPrice) }}đ
                                 </p>
                                 <span class="text-muted text-decoration-line-through small" style="font-size: 13px;">
-                                    {{ number_format($cart->productVariant->price) }}đ
+                                    {{ number_format($originalPrice) }}đ
                                 </span>
                             @else
                                 <p class="text-danger fw-bold mb-0" style="font-size: 16px;">
-                                    {{ number_format($cart->productVariant->price) }}đ
+                                    {{ number_format($originalPrice) }}đ
                                 </p>
                             @endif
                         </div>
@@ -85,7 +90,7 @@
                             <div class="d-flex align-items-center gap-2">
                                 <span class="small text-muted fw-bold">Dung tích:</span>
                                 <select name="newIdVariant" class="form-select form-select-sm w-auto rounded-0 shadow-none border-dark" onchange="this.form.submit()">
-                                    @foreach($cart->productVariant->product->variants as $v)
+                                    @foreach($variant->product->variants as $v)
                                     <option value="{{ $v->id }}"
                                         {{ $cart->idPV == $v->id ? 'selected' : '' }}
                                         {{ $v->stock <= 0 && $cart->idPV != $v->id ? 'disabled' : '' }}>
@@ -113,7 +118,7 @@
                                 <button type="button" class="btn btn-light border-0 px-2 fw-bold btn-qty-change" 
                                     data-id="{{ $cart->id }}" 
                                     data-action="up" 
-                                    data-stock="{{ $cart->productVariant->stock }}" {{-- 🌟 ĐÃ SỬA: Bơm chuẩn stock thật từ DB lên HTML --}}
+                                    data-stock="{{ $variant->stock }}"
                                     {{ $isOutOfStock ? 'disabled' : '' }}>+</button>
                             </div>
                         </div>

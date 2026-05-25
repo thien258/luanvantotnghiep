@@ -72,23 +72,26 @@
 
       <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2">
         <span class="text-muted small">Hiển thị {{ $products->count() }} sản phẩm</span>
-
-        <!-- <div class="d-flex align-items-center">
-          <span class="text-uppercase small fw-bold me-2">Sắp xếp:</span>
-          <select class="form-select form-select-sm rounded-0 border-dark w-auto shadow-none">
-            <option>Mới nhất</option>
-            <option>Giá tăng dần</option>
-            <option>Giá giảm dần</option>
-          </select>
-        </div> -->
       </div>
 
       <div class="row d-flex flex-wrap">
         @forelse($products as $product)
         @php
-        $originalPrice = $product->variants->first()?->price ?? 0;
-        $maxDiscount = ($product->festivals) ? $product->festivals->where('status', 1)->max('discount') ?? 0 : 0;
-        $finalPrice = method_exists($product, 'getDiscountedPrice') ? $product->getDiscountedPrice($originalPrice) : $originalPrice;
+            // 1. Lấy biến thể đầu tiên làm đại diện hiển thị
+            $defaultVariant = $product->variants->first();
+            $originalPrice = $defaultVariant ? $defaultVariant->price : 0;
+
+            // 2. TÌM % GIẢM GIÁ CAO NHẤT (Sản phẩm vs Dung tích đại diện)
+            $productDiscount = $product->festivals ? $product->festivals->where('status', 1)->max('discount') ?? 0 : 0;
+            $variantDiscount = ($defaultVariant && $defaultVariant->specificFestivals) 
+                                ? $defaultVariant->specificFestivals->where('status', 1)->max('discount') ?? 0 
+                                : 0;
+            
+            // Lấy cái nào to hơn
+            $maxDiscount = max($productDiscount, $variantDiscount); 
+
+            // 3. Lấy giá cuối cùng (Sử dụng hàm getFinalPriceAttribute trong Model ProductVariant)
+            $finalPrice = $defaultVariant ? $defaultVariant->final_price : $originalPrice;
         @endphp
         <div class="col-12 col-md-6 col-lg-4 mb-4">
           <div class="card border-0 h-100 text-center bg-transparent d-flex flex-column">
@@ -124,7 +127,7 @@
                 </span>
                 </p>
                 @else
-                {{-- Nếu sản phẩm ĐÉO có giảm giá: Chỉ hiện 1 giá gốc màu đen bình thường --}}
+                {{-- Nếu sản phẩm KHÔNG có giảm giá: Chỉ hiện 1 giá gốc màu đen bình thường --}}
                 <p class="text-dark mb-0 fs-5 fw-bold">{{ number_format($originalPrice) }}đ</p>
                 @endif
             </div>

@@ -8,6 +8,7 @@ use App\Models\Concentration;
 use App\Models\Volume;
 use App\Models\Brand;
 use App\Models\Festival;
+use App\Models\FestivalProductVariant;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ProductVariant;
@@ -31,7 +32,7 @@ class ProductController extends Controller
         $categories = Category::all();
         $concentrations = Concentration::all();
         $volumes = Volume::all();
-       $festivals = Festival::where('status', 1)->get();
+        $festivals = Festival::where('status', 1)->get();
         $brands = Brand::all();
 
         return view('admin.product.add', compact('categories', 'concentrations', 'volumes', 'brands', 'festivals'));
@@ -49,20 +50,29 @@ class ProductController extends Controller
         ]);
 
         if ($product) {
-            // 2. LOGIC MỚI: Quét qua mảng variants được tích chọn từ Form
+            // Quét qua mảng variants được tích chọn từ Form
             if ($request->has('variants') && is_array($request->variants)) {
                 foreach ($request->variants as $volumeId => $data) {
-                    // Chỉ lưu vào Database nếu checkbox của dung tích đó được tích (checked = 1)
+
+                    // Chỉ lưu vào Database nếu checkbox của dung tích đó được tích
                     if (isset($data['checked']) && $data['checked'] == 1) {
-                        ProductVariant::create([
-                            'idProduct' => $product->id, // Lấy ID sản phẩm vừa tạo
-                            'idVolume'  => $volumeId,    // ID của dung tích
+                        $variant = ProductVariant::create([
+                            'idProduct' => $product->id,
+                            'idVolume'  => $volumeId,
                             'price'     => $data['price'] ?? 0,
                             'stock'     => $data['stock'] ?? 0,
                         ]);
+
+                        // LOGIC MỚI: Sau khi tạo variant xong, kiểm tra xem có chọn lễ hội riêng không
+                        if ($request->has("variant_festivals.{$volumeId}")) {
+                            // Dùng attach để lưu vào bảng trung gian
+                            $variant->specificFestivals()->attach($request->variant_festivals[$volumeId]);
+                        }
                     }
                 }
             }
+
+            // Lưu lễ hội chung toàn sản phẩm
             if (($request->has('idFestival')) && is_array($request->idFestival)) {
                 $product->festivals()->attach($request->idFestival);
             }
@@ -122,6 +132,25 @@ class ProductController extends Controller
                 }
             }
         }
+        // ... [Đoạn cập nhật Product và Variant ở trên giữ nguyên] ...
+
+        // LOGIC MỚI: Cập nhật nhiều lễ hội cho TỪNG dung tích
+        if ($request->has('variant_festivals')) {
+            foreach ($request->variant_festivals as $volumeId => $festivalIds) {
+                $variant = ProductVariant::where('idProduct', $product->id)->where('idVolume', $volumeId)->first();
+                if ($variant) {
+                    // Tự động xóa cái cũ, thêm cái mới (giống y hệt sản phẩm)
+                    $variant->specificFestivals()->sync($festivalIds);
+                }
+            }
+        } else {
+            // Nếu Admin bỏ tích sạch mọi lễ hội riêng của tất cả dung tích
+            foreach ($product->variants as $variant) {
+                $variant->specificFestivals()->detach();
+            }
+        }
+
+        // Sync Lễ hội chung toàn sản phẩm
         $festivalIds = $request->input('idFestival', []);
         $product->festivals()->sync($festivalIds);
 
@@ -136,7 +165,7 @@ class ProductController extends Controller
             return back()->with('error', 'Sản phẩm không tồn tại.');
         }
         ProductVariant::where('idProduct', $product->id)->delete();
-        
+
         $product->delete();
 
         return redirect()->route('admin.product.index');

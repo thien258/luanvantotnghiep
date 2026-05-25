@@ -28,31 +28,32 @@
                 <div class="s_product_text">
                     <h3 class="display-6 fw-bold mb-2">{{$product->title}}</h3>
 
-                    {{-- 🌟 1. NƠI HIỂN THỊ GIÁ TIỀN ĐÃ SỬA (HỖ TRỢ HIỂN THỊ CẢ GIÁ GỐC LẪN GIÁ SALE KHI VỪA LOAD TRANG) --}}
+                    {{-- 🌟 1. NƠI HIỂN THỊ GIÁ TIỀN (LÚC VỪA LOAD TRANG SẼ LẤY DUNG TÍCH ĐẦU TIÊN LÀM MẪU) --}}
                     <div class="mb-4">
                         @php
-                        $firstVariant = $product->variants->first();
-                        $originalPrice = $firstVariant?->price ?? 0;
-                        // Tính giá đã giảm cho biến thể đầu tiên để hiển thị mặc định
-                        $finalPrice = method_exists($product, 'getDiscountedPrice') ? $product->getDiscountedPrice($originalPrice) : $originalPrice;
+                            $firstVariant = $product->variants->first();
+                            $originalPrice = $firstVariant?->price ?? 0;
+                            
+                            // CHỈ CHỈNH Ở ĐÂY: Gọi thẳng cái thuộc tính thông minh trong Model ra
+                            $finalPrice = $firstVariant ? $firstVariant->final_price : $originalPrice;
                         @endphp
 
                         <div id="price-wrapper" class="d-flex align-items-baseline gap-2 flex-wrap">
                             @if($finalPrice < $originalPrice)
                                 {{-- Có giảm giá: Hiện giá mới đỏ rực và giá cũ gạch ngang màu xám --}}
                                 <h2 class="text-danger fw-bold m-0 d-inline">
-                                <span id="display-price">{{ number_format($finalPrice) }}</span> VNĐ
+                                    <span id="display-price">{{ number_format($finalPrice) }}</span> VNĐ
                                 </h2>
                                 <span class="text-muted text-decoration-line-through small ms-2" id="display-original-price" style="font-size: 16px;">
                                     {{ number_format($originalPrice) }} VNĐ
                                 </span>
-                                @else
+                            @else
                                 {{-- Không giảm giá: Chỉ hiện một giá thường --}}
                                 <h2 class="text-danger fw-bold m-0 d-inline">
                                     <span id="display-price">{{ number_format($originalPrice) }}</span> VNĐ
                                 </h2>
                                 <span class="text-muted text-decoration-line-through small ms-2 d-none" id="display-original-price" style="font-size: 16px;"></span>
-                                @endif
+                            @endif
                         </div>
                     </div>
 
@@ -63,20 +64,20 @@
                             Concentration: <span class="text-dark fw-bold ms-2">{{$product->concentration->concentration ?? 'N/A'}}</span>
                         </div>
 
-                        {{-- 🌟 2. DÀN OPTION BUTTON ĐỂ CHỌN DUNG TÍCH (BƠM GIÁ SALE VÀO DATA-FINAL-PRICE CHO JS ĐỌC) --}}
+                        {{-- 🌟 2. DÀN OPTION BUTTON ĐỂ CHỌN DUNG TÍCH --}}
                         <div class="text-uppercase small tracking-widest text-muted mb-2">Chọn dung tích:</div>
                         <div class="d-flex flex-wrap gap-2 mb-3">
                             @forelse($product->variants as $key => $variant)
                             @php
-                            $vOriginalPrice = $variant->price;
-                            // Ép giá gốc của từng dung tích đi qua hàm tính giảm giá của product cha
-                            $vFinalPrice = method_exists($product, 'getDiscountedPrice') ? $product->getDiscountedPrice($vOriginalPrice) : $vOriginalPrice;
+                                $vOriginalPrice = $variant->price;
+                                // CHỈ CHỈNH Ở ĐÂY: Gán giá đã qua xử lý max discount
+                                $vFinalPrice = $variant->final_price; 
                             @endphp
+                            
                             <button type="button"
                                 class="btn btn-outline-dark rounded-0 px-3 py-2 variant-btn {{ $key == 0 && $variant->stock > 0 ? 'active btn-dark text-white' : '' }}"
                                 data-id="{{ $variant->id }}"
                                 data-price="{{ $vOriginalPrice }}"
-                                {{-- Găm giá sau giảm vào đây để JS bốc lên khi click chuột --}}
                                 data-final-price="{{ $vFinalPrice }}"
                                 data-stock="{{ $variant->stock }}"
                                 {{ $variant->stock <= 0 ? 'disabled' : '' }}
@@ -87,6 +88,7 @@
                             <span class="text-danger small">Đang cập nhật dung tích...</span>
                             @endforelse
                         </div>
+
                         {{-- 3. NƠI HIỂN THỊ TỒN KHO TƯƠNG ỨNG VỚI NÚT ĐANG CHỌN --}}
                         <div class="text-uppercase small tracking-widest text-muted">
                             Trạng thái:
@@ -98,7 +100,6 @@
                     {{-- 4. FORM THÊM VÀO GIỎ HÀNG --}}
                     <form action="{{ route('carts.store') }}" method="POST" class="m-0">
                         @csrf
-                        {{-- Quan trọng: Ô ẩn này chứa ID dung tích được chọn --}}
                         <input type="hidden" name="idVariant" id="hidden-variant-id" value="{{ $product->variants->first()?->id ?? '' }}">
                         <input type="hidden" name="quantity" value="1">
 

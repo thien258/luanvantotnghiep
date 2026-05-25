@@ -40,8 +40,7 @@ public function getDiscountedPrice($originalPrice)
     // 1. Lấy ngày hôm nay chuẩn định dạng YYYY-MM-DD (Giúp khớp với định dạng date trong MySQL)
     $today = Carbon::today()->toDateString(); 
 
-    // 2. Lấy số phần trăm giảm giá lớn nhất của các lễ hội đang chạy và còn hạn dùng
-    // ⚠️ CHÚ Ý: Đổi 'festivals' thành đúng tên hàm quan hệ Nhiều-Nhiều của ông nếu đặt khác
+ 
     $maxDiscount = $this->festivals()
         ->where('status', 1)
         ->where('start_date', '<=', $today)  // Ngày bắt đầu nhỏ hơn hoặc bằng hôm nay
