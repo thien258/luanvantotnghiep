@@ -154,5 +154,5 @@
 
 @endsection
 @section('script')
-<script src="{{ asset('js/single-product.js') }}"></script>
+<script src="{{ asset('js/single_product.js') }}"></script>
 @endsection

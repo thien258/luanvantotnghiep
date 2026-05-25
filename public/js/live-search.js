@@ -12,14 +12,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 fetch(`/search-suggest?keyword=${encodeURIComponent(keyword)}`)
                     .then(response => response.json())
                     .then(data => {
-                        searchSuggestions.innerHTML = ''; // Xóa sạch kết quả cũ của lần gõ trước
+                        searchSuggestions.innerHTML = ''; 
 
                         if (data.length > 0) {
                             // Duyệt qua danh sách sản phẩm và tạo giao diện
                             data.forEach(item => {
 
                                 // CHÚ Ý: Đổi '/product/' thành route trỏ tới trang chi tiết thực tế của ông
-                                let detailUrl = `/category_product/single_product/${item.id}`;
+                                let detailUrl = `/product/${item.id}`;
 
                                 // Định dạng số tiền thành kiểu 1.500.000đ
                                 let formattedPrice = parseInt(item.price).toLocaleString('vi-VN') + 'đ';

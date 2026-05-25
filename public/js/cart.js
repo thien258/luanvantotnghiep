@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // ========================================================
-    // PHẦN 1: LOGIC CHECKBOX VÀ TÍNH TỔNG TIỀN (REAL-TIME CLIENT)
+    // PHẦN 1: LOGIC CHECKBOX VÀ TÍNH TỔNG TIỀN REAL-TIME
     // ========================================================
     const checkboxes = document.querySelectorAll('.cart-item-checkbox');
     const displaySubtotal = document.getElementById('display-subtotal');
@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 let rawPrice = checkbox.getAttribute('data-price') || "0";
                 let rawQty = checkbox.getAttribute('data-quantity') || "1";
 
-                // Lọc sạch các ký tự lạ, ép về kiểu số thuần túy để tính toán
                 let price = parseInt(rawPrice.replace(/\D/g, '')) || 0;
                 let quantity = parseInt(rawQty) || 1;
                 let cartId = checkbox.value;
@@ -38,10 +37,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        let vat = subtotal * 0.10; // Thuế VAT 10%
+        let vat = subtotal * 0.10; 
         let grandTotal = subtotal + vat;
 
-        // Đổ dữ liệu định dạng tiền tệ vi-VN ra màn hình
         if (displaySubtotal) displaySubtotal.innerText = subtotal.toLocaleString('vi-VN') + 'đ';
         if (displayVat) displayVat.innerText = vat.toLocaleString('vi-VN') + 'đ';
         if (displayTotal) displayTotal.innerText = grandTotal.toLocaleString('vi-VN') + 'đ';
@@ -52,7 +50,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Lắng nghe sự kiện khi tích chọn hoặc bỏ tích sản phẩm
     checkboxes.forEach(function(checkbox) {
         checkbox.addEventListener('change', calculateTotal);
     });
@@ -65,17 +62,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Chạy tính toán tổng tiền lần đầu khi vừa tải xong trang
     calculateTotal();
 
     // ========================================================
-    // PHẦN 2: XỬ LÝ NÚT TĂNG GIẢM SỐ LƯỢNG ĐỒNG BỘ REAL-TIME (AJAX)
+    // PHẦN 2: XỬ LÝ NÚT TĂNG GIẢM SỐ LƯỢNG ĐỒNG BỘ REAL-TIME (KHÔNG REFRESH)
     // ========================================================
     const qtyButtons = document.querySelectorAll('.btn-qty-change');
 
+    // Hàm kiểm tra trạng thái kho để khóa/mở nút bấm ngay lập tức
+    function checkButtonStates(cartId, currentQty) {
+        const row = document.getElementById('qty-' + cartId)?.closest('.row');
+        if (!row) return;
+
+        const btnUp = row.querySelector('[data-action="up"]');
+        const btnDown = row.querySelector('[data-action="down"]');
+        const maxStock = parseInt(btnUp?.getAttribute('data-stock')) || 0;
+
+        // Nếu số lượng đạt đỉnh kho, block (disabled) luôn nút tăng (+)
+        if (btnUp && maxStock > 0) {
+            btnUp.disabled = (currentQty >= maxStock);
+        }
+
+        // Nếu số lượng về mức tối thiểu (1), block nút giảm (-)
+        if (btnDown) {
+            btnDown.disabled = (currentQty <= 1);
+        }
+    }
+
+    // Chạy kiểm tra trạng thái nút bấm cho tất cả sản phẩm ngay khi tải trang
+    checkboxes.forEach(cb => {
+        let cartId = cb.value;
+        let inputQty = document.getElementById('qty-' + cartId);
+        if (inputQty) {
+            checkButtonStates(cartId, parseInt(inputQty.value) || 1);
+        }
+    });
+
     qtyButtons.forEach(function(btn) {
         btn.addEventListener('click', function() {
-            // Đảm bảo bốc đúng thuộc tính của nút kể cả khi click lệch vào icon bên trong
             let targetBtn = this.closest('.btn-qty-change');
             if (!targetBtn) return;
 
@@ -87,12 +111,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (!inputQty) return;
             let currentQty = parseInt(inputQty.value) || 1;
+            let maxStock = parseInt(targetBtn.parentElement.querySelector('[data-action="up"]')?.getAttribute('data-stock')) || 0;
 
             if (action === 'up') {
-                let maxStock = parseInt(targetBtn.getAttribute('data-stock')) || 0;
-
+                // Nếu bằng hoặc lớn hơn kho thì dừng hình luôn, không tăng giao diện
                 if (maxStock > 0 && currentQty >= maxStock) {
-                    alert('Số lượng trong kho không đủ để tăng tiếp!');
+                    targetBtn.disabled = true;
                     return; 
                 }
                 currentQty++;
@@ -104,18 +128,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // 1. Cập nhật số lượng hiển thị tức thì ngoài màn hình Client
+            // Đồng bộ dữ liệu tạm thời ra giao diện Client
             inputQty.value = currentQty;
             
             if (checkbox) {
                 checkbox.setAttribute('data-quantity', currentQty);
-                checkbox.checked = true; // Tự động tích chọn dòng đó khi bấm tăng/giảm số lượng giống Shopee
+                checkbox.checked = true; 
             }
             
-            // Tính lại tiền mặt Client
             calculateTotal();
+            
+            // Cập nhật trạng thái Block/Unblock của cụm nút (+ / -) dựa trên số lượng mới
+            checkButtonStates(cartId, currentQty);
 
-            // 2. 🌟 ĐÃ FIX: Bắn request ngầm bọc kèm ID chuẩn xác lên Server
+            // Bắn phương thức PUT ngầm cập nhật Database mà không cần reload trang
             fetch(`/carts/${cartId}`, {
                 method: 'PUT',
                 headers: {
@@ -128,14 +154,12 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => {
                 if (!response.ok) {
-                    // Nếu backend kiểm tra thấy kho hết hoặc dính lỗi bảo mật
-                    alert('Cập nhật kho hàng thất bại hoặc vượt quá tồn kho hiện tại!');
-                    window.location.reload();
+                    // 🌟 ĐÃ SỬA: Lỗi ngầm thì chỉ ghi nhận lỗi ở tab F12 (Console) cho Dev, không hiện Alert, không Reload trang của khách
+                    console.error('Không thể đồng bộ số lượng lên Server, mã lỗi:', response.status);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi kết nối hệ thống ngầm, vui lòng thử lại!');
+                console.error('Lỗi kết nối Fetch API:', error);
             });
         });
     });
