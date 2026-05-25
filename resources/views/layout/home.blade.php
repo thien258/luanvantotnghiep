@@ -16,6 +16,9 @@
 		<link rel="stylesheet" href="vendors/owl-carousel/owl.carousel.min.css">
 
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+		<script>
+			window.APP_URL = "{{ url('/') }}";
+		</script>
 		<meta name="csrf-token" content="{{ csrf_token() }}">
 
 		<link rel="stylesheet" href="css/style.css">
@@ -222,9 +225,9 @@
 		<script src="vendors/mail-script.js"></script>
 		<script src="js/main.js"></script>
 
-		@section('script')
+	
 		<script src="{{ asset('js/live-search.js') }}"></script>
-		@endsection
+		
 		@yield('script')
 	</body>
 
