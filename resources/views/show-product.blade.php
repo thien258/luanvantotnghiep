@@ -29,7 +29,19 @@
           @endforeach
         </div>
         @endif
+        <div class="mb-5">
+          <p class="text-uppercase fw-bold small mb-3">Mức giá</p>
 
+          <div id="price-range" class="mb-4 mt-2 px-2"></div>
+
+          <div class="d-flex align-items-center justify-content-between small fw-bold text-danger">
+            <span id="price-min-display">0đ</span>
+            <span id="price-max-display">10.000.000đ</span>
+          </div>
+
+          <input type="hidden" name="min_price" id="min_price" value="{{ request('min_price', 0) }}">
+          <input type="hidden" name="max_price" id="max_price" value="{{ request('max_price', 100000000) }}">
+        </div>
         {{-- LỌC THƯƠNG HIỆU: Chỉ hiện nếu KHÔNG PHẢI đang ở trang thương hiệu --}}
         @if(!isset($brand) && isset($all_brands))
         <div class="mb-5">
@@ -70,28 +82,37 @@
 
     <div class="col-lg-9">
 
-      <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2">
-        <span class="text-muted small">Hiển thị {{ $products->count() }} sản phẩm</span>
-      </div>
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <span class="text-muted small">Hiển thị {{ $products->count() }} sản phẩm</span>
+
+    <div class="d-flex align-items-center">
+        <span class="text-uppercase small fw-bold me-2">Sắp xếp:</span>
+        <select name="sort" class="form-select form-select-sm rounded-0 border-dark w-auto shadow-none" onchange="this.form.submit()">
+            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Mới nhất</option>
+            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá: Thấp đến Cao</option>
+            <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá: Cao đến Thấp</option>
+        </select>
+    </div>
+</div>
 
       <div class="row d-flex flex-wrap">
         @forelse($products as $product)
         @php
-            // 1. Lấy biến thể đầu tiên làm đại diện hiển thị
-            $defaultVariant = $product->variants->first();
-            $originalPrice = $defaultVariant ? $defaultVariant->price : 0;
+        // 1. Lấy biến thể đầu tiên làm đại diện hiển thị
+        $defaultVariant = $product->variants->first();
+        $originalPrice = $defaultVariant ? $defaultVariant->price : 0;
 
-            // 2. TÌM % GIẢM GIÁ CAO NHẤT (Sản phẩm vs Dung tích đại diện)
-            $productDiscount = $product->festivals ? $product->festivals->where('status', 1)->max('discount') ?? 0 : 0;
-            $variantDiscount = ($defaultVariant && $defaultVariant->specificFestivals) 
-                                ? $defaultVariant->specificFestivals->where('status', 1)->max('discount') ?? 0 
-                                : 0;
-            
-            // Lấy cái nào to hơn
-            $maxDiscount = max($productDiscount, $variantDiscount); 
+        // 2. TÌM % GIẢM GIÁ CAO NHẤT (Sản phẩm vs Dung tích đại diện)
+        $productDiscount = $product->festivals ? $product->festivals->where('status', 1)->max('discount') ?? 0 : 0;
+        $variantDiscount = ($defaultVariant && $defaultVariant->specificFestivals)
+        ? $defaultVariant->specificFestivals->where('status', 1)->max('discount') ?? 0
+        : 0;
 
-            // 3. Lấy giá cuối cùng (Sử dụng hàm getFinalPriceAttribute trong Model ProductVariant)
-            $finalPrice = $defaultVariant ? $defaultVariant->final_price : $originalPrice;
+        // Lấy cái nào to hơn
+        $maxDiscount = max($productDiscount, $variantDiscount);
+
+        // 3. Lấy giá cuối cùng (Sử dụng hàm getFinalPriceAttribute trong Model ProductVariant)
+        $finalPrice = $defaultVariant ? $defaultVariant->final_price : $originalPrice;
         @endphp
         <div class="col-12 col-md-6 col-lg-4 mb-4">
           <div class="card border-0 h-100 text-center bg-transparent d-flex flex-column">
@@ -151,4 +172,52 @@
   </div>
 </div>
 
+@endsection
+@section('script')
+<link rel="stylesheet" href="{{ asset('vendors/nouislider/nouislider.min.css') }}">
+<script src="{{ asset('vendors/nouislider/nouislider.min.js') }}"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var slider = document.getElementById('price-range');
+    var minInput = document.getElementById('min_price');
+    var maxInput = document.getElementById('max_price');
+    var minDisplay = document.getElementById('price-min-display');
+    var maxDisplay = document.getElementById('price-max-display');
+
+    // Lấy giá trị hiện tại (nếu đang lọc dở) hoặc lấy mặc định 0 -> 10 củ
+    var currentMin = parseInt(minInput.value) || 0;
+    var currentMax = parseInt(maxInput.value) || 10000000;
+
+    // Khởi tạo thanh kéo
+    noUiSlider.create(slider, {
+      start: [currentMin, currentMax], // Vị trí bắt đầu
+      connect: true, // Nối thanh màu ở giữa
+      step: 100000, // Mỗi lần kéo nhảy 100k
+      range: {
+        'min': 0,
+        'max': 10000000 // Tối đa 10 triệu (ông có thể tự chỉnh)
+      },
+      format: {
+        to: function(value) {
+          return Math.round(value).toLocaleString('vi-VN'); // Format dấu chấm
+        },
+        from: function(value) {
+          return Number(value.replace(/[^0-9.-]+/g, ""));
+        }
+      }
+    });
+
+    // Sự kiện khi khách hàng kéo thanh trượt
+    slider.noUiSlider.on('update', function(values, handle) {
+      if (handle === 0) {
+        minDisplay.innerHTML = values[0] + 'đ';
+        minInput.value = values[0].replace(/\./g, ''); // Xóa dấu chấm để nhét vào db
+      } else {
+        maxDisplay.innerHTML = values[1] + 'đ';
+        maxInput.value = values[1].replace(/\./g, '');
+      }
+    });
+  });
+</script>
 @endsection
