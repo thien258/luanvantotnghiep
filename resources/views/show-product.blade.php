@@ -118,46 +118,7 @@
                         value="{{ request('max_price', 10000000) }}">
 
                 </div>
-                <div class="d-flex align-items-center mt-2 mt-md-0">
-
-                    <span class="text-uppercase small fw-bold me-2">
-
-                        Sắp xếp:
-
-                    </span>
-
-                    <select
-                        id="sort"
-                        name="sort"
-                        class="form-select form-select-sm rounded-0 border-dark shadow-none">
-
-                        <option
-                            value="latest"
-                            {{ request('sort', 'latest') == 'latest' ? 'selected' : '' }}>
-
-                            Mới nhất
-
-                        </option>
-
-                        <option
-                            value="price_asc"
-                            {{ request('sort') == 'price_asc' ? 'selected' : '' }}>
-
-                            Giá: Thấp đến Cao
-
-                        </option>
-
-                        <option
-                            value="price_desc"
-                            {{ request('sort') == 'price_desc' ? 'selected' : '' }}>
-
-                            Giá: Cao đến Thấp
-
-                        </option>
-
-                    </select>
-
-                </div>
+              
                 {{-- BRAND --}}
                 @if(!isset($brand) && isset($all_brands))
 
@@ -243,7 +204,46 @@
 
                 </span>
 
+                <div class="d-flex align-items-center mt-2 mt-md-0">
 
+<span class="text-uppercase small fw-bold me-2">
+
+    Sắp xếp:
+
+</span>
+
+<select
+    id="sort"
+    name="sort"
+    class="form-select form-select-sm rounded-0 border-dark shadow-none">
+
+    <option
+        value="latest"
+        {{ request('sort', 'latest') == 'latest' ? 'selected' : '' }}>
+
+        Mới nhất
+
+    </option>
+
+    <option
+        value="price_asc"
+        {{ request('sort') == 'price_asc' ? 'selected' : '' }}>
+
+        Giá: Thấp đến Cao
+
+    </option>
+
+    <option
+        value="price_desc"
+        {{ request('sort') == 'price_desc' ? 'selected' : '' }}>
+
+        Giá: Cao đến Thấp
+
+    </option>
+
+</select>
+
+</div>
 
             </div>
 
