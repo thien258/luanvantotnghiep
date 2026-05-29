@@ -7,14 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Cart extends Model
 {
     //
-    
+
     //
-       protected $table= "carts";
-    protected $fillable = ['idUser','idPV','quantity'];
-    public function productVariant(){
-        return $this->belongsTo('App\Models\ProductVariant','idPV','id');
+    protected $table = "carts";
+    protected $fillable = ['idUser', 'product_id', 'quantity'];
+    public function product()
+    {
+        return $this->belongsTo('App\Models\Product', 'product_id', 'id');
     }
-     public function user(){
-        return $this->belongsTo('App\Models\User','idUser','id');
+    public function user()
+    {
+        return $this->belongsTo('App\Models\User', 'idUser', 'id');
     }
 }

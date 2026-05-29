@@ -56,12 +56,7 @@
                 </a>
             </li>
 
-            <li class="nav-item {{ request()->routeIs('admin.volume.index') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{route('admin.volume.index')}}">
-                    <i class="fa-solid fa-ruler-horizontal text-dark mr-3"></i>
-                    <span>Volume</span>
-                </a>
-            </li>
+       
             
             <li class="nav-item {{ request()->routeIs('admin.festival.index') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{route('admin.festival.index')}}">

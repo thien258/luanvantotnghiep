@@ -39,11 +39,13 @@
         Route::resource('user', UserController::class);
         Route::resource('footer', FooterController::class);
         Route::resource('title', TitleController::class);
+        Route::get('/festival/{festival}/products', [FestivalController::class, 'selectProducts'])->name('festival.selectProducts');
+        Route::post('/festival/{festival}/products/update', [FestivalController::class, 'updateProducts'])->name('festival.updateProducts');
     });
     Route::resource('contact', ContactController::class);
     Route::resource('carts', CartController::class);
     Route::resource('order', OrderController::class)->middleware('auth');
-    Route::get('/show-products', [HomeController::class, 'showProducts'])->name('show_products');
+    Route::get('/show-products', [ProductShowController::class, 'showProducts'])->name('show_products');
     Route::resource('comments', App\Http\Controllers\CommentController::class);
     Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('welcome');
     Route::get('/search', [App\Http\Controllers\HomeController::class, 'search'])->name('home.search');

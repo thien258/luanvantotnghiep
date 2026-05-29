@@ -1,4 +1,4 @@
-@extends('layout/home')
+@extends('layout.home')
 @section('body')
 
 <section class="blog-banner-area py-5 bg-light border-bottom">
@@ -8,7 +8,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb justify-content-center mb-0">
                     <li class="breadcrumb-item"><a href="{{ route('welcome') ?? '#' }}" class="text-decoration-none text-muted">Home</a></li>
-                    <li class="breadcrumb-item active text-dark" aria-current="page">Shop Single</li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">Chi tiết sản phẩm</li>
                 </ol>
             </nav>
         </div>
@@ -28,31 +28,26 @@
                 <div class="s_product_text">
                     <h3 class="display-6 fw-bold mb-2">{{$product->title}}</h3>
 
-                    {{-- 🌟 1. NƠI HIỂN THỊ GIÁ TIỀN (LÚC VỪA LOAD TRANG SẼ LẤY DUNG TÍCH ĐẦU TIÊN LÀM MẪU) --}}
+                    {{-- 1. HIỂN THỊ GIÁ TIỀN PHẲNG --}}
                     <div class="mb-4">
                         @php
-                            $firstVariant = $product->variants->first();
-                            $originalPrice = $firstVariant?->price ?? 0;
-                            
-                            // CHỈ CHỈNH Ở ĐÂY: Gọi thẳng cái thuộc tính thông minh trong Model ra
-                            $finalPrice = $firstVariant ? $firstVariant->final_price : $originalPrice;
+                            // Gọi hàm trong Model Product đã sửa ở bước trước
+                            $finalPrice = $product->getDiscountedPrice();
+                            $originalPrice = $product->price;
                         @endphp
 
-                        <div id="price-wrapper" class="d-flex align-items-baseline gap-2 flex-wrap">
+                        <div class="d-flex align-items-baseline gap-2 flex-wrap">
                             @if($finalPrice < $originalPrice)
-                                {{-- Có giảm giá: Hiện giá mới đỏ rực và giá cũ gạch ngang màu xám --}}
                                 <h2 class="text-danger fw-bold m-0 d-inline">
-                                    <span id="display-price">{{ number_format($finalPrice) }}</span> VNĐ
+                                    {{ number_format($finalPrice) }} VNĐ
                                 </h2>
-                                <span class="text-muted text-decoration-line-through small ms-2" id="display-original-price" style="font-size: 16px;">
+                                <span class="text-muted text-decoration-line-through small ms-2" style="font-size: 16px;">
                                     {{ number_format($originalPrice) }} VNĐ
                                 </span>
                             @else
-                                {{-- Không giảm giá: Chỉ hiện một giá thường --}}
                                 <h2 class="text-danger fw-bold m-0 d-inline">
-                                    <span id="display-price">{{ number_format($originalPrice) }}</span> VNĐ
+                                    {{ number_format($originalPrice) }} VNĐ
                                 </h2>
-                                <span class="text-muted text-decoration-line-through small ms-2 d-none" id="display-original-price" style="font-size: 16px;"></span>
                             @endif
                         </div>
                     </div>
@@ -60,51 +55,32 @@
                     <p class="text-secondary lh-lg mb-4">{{$product->decription}}</p>
 
                     <div class="mb-4 py-3 border-top border-bottom">
-                        <div class="text-uppercase small tracking-widest text-muted mb-3">
+                        <div class="text-uppercase small tracking-widest text-muted mb-2">
                             Concentration: <span class="text-dark fw-bold ms-2">{{$product->concentration->concentration ?? 'N/A'}}</span>
                         </div>
-
-                        {{-- 🌟 2. DÀN OPTION BUTTON ĐỂ CHỌN DUNG TÍCH --}}
-                        <div class="text-uppercase small tracking-widest text-muted mb-2">Chọn dung tích:</div>
-                        <div class="d-flex flex-wrap gap-2 mb-3">
-                            @forelse($product->variants as $key => $variant)
-                            @php
-                                $vOriginalPrice = $variant->price;
-                                // CHỈ CHỈNH Ở ĐÂY: Gán giá đã qua xử lý max discount
-                                $vFinalPrice = $variant->final_price; 
-                            @endphp
-                            
-                            <button type="button"
-                                class="btn btn-outline-dark rounded-0 px-3 py-2 variant-btn {{ $key == 0 && $variant->stock > 0 ? 'active btn-dark text-white' : '' }}"
-                                data-id="{{ $variant->id }}"
-                                data-price="{{ $vOriginalPrice }}"
-                                data-final-price="{{ $vFinalPrice }}"
-                                data-stock="{{ $variant->stock }}"
-                                {{ $variant->stock <= 0 ? 'disabled' : '' }}
-                                style="{{ $variant->stock <= 0 ? 'opacity: 0.4; text-decoration: line-through; cursor: not-allowed;' : '' }}">
-                                {{ $variant->volume?->name ?? 'N/A' }}
-                            </button>
-                            @empty
-                            <span class="text-danger small">Đang cập nhật dung tích...</span>
-                            @endforelse
+                        
+                        {{-- 2. HIỂN THỊ DUNG TÍCH CỐ ĐỊNH --}}
+                        <div class="text-uppercase small tracking-widest text-muted mb-3">
+                            Dung tích: <span class="badge bg-secondary text-white">{{ $product->volume }}</span>
                         </div>
 
-                        {{-- 3. NƠI HIỂN THỊ TỒN KHO TƯƠNG ỨNG VỚI NÚT ĐANG CHỌN --}}
+                        {{-- 3. HIỂN THỊ TỒN KHO --}}
                         <div class="text-uppercase small tracking-widest text-muted">
-                            Trạng thái:
-                            <span id="display-stock-status" class="fw-bold ms-2 text-success">Còn hàng</span>
-                            (<span id="display-stock" class="text-dark fw-bold">{{ $product->variants->first()?->stock ?? 0 }}</span> chai có sẵn)
+                            Trạng thái: 
+                            <span class="fw-bold ms-2 {{ $product->quantity > 0 ? 'text-success' : 'text-danger' }}">
+                                {{ $product->quantity > 0 ? 'Còn hàng' : 'Hết hàng' }}
+                            </span>
+                            ({{ $product->quantity }} chai có sẵn)
                         </div>
                     </div>
 
-                    {{-- 4. FORM THÊM VÀO GIỎ HÀNG --}}
+                    {{-- 4. FORM THÊM VÀO GIỎ HÀNG (Sửa lại chỉ gửi product_id) --}}
                     <form action="{{ route('carts.store') }}" method="POST" class="m-0">
                         @csrf
-                        <input type="hidden" name="idVariant" id="hidden-variant-id" value="{{ $product->variants->first()?->id ?? '' }}">
-                        <input type="hidden" name="quantity" value="1">
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
 
-                        <button type="submit" id="btn-add-cart" class="btn btn-dark btn-lg rounded-0 px-5 text-uppercase fw-bold shadow-none w-100"
-                            {{ $product->variants->where('stock', '>', 0)->count() == 0 ? 'disabled' : '' }}>
+                        <button type="submit" class="btn btn-dark btn-lg rounded-0 px-5 text-uppercase fw-bold shadow-none w-100"
+                            {{ $product->quantity <= 0 ? 'disabled' : '' }}>
                             <i class="fa-solid fa-shopping-cart me-2"></i> THÊM VÀO GIỎ
                         </button>
                     </form>
@@ -114,6 +90,7 @@
     </div>
 </div>
 
+{{-- Phần đánh giá giữ nguyên vì không phụ thuộc cấu trúc sản phẩm --}}
 <div class="bg-light py-5 border-top">
     <div class="container">
         <div class="row">
@@ -126,11 +103,10 @@
                 </div>
                 @empty
                 <div class="p-4 bg-white shadow-sm border text-center text-muted">
-                    <p class="mb-0 fst-italic">Chưa có đánh giá nào. Hãy là người đầu tiên nhận xét!</p>
+                    <p class="mb-0 fst-italic">Chưa có đánh giá nào.</p>
                 </div>
                 @endforelse
             </div>
-
             <div class="col-lg-5 offset-lg-1">
                 <div class="p-4 bg-white shadow-sm border">
                     <h4 class="fw-bold mb-4">Leave a Review</h4>
@@ -153,7 +129,4 @@
     </div>
 </div>
 
-@endsection
-@section('script')
-<script src="{{ asset('js/single_product.js') }}"></script>
 @endsection

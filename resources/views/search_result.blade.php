@@ -19,17 +19,16 @@
                 <div class="card-body text-center">
                     <h6 class="card-title fw-bold text-dark text-truncate" title="{{ $product->title }}">{{ $product->title }}</h6>
 
-                    {{-- Lấy giá nhỏ nhất để hiển thị --}}
+                    {{-- 🌟 LOGIC MỚI: Lấy trực tiếp từ thuộc tính price của bảng products phẳng --}}
                     @php
-                    $minPrice = $product->variants->min('price');
+                    $price = $product->price;
                     @endphp
 
                     <p class="text-danger fw-bold mb-3">
-                        {{ $minPrice ? number_format($minPrice).'đ' : 'Đang cập nhật' }}
+                        {{ $price > 0 ? number_format($price).'đ' : 'Đang cập nhật' }}
                     </p>
 
                     {{-- Nút xem chi tiết --}}
-                    {{-- Truyền thẳng ID của sản phẩm vào luôn --}}
                     <a href="{{ route('single_product', $product->id) }}" class="btn btn-outline-dark btn-sm rounded-0 w-100">Xem chi tiết</a>
                 </div>
             </div>

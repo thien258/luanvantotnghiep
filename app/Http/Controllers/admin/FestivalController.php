@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\admin;
+
 use App\Models\Festival;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
+use App\Models\Product;
 
 class FestivalController extends Controller
 {
@@ -13,15 +15,15 @@ class FestivalController extends Controller
      */
     public function __construct()
     {
-      $this->middleware('auth');
-      $fetivals= Festival::orderBy( 'id','desc')->get();
-      view::share('festivals',$fetivals);
+        $this->middleware('auth');
+        $fetivals = Festival::orderBy('id', 'desc')->get();
+        view::share('festivals', $fetivals);
     }
     public function index()
     {
         //
-        $festivals= Festival::all();
-        return view('admin.festival.festival-list',compact('festivals'));
+        $festivals = Festival::all();
+        return view('admin.festival.festival-list', compact('festivals'));
     }
 
     /**
@@ -30,7 +32,7 @@ class FestivalController extends Controller
     public function create()
     {
         //
-        
+
         return view('admin.festival.add');
     }
 
@@ -47,10 +49,10 @@ class FestivalController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
         ]);
-        if ($festival)          
-               return redirect()->route('admin.festival.index');
+        if ($festival)
+            return redirect()->route('admin.festival.index');
         else {
-            return back();        
+            return back();
         }
     }
 
@@ -101,9 +103,45 @@ class FestivalController extends Controller
         //  
         $festival = Festival::find($id);
         $festival->delete();
-       if ($festival)            return redirect()->route('admin.festival.index');
+        if ($festival)            return redirect()->route('admin.festival.index');
         else {
-            return back();        
+            return back();
         }
+    }
+    public function selectProducts(Request $request, $id)
+    {
+        $festival = Festival::findOrFail($id);
+        $query = Product::query();
+
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // Nếu là AJAX, hãy lấy tất cả kết quả khớp thay vì paginate(15) 
+        // để người dùng thấy đầy đủ kết quả tìm kiếm ngay lập tức
+        if ($request->expectsJson() || $request->header('X-Requested-With') == 'XMLHttpRequest') {
+            $products = $query->get(); // Dùng get() thay vì paginate() cho tìm kiếm nhanh
+            $html = '';
+            foreach ($products as $product) {
+                $checked = $festival->products->contains($product->id) ? 'checked' : '';
+                $html .= "<tr>
+                <td><input type='checkbox' name='product_ids[]' value='{$product->id}' {$checked}></td>
+                <td>{$product->title}</td>
+                <td><img src='{$product->image}' style='width: 50px;'></td>
+                <td>" . number_format($product->price) . "đ</td>
+            </tr>";
+            }
+            return $html;
+        }
+
+        $products = $query->paginate(15);
+        return view('admin.festival.select_products', compact('festival', 'products'));
+    }
+    public function updateProducts(Request $request, $id)
+    {
+        $festival = Festival::findOrFail($id);
+        // sync() giúp cập nhật danh sách quan hệ, tự động xóa cái cũ, thêm cái mới
+        $festival->products()->sync($request->product_ids);
+        return redirect()->route('admin.festival.index')->with('status', 'Cập nhật sản phẩm thành công!');
     }
 }

@@ -11,16 +11,15 @@
 <table class="table table-bordered table-hover align-middle">
     <thead class="table-light">
         <tr>
-            <!-- <th scope="col">#</th> -->
             <th scope="col">Title</th>
             <th scope="col">Description</th>
             <th scope="col">Category</th>
             <th scope="col">Brand</th>
             <th scope="col">Image</th>
-            <th scope="col">Khoảng Giá</th>
+            <th scope="col">Giá bán</th>
+            <th scope="col">Dung tích</th>
             <th scope="col">Nồng độ</th>
-            <th scope="col">Kho (Tổng)</th>
-            <th scope="col">Các Dung tích</th>
+            <th scope="col">Kho hàng</th>
             <th scope="col">Sự kiện</th>
             <th scope="col">Status</th>
             <th scope="col">Option</th>
@@ -29,54 +28,47 @@
     <tbody>
         @forelse($products as $object)
         <tr>
-            <!-- <th scope="row">{{ $object->id }}</th> -->
             <td class="fw-bold">{{$object->title}}</td>
             <td>{{$object->decription}}</td>
             <td>{{$object->category?->name ?? 'Trống'}}</td>
             <td>{{$object->brand?->name ?? 'Trống'}}</td>
             <td><img src="{{ $object->image }}" width="80" alt="" class="img-thumbnail"></td>
 
-            {{-- Lấy giá thấp nhất và cao nhất của các dung tích --}}
+            {{-- Hiển thị giá tiền trực tiếp từ bảng products --}}
             <td class="text-danger fw-bold text-nowrap">
-                @if($object->variants->count() > 0)
-                {{ number_format($object->variants->min('price')) }} đ - {{ number_format($object->variants->max('price')) }} đ
+                {{ $object->price > 0 ? number_format($object->price) . ' đ' : 'Chưa có giá' }}
+            </td>
+
+            {{-- Hiển thị dung tích cố định dạng Badge --}}
+            <td>
+                @if($object->volume)
+                <span class="badge text-white mb-1" style="background-color: #6c757d; font-size: 13px; padding: 5px 8px;">
+                    {{ $object->volume }}
+                </span>
                 @else
-                Chưa có giá
+                <span class="text-muted small">Trống</span>
                 @endif
             </td>
 
             <td>{{ $object->concentration?->concentration ?? 'Trống' }}</td>
 
-            {{-- Tổng kho của tất cả các dung tích (biến thể) --}}
-            <td class="text-center fw-bold">{{ $object->variants->sum('stock') }}</td>
+            {{-- Hiển thị số lượng kho trực tiếp --}}
+            <td class="text-center fw-bold">{{ $object->quantity }}</td>
 
-            {{-- Hiển thị các dung tích dạng Badge (Đã fix lỗi chữ tàng hình) --}}
-            <td>
-                @forelse($object->variants as $variant)
-                <span class="badge text-white mb-1" style="background-color: #6c757d; font-size: 13px; padding: 5px 8px;">
-                    {{ $variant->volume?->name ?? 'N/A' }}
-                </span>
-                @empty
-                <span class="text-muted small">Trống</span>
-                @endforelse
-            </td>
             <td>
                 <div class="d-flex flex-wrap gap-1">
                     @forelse($object->festivals as $festival)
                     @if($festival->status == 1)
-                    {{-- Lễ hội đang bật (Active) thì hiện màu xanh --}}
                     <span class="badge bg-success text-white p-2 small" title="Đang diễn ra">
                         <i class="fa-solid fa-gift me-1"></i> {{ $festival->name }}
                         <strong class="ms-1">(-{{ $festival->discount }}%)</strong>
                     </span>
                     @else
-                    {{-- Lễ hội đang tắt (Inactive) thì hiện màu xám mờ --}}
                     <span class="badge bg-secondary text-white p-2 small" title="Đã tắt hoặc hết hạn">
                         <i class="fa-solid fa-circle-minus me-1"></i> {{ $festival->name }}
                     </span>
                     @endif
                     @empty
-                    {{-- Nếu sản phẩm không tham gia chương trình nào --}}
                     <span class="text-muted small"><em>Không áp dụng</em></span>
                     @endforelse
                 </div>
@@ -97,12 +89,9 @@
 
             <td class="text-center">
                 <div class="dropdown">
-                    {{-- Đã fix: Trả data-toggle về đúng chuẩn Bootstrap 4 của đồ án --}}
                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle shadow-none" type="button" id="dropdownMenu{{ $object->id }}" data-toggle="dropdown" aria-expanded="false">
                         Tùy chọn
                     </button>
-
-                    {{-- Đã fix: Thêm dropdown-menu-right để menu xổ xuống không bị rớt khung --}}
                     <ul class="dropdown-menu dropdown-menu-right shadow-sm" aria-labelledby="dropdownMenu{{ $object->id }}">
                         <li>
                             <a class="dropdown-item" href="{{ route('admin.product.edit',['product' =>$object->id]) }}">
@@ -127,7 +116,7 @@
         </tr>
         @empty
         <tr>
-            <td colspan="11" class="text-center py-4 text-muted">Không tìm thấy sản phẩm nào.</td>
+            <td colspan="12" class="text-center py-4 text-muted">Không tìm thấy sản phẩm nào.</td>
         </tr>
         @endforelse
     </tbody>
@@ -135,6 +124,5 @@
 </div>
 @endsection
 @section('script')
-
 <script src="{{ asset('js/adminProduct_search.js') }}"></script>
 @endsection
