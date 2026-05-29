@@ -86,23 +86,11 @@ class HomeController extends Controller
             );
         }
 
-        // SORT
-        if ($request->sort == 'price_asc') {
-
-            $query->orderBy('price', 'asc');
-        } elseif ($request->sort == 'price_desc') {
-
-            $query->orderBy('price', 'desc');
-        } else {
-
-            $query->latest();
-        }
-
         $products = $query
             ->with('festivals')
             ->get();
 
-        // FILTER PRICE
+        // FILTER PRICE (theo giá khuyến mãi)
         if (
             $request->has('min_price') &&
             $request->has('max_price')
@@ -123,6 +111,26 @@ class HomeController extends Controller
                         $finalPrice <= $max;
                 }
             );
+        }
+
+        // SORT (theo giá khuyến mãi)
+        if ($request->sort == 'price_asc') {
+
+            $products = $products
+                ->sortBy(fn($p) => $p->getDiscountedPrice())
+                ->values();
+
+        } elseif ($request->sort == 'price_desc') {
+
+            $products = $products
+                ->sortByDesc(fn($p) => $p->getDiscountedPrice())
+                ->values();
+
+        } else {
+
+            $products = $products
+                ->sortByDesc('created_at')
+                ->values();
         }
 
         return view(
@@ -179,23 +187,11 @@ class HomeController extends Controller
             );
         }
 
-        // SORT
-        if ($request->sort == 'price_asc') {
-
-            $query->orderBy('price', 'asc');
-        } elseif ($request->sort == 'price_desc') {
-
-            $query->orderBy('price', 'desc');
-        } else {
-
-            $query->latest();
-        }
-
         $products = $query
             ->with('festivals')
             ->get();
 
-        // FILTER PRICE
+        // FILTER PRICE (theo giá khuyến mãi)
         if (
             $request->has('min_price') &&
             $request->has('max_price')
@@ -216,6 +212,26 @@ class HomeController extends Controller
                         $finalPrice <= $max;
                 }
             );
+        }
+
+        // SORT (theo giá khuyến mãi)
+        if ($request->sort == 'price_asc') {
+
+            $products = $products
+                ->sortBy(fn($p) => $p->getDiscountedPrice())
+                ->values();
+
+        } elseif ($request->sort == 'price_desc') {
+
+            $products = $products
+                ->sortByDesc(fn($p) => $p->getDiscountedPrice())
+                ->values();
+
+        } else {
+
+            $products = $products
+                ->sortByDesc('created_at')
+                ->values();
         }
 
         return view(
@@ -325,15 +341,88 @@ class HomeController extends Controller
     public function search(Request $request)
     {
         $keyword = $request->keyword;
-        $products = Product::where('title', 'LIKE', "%{$keyword}%")
-            ->where('status', 1)
-            ->paginate(12);
 
-        $brands = Brand::where('status', '1')->get();
+        $all_brands = Brand::where('status', '1')->get();
+        $all_concentrations = Concentration::where('status', '1')->get();
+        $categories = Category::where('status', '1')->get();
         $title = Title::all();
         $footers = Footer::all();
 
-        return view('search_result', compact('products', 'keyword', 'brands', 'title', 'footers'));
+        $query = Product::where('title', 'LIKE', "%{$keyword}%")
+            ->where('status', 1);
+
+        // FILTER BRAND
+        if (
+            $request->has('brands') &&
+            is_array($request->brands)
+        ) {
+            $query->whereIn('idBrand', $request->brands);
+        }
+
+        // FILTER CONCENTRATION
+        if (
+            $request->has('concentrations') &&
+            is_array($request->concentrations)
+        ) {
+            $query->whereIn('idConcentration', $request->concentrations);
+        }
+
+        // FILTER CATEGORY
+        if (
+            $request->has('categories') &&
+            is_array($request->categories)
+        ) {
+            $query->whereIn('idCategory', $request->categories);
+        }
+
+        $products = $query
+            ->with('festivals')
+            ->get();
+
+        // FILTER PRICE (theo giá khuyến mãi)
+        if (
+            $request->has('min_price') &&
+            $request->has('max_price')
+        ) {
+            $min = (int) $request->min_price;
+            $max = (int) $request->max_price;
+
+            $products = $products->filter(
+                fn($product) =>
+                    $product->getDiscountedPrice() >= $min &&
+                    $product->getDiscountedPrice() <= $max
+            );
+        }
+
+        // SORT (theo giá khuyến mãi)
+        if ($request->sort == 'price_asc') {
+
+            $products = $products
+                ->sortBy(fn($p) => $p->getDiscountedPrice())
+                ->values();
+
+        } elseif ($request->sort == 'price_desc') {
+
+            $products = $products
+                ->sortByDesc(fn($p) => $p->getDiscountedPrice())
+                ->values();
+
+        } else {
+
+            $products = $products
+                ->sortByDesc('created_at')
+                ->values();
+        }
+
+        return view('search_result', compact(
+            'products',
+            'keyword',
+            'all_brands',
+            'all_concentrations',
+            'categories',
+            'title',
+            'footers'
+        ));
     }
 
     public function festival_product(Request $request, $id)
@@ -381,26 +470,11 @@ class HomeController extends Controller
         );
     }
 
-    // SORT
-    if ($request->sort == 'price_asc') {
-
-        $query->orderBy('price', 'asc');
-
-    } elseif ($request->sort == 'price_desc') {
-
-        $query->orderBy('price', 'desc');
-
-    } else {
-
-        $query->latest();
-
-    }
-
-    $products = $query
+        $products = $query
         ->with('festivals')
         ->get();
 
-    // FILTER PRICE
+    // FILTER PRICE (theo giá khuyến mãi)
     if (
         $request->has('min_price') &&
         $request->has('max_price')
@@ -421,6 +495,26 @@ class HomeController extends Controller
                     $finalPrice <= $max;
             }
         );
+    }
+
+    // SORT (theo giá khuyến mãi)
+    if ($request->sort == 'price_asc') {
+
+        $products = $products
+            ->sortBy(fn($p) => $p->getDiscountedPrice())
+            ->values();
+
+    } elseif ($request->sort == 'price_desc') {
+
+        $products = $products
+            ->sortByDesc(fn($p) => $p->getDiscountedPrice())
+            ->values();
+
+    } else {
+
+        $products = $products
+            ->sortByDesc('created_at')
+            ->values();
     }
 
     return view(

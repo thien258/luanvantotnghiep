@@ -46,7 +46,40 @@
                     </a>
 
                 </div>
+ {{-- PRICE --}}
+                <div class="mb-5">
 
+                    <p class="text-uppercase fw-bold small mb-3">
+                        Mức giá
+                    </p>
+
+                    <div id="price-range" class="mb-4 mt-2 px-2"></div>
+
+                    <div class="d-flex align-items-center justify-content-between small fw-bold text-danger">
+
+                        <span id="price-min-display">
+                            0đ
+                        </span>
+
+                        <span id="price-max-display">
+                            10.000.000đ
+                        </span>
+
+                    </div>
+
+                    <input
+                        type="hidden"
+                        name="min_price"
+                        id="min_price"
+                        value="{{ request('min_price', 0) }}">
+
+                    <input
+                        type="hidden"
+                        name="max_price"
+                        id="max_price"
+                        value="{{ request('max_price', 10000000) }}">
+
+                </div>
                 {{-- CATEGORY --}}
                 @if(!isset($category) && isset($categories))
 
@@ -84,40 +117,7 @@
 
                 @endif
 
-                {{-- PRICE --}}
-                <div class="mb-5">
-
-                    <p class="text-uppercase fw-bold small mb-3">
-                        Mức giá
-                    </p>
-
-                    <div id="price-range" class="mb-4 mt-2 px-2"></div>
-
-                    <div class="d-flex align-items-center justify-content-between small fw-bold text-danger">
-
-                        <span id="price-min-display">
-                            0đ
-                        </span>
-
-                        <span id="price-max-display">
-                            10.000.000đ
-                        </span>
-
-                    </div>
-
-                    <input
-                        type="hidden"
-                        name="min_price"
-                        id="min_price"
-                        value="{{ request('min_price', 0) }}">
-
-                    <input
-                        type="hidden"
-                        name="max_price"
-                        id="max_price"
-                        value="{{ request('max_price', 10000000) }}">
-
-                </div>
+               
               
                 {{-- BRAND --}}
                 @if(!isset($brand) && isset($all_brands))

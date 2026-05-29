@@ -29,12 +29,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                 let formattedPrice = parseInt(item.price).toLocaleString('vi-VN') + 'đ';
                                 let html = `
-                                <a href="${detailUrl}" class="dropdown-item d-flex align-items-center justify-content-between py-2 border-bottom text-wrap text-decoration-none" style="white-space: normal;">
-                                    <div class="d-flex align-items-center" style="max-width: 75%; overflow: hidden;">
-                                        <img src="${item.image}" alt="" style="width: 40px; height: 40px; object-fit: contain; margin-right: 10px; background: #f8f9fa; border-radius: 4px; flex-shrink: 0;">
-                                        <span class="small fw-bold text-dark lh-sm text-truncate">${item.title}</span>
+                                <a href="${detailUrl}" class="dropdown-item d-flex align-items-center gap-2 py-2 border-bottom text-decoration-none" style="white-space: normal;">
+                                    <img src="${item.image}" alt="" style="width: 48px; height: 48px; object-fit: contain; background: #f8f9fa; border-radius: 4px; flex-shrink: 0;">
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div class="small fw-bold text-dark lh-sm" style="white-space: normal; word-break: break-word;">${item.title}</div>
+                                        <div class="small fw-bold text-danger mt-1">${formattedPrice}</div>
                                     </div>
-                                    <span class="small fw-bold text-danger ms-2 text-end flex-shrink-0">${formattedPrice}</span>
                                 </a>
                             `;
                                 searchSuggestions.innerHTML += html;
