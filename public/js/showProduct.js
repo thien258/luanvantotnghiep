@@ -1,182 +1,152 @@
 // public/js/showProduct.js
+(function () {
 
-document.addEventListener('DOMContentLoaded', function () {
+    function initProductFilters() {
 
-    const form = document.getElementById('filterForm');
+        const form = document.getElementById('filterForm');
 
-    // =========================
-    // AJAX LOAD PRODUCTS
-    // =========================
-    function loadProducts() {
+        if (!form) {
+            return;
+        }
 
-        const formData = new FormData(form);
+        function buildQueryParams() {
 
-        // lấy sort
-        const sort =
-            document.querySelector('#sort');
+            const params = new URLSearchParams();
 
-        if (sort) {
+            new FormData(form).forEach(function (value, key) {
 
-            formData.append('sort', sort.value);
+                if (value !== '') {
+                    params.append(key, value);
+                }
+
+            });
+
+            const sortEl = document.getElementById('sort');
+
+            if (sortEl) {
+                params.set('sort', sortEl.value);
+            }
+
+            return params;
 
         }
 
-        const params =
-            new URLSearchParams(formData);
+        function updateUrl(params) {
 
-        fetch(
-            window.location.pathname + '?' + params.toString(),
-            {
+            const query = params.toString();
+
+            const newUrl = query
+                ? window.location.pathname + '?' + query
+                : window.location.pathname;
+
+            window.history.pushState({}, '', newUrl);
+
+            return newUrl;
+
+        }
+
+        function loadProducts() {
+
+            const params = buildQueryParams();
+
+            const url = updateUrl(params);
+
+            fetch(url, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
-            }
-        )
-        .then(response => response.text())
-        .then(html => {
+            })
+                .then(function (response) {
+                    return response.text();
+                })
+                .then(function (html) {
 
-            const parser =
-                new DOMParser();
+                    const doc = new DOMParser()
+                        .parseFromString(html, 'text/html');
 
-            const doc =
-                parser.parseFromString(html, 'text/html');
+                    const newProducts =
+                        doc.querySelector('#product-container');
 
-            const newProducts =
-                doc.querySelector('#product-container');
+                    const container =
+                        document.querySelector('#product-container');
 
-            document.querySelector('#product-container')
-                .innerHTML = newProducts.innerHTML;
+                    if (newProducts && container) {
+                        container.innerHTML = newProducts.innerHTML;
+                    }
 
-            // update url không reload
-            window.history.pushState(
-                {},
-                '',
-                window.location.pathname + '?' + params.toString()
-            );
+                })
+                .catch(function (err) {
+                    console.error('loadProducts:', err);
+                });
 
-        });
+        }
 
-    }
+        window.applyProductFilters = loadProducts;
 
-    // =========================
-    // SORT
-    // =========================
-    const sort =
-        document.querySelector('#sort');
+        const sort = document.getElementById('sort');
 
-    if (sort) {
+        if (sort) {
+            sort.addEventListener('change', loadProducts);
+        }
 
-        sort.addEventListener('change', function () {
+        form.querySelectorAll('input[type="checkbox"]').forEach(function (item) {
 
-            loadProducts();
+            item.addEventListener('change', loadProducts);
 
         });
 
-    }
+        const slider = document.getElementById('price-range');
 
-    // =========================
-    // CHECKBOX FILTER
-    // =========================
-    document.querySelectorAll(
-        '#filterForm input[type="checkbox"]'
-    ).forEach(item => {
+        if (!slider || typeof noUiSlider === 'undefined') {
+            return;
+        }
 
-        item.addEventListener('change', function () {
+        const minInput = document.getElementById('min_price');
+        const maxInput = document.getElementById('max_price');
+        const minDisplay = document.getElementById('price-min-display');
+        const maxDisplay = document.getElementById('price-max-display');
 
-            loadProducts();
+        const currentMin = parseInt(minInput.value, 10) || 0;
+        const currentMax = parseInt(maxInput.value, 10) || 10000000;
 
-        });
-
-    });
-
-    // =========================
-    // PRICE SLIDER
-    // =========================
-    const slider =
-        document.getElementById('price-range');
-
-    if (!slider) return;
-
-    const minInput =
-        document.getElementById('min_price');
-
-    const maxInput =
-        document.getElementById('max_price');
-
-    const minDisplay =
-        document.getElementById('price-min-display');
-
-    const maxDisplay =
-        document.getElementById('price-max-display');
-
-    const currentMin =
-        parseInt(minInput.value) || 0;
-
-    const currentMax =
-        parseInt(maxInput.value) || 10000000;
-
-    noUiSlider.create(slider, {
-
-        start: [currentMin, currentMax],
-
-        connect: true,
-
-        step: 100000,
-
-        range: {
-            min: 0,
-            max: 10000000
-        },
-
-        format: {
-
-            to: function (value) {
-
-                return Math.round(value)
-                    .toLocaleString('vi-VN');
-
+        noUiSlider.create(slider, {
+            start: [currentMin, currentMax],
+            connect: true,
+            step: 100000,
+            range: {
+                min: 0,
+                max: 10000000
             },
+            format: {
+                to: function (value) {
+                    return Math.round(value).toLocaleString('vi-VN');
+                },
+                from: function (value) {
+                    return Number(value.replace(/[^0-9.-]+/g, ''));
+                }
+            }
+        });
 
-            from: function (value) {
+        slider.noUiSlider.on('update', function (values, handle) {
 
-                return Number(
-                    value.replace(/[^0-9.-]+/g, "")
-                );
-
+            if (handle === 0) {
+                minDisplay.innerHTML = values[0] + 'đ';
+                minInput.value = values[0].replace(/\./g, '');
+            } else {
+                maxDisplay.innerHTML = values[1] + 'đ';
+                maxInput.value = values[1].replace(/\./g, '');
             }
 
-        }
+        });
 
-    });
+        slider.noUiSlider.on('change', loadProducts);
 
-    // update text
-    slider.noUiSlider.on('update', function (values, handle) {
+    }
 
-        if (handle === 0) {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initProductFilters);
+    } else {
+        initProductFilters();
+    }
 
-            minDisplay.innerHTML =
-                values[0] + 'đ';
-
-            minInput.value =
-                values[0].replace(/\./g, '');
-
-        } else {
-
-            maxDisplay.innerHTML =
-                values[1] + 'đ';
-
-            maxInput.value =
-                values[1].replace(/\./g, '');
-
-        }
-
-    });
-
-    // load ajax khi thả slider
-    slider.noUiSlider.on('change', function () {
-
-        loadProducts();
-
-    });
-
-});
+})();

@@ -1,4 +1,3 @@
-```blade
 @extends('layout.home')
 
 @section('body')
@@ -9,18 +8,18 @@
 
         @hasSection('product_header_zone')
 
-            @yield('product_header_zone')
+        @yield('product_header_zone')
 
         @else
 
-            <h2 class="display-5 text-dark mb-3" style="font-family: serif;">
-                Bộ sưu tập
-            </h2>
+        <h2 class="display-5 text-dark mb-3" style="font-family: serif;">
+            Bộ sưu tập
+        </h2>
 
-            <p class="text-muted">
-                Khám phá những kiệt tác hương thơm được tinh tuyển,
-                mang đậm dấu ấn nghệ thuật và sự xa xỉ thầm lặng.
-            </p>
+        <p class="text-muted">
+            Khám phá những kiệt tác hương thơm được tinh tuyển,
+            mang đậm dấu ấn nghệ thuật và sự xa xỉ thầm lặng.
+        </p>
 
         @endif
 
@@ -40,7 +39,7 @@
                     </span>
 
                     <a href="{{ url()->current() }}"
-                       class="text-muted small text-decoration-none">
+                        class="text-muted small text-decoration-none">
 
                         Xóa bộ lọc
 
@@ -119,7 +118,46 @@
                         value="{{ request('max_price', 10000000) }}">
 
                 </div>
+                <div class="d-flex align-items-center mt-2 mt-md-0">
 
+                    <span class="text-uppercase small fw-bold me-2">
+
+                        Sắp xếp:
+
+                    </span>
+
+                    <select
+                        id="sort"
+                        name="sort"
+                        class="form-select form-select-sm rounded-0 border-dark shadow-none">
+
+                        <option
+                            value="latest"
+                            {{ request('sort', 'latest') == 'latest' ? 'selected' : '' }}>
+
+                            Mới nhất
+
+                        </option>
+
+                        <option
+                            value="price_asc"
+                            {{ request('sort') == 'price_asc' ? 'selected' : '' }}>
+
+                            Giá: Thấp đến Cao
+
+                        </option>
+
+                        <option
+                            value="price_desc"
+                            {{ request('sort') == 'price_desc' ? 'selected' : '' }}>
+
+                            Giá: Cao đến Thấp
+
+                        </option>
+
+                    </select>
+
+                </div>
                 {{-- BRAND --}}
                 @if(!isset($brand) && isset($all_brands))
 
@@ -205,47 +243,7 @@
 
                 </span>
 
-                <div class="d-flex align-items-center mt-2 mt-md-0">
 
-                    <span class="text-uppercase small fw-bold me-2">
-
-                        Sắp xếp:
-
-                    </span>
-
-                    <select
-                        id="sort"
-                        name="sort"
-                        form="filterForm"
-                        class="form-select form-select-sm rounded-0 border-dark shadow-none">
-
-                        <option
-                            value="latest"
-                            {{ request('sort') == 'latest' ? 'selected' : '' }}>
-
-                            Mới nhất
-
-                        </option>
-
-                        <option
-                            value="price_asc"
-                            {{ request('sort') == 'price_asc' ? 'selected' : '' }}>
-
-                            Giá: Thấp đến Cao
-
-                        </option>
-
-                        <option
-                            value="price_desc"
-                            {{ request('sort') == 'price_desc' ? 'selected' : '' }}>
-
-                            Giá: Cao đến Thấp
-
-                        </option>
-
-                    </select>
-
-                </div>
 
             </div>
 
@@ -257,15 +255,15 @@
 
                     @php
 
-                        $originalPrice = $product->price;
+                    $originalPrice = $product->price;
 
-                        $productDiscount = $product->festivals
-                            ? $product->festivals->where('status', 1)->max('discount') ?? 0
-                            : 0;
+                    $productDiscount = $product->festivals
+                    ? $product->festivals->where('status', 1)->max('discount') ?? 0
+                    : 0;
 
-                        $maxDiscount = $productDiscount;
+                    $maxDiscount = $productDiscount;
 
-                        $finalPrice = $product->getDiscountedPrice();
+                    $finalPrice = $product->getDiscountedPrice();
 
                     @endphp
 
@@ -330,7 +328,7 @@
 
                                     @if($finalPrice < $originalPrice)
 
-                                    <p class="mb-0 fs-5">
+                                        <p class="mb-0 fs-5">
 
                                         <span class="text-danger fw-bold fs-4 me-2">
 
@@ -346,17 +344,17 @@
 
                                         </span>
 
-                                    </p>
+                                        </p>
 
-                                    @else
+                                        @else
 
-                                    <p class="text-dark mb-0 fs-5 fw-bold">
+                                        <p class="text-dark mb-0 fs-5 fw-bold">
 
-                                        {{ number_format($originalPrice) }}đ
+                                            {{ number_format($originalPrice) }}đ
 
-                                    </p>
+                                        </p>
 
-                                    @endif
+                                        @endif
 
                                 </div>
 
