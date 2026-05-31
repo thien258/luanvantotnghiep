@@ -255,10 +255,15 @@
 
                     @php
 
+                    $today = \Carbon\Carbon::today()->toDateString();
+
                     $originalPrice = $product->price;
 
                     $productDiscount = $product->festivals
-                    ? $product->festivals->where('status', 1)->max('discount') ?? 0
+                    ? $product->festivals
+                        ->where('status', 1)
+                        ->filter(fn($f) => $f->start_date <= $today && $f->end_date >= $today)
+                        ->max('discount') ?? 0
                     : 0;
 
                     $maxDiscount = $productDiscount;

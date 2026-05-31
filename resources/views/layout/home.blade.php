@@ -114,6 +114,7 @@
 								</li>
 								<li class="nav-item "><a class="nav-link" href="{{route('contact.index')}}">Contact</a></li>
 								<li class="nav-item active"><a class="nav-link" href="{{route('carts.index')}}"><i class="fa-solid fa-shopping-cart"></i></a></li>
+								<li class="nav-item active"><a class="nav-link" href="{{route('order.index')}}"><i class="fa-solid fa-shopping-cart"></i></a></li>
 
 								@if(Auth::check())
 								<li class="nav-item submenu dropdown">

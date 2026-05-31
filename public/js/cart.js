@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Tính toán VAT 10%
-        let vat = subtotal * 0.1;
-        let grandTotal = subtotal + vat;
+        
+        let grandTotal = subtotal ;
 
         // Cập nhật giao diện
         if (displaySubtotal) displaySubtotal.innerText = subtotal.toLocaleString('vi-VN') + 'đ';
@@ -63,4 +63,28 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Tính toán lần đầu khi load trang
     calculateTotal();
+
+    // Xử lý nút thanh toán
+    if (btnCheckout) {
+        btnCheckout.addEventListener('click', function () {
+            const checkedIds = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) checkedIds.push(cb.value);
+            });
+
+            if (checkedIds.length === 0) return;
+
+            const idsContainer = document.getElementById('checkout-ids');
+            idsContainer.innerHTML = '';
+            checkedIds.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'cart_ids[]';
+                input.value = id;
+                idsContainer.appendChild(input);
+            });
+
+            document.getElementById('checkout-form').submit();
+        });
+    }
 });

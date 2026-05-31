@@ -4,7 +4,7 @@
     use App\Http\Controllers\admin\CategoryController;
 
     use App\Http\Controllers\admin\ConcentrationController;
-    use App\Http\Controllers\admin\VolumeController;
+
     use App\Http\Controllers\admin\FooterController;
     use App\Http\Controllers\admin\TitleController;
     use App\Http\Controllers\admin\ProductController;
@@ -14,7 +14,7 @@
     use App\Http\Controllers\ContactController;
     use App\Http\Controllers\HomeController;
     use App\Http\Controllers\CartController;
-    use App\Http\Controllers\omeController;
+
     use App\Http\Controllers\OrderController;
     use App\Http\Controllers\ProductShowController;
     use App\Http\Controllers\admin\UserController;
@@ -27,7 +27,7 @@
         Route::resource('category', CategoryController::class);
         Route::resource('brand', BrandController::class);
         Route::resource('concentration', ConcentrationController::class);
-        Route::resource('volume', VolumeController::class);
+       
         Route::resource('festival', FestivalController::class);
 
         Route::get('/', [App\Http\Controllers\admin\AdminController::class, 'index'])
@@ -44,7 +44,7 @@
     });
     Route::resource('contact', ContactController::class);
     Route::resource('carts', CartController::class);
-    Route::resource('order', OrderController::class)->middleware('auth');
+ 
     Route::get('/show-products', [ProductShowController::class, 'showProducts'])->name('show_products');
     Route::resource('comments', App\Http\Controllers\CommentController::class);
     Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('welcome');
@@ -71,6 +71,16 @@
     Route::get('logout', [HomeController::class, 'logout'])->name('logout');
     Route::middleware('auth')->group(function () {
         Route::resource('profile', ProfileController::class);
+        Route::post('/order/checkout', [OrderController::class, 'checkout'])->name('order.checkout');
+        Route::post('/order/place', [OrderController::class, 'placeOrder'])->name('order.place');
+        Route::resource('order', OrderController::class);
+        Route::get('/order/{id}/payment', [OrderController::class, 'paymentForm'])->name('order.payment');
+        Route::post('/order/{id}/confirm-paid', [OrderController::class, 'confirmPaid'])->name('order.confirmPaid');
+        Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder'])->name('order.cancel');
+
+        // User addresses (AJAX) — resource + setDefault extra
+        Route::resource('addresses', \App\Http\Controllers\UserAddressController::class);
+        Route::patch('/addresses/{id}/default', [\App\Http\Controllers\UserAddressController::class, 'setDefault'])->name('addresses.setDefault');
     });
 
     // Route::post('/logout', [HomeController::class, 'logout'])->name('logouts');

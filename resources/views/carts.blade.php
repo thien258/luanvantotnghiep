@@ -80,12 +80,17 @@
             <div class="bg-light p-4 rounded sticky-top">
                 <h4 class="fw-bold mb-4">Tóm tắt đơn hàng</h4>
                 <div class="d-flex justify-content-between mb-3"><span>Tạm tính</span><span id="display-subtotal">0đ</span></div>
-                <div class="d-flex justify-content-between mb-3 small text-muted">
-                    <span>Thuế (VAT 10%)</span>
-                    <span id="display-vat">0đ</span>
-                </div>
+              
                 <div class="d-flex justify-content-between mb-4"><span>Tổng cộng</span><span id="display-total" class="fs-3 text-danger fw-bold">0đ</span></div>
-                <button type="button" id="btn-checkout" class="btn btn-dark w-100" disabled>THANH TOÁN (<span id="display-count">0</span>)</button>
+                <button type="button" id="btn-checkout" class="btn btn-dark w-100" disabled>
+                    THANH TOÁN (<span id="display-count">0</span>)
+                </button>
+
+                {{-- Form ẩn để submit cart IDs đã chọn --}}
+                <form id="checkout-form" action="{{ route('order.checkout') }}" method="POST" class="d-none">
+                    @csrf
+                    <div id="checkout-ids"></div>
+                </form>
             </div>
         </div>
     </div>
