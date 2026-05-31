@@ -218,4 +218,14 @@ class OrderController extends Controller
         // 5. Trả dữ liệu ra file view thanh toán
         return view('order.order_payment', compact('order', 'qrCodeUrl', 'amount', 'addInfo'));
     }
+    public function history(){
+        $orders = Order::where('idUser', Auth::id())->orderBy('id', 'desc')->get();
+        return view('order.history', compact('orders'));
+    
+    }
+    public function historyDetail($id){
+        $order = Order::where('id', $id)->where('idUser', Auth::id())->firstOrFail();
+        $orderDetails = OrderDetail::where('idOrder', $id)->with('product')->get();
+        return view('order.history_detail', compact('order', 'orderDetails'));
+    }
 }

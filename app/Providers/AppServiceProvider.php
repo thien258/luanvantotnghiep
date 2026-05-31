@@ -28,9 +28,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Festival::expireOutdated();
+
         View::share('categories', Category::where('status', 1)->get());
         View::share('brands', Brand::where('status', 1)->get());
-        View::share('festivals', Festival::where('status', 1)->get());
+        View::share('festivals', Festival::active()->get());
 
         Paginator::useBootstrapFive();
         View::composer('*', function ($view) {

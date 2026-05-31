@@ -38,110 +38,120 @@
 							<span class="icon-bar"></span>
 						</button>
 						<div class="collapse navbar-collapse offset" id="navbarSupportedContent">
-							<ul class="nav navbar-nav menu_nav ml-auto mr-auto">
-								<li class="nav-item active"><a class="nav-link" href="{{route('welcome')}}">Home</a></li>
-								<li class="nav-item active"><a class="nav-link" href="{{route('show_products')}}">Products</a></li>
+							<div class="navbar-collapse-inner">
+								<ul class="nav navbar-nav menu_nav ml-auto mr-auto align-items-lg-center">
+									<li class="nav-item active"><a class="nav-link" href="{{ route('welcome') }}">Home</a></li>
+									<li class="nav-item active"><a class="nav-link" href="{{ route('show_products') }}">Products</a></li>
 
-								<li class="nav-item submenu dropdown">
-									<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-										aria-expanded="false">Category</a>
-									<ul class="dropdown-menu">
-										@forelse($categories as $object)
-										<li class="nav-item">
-											<a href="{{ route('category_product',['category'=>$object->id]) }}">{{ $object->name }}</a>
-										</li>
-										@empty
-										<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
-										@endforelse
-									</ul>
-								</li>
-								<li class="nav-item submenu dropdown">
-									<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-										aria-expanded="false">Brand</a>
-									<ul class="dropdown-menu">
-										@forelse($brands as $object)
-										<li class="nav-item">
-											<a href="{{ route('brand_product',['brand'=>$object->id]) }}">{{ $object->name }}</a>
-										</li>
-										@empty
-										<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
-										@endforelse
-									</ul>
-								</li>
-								<li class="nav-item submenu dropdown">
-									<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-										aria-expanded="false">Festival</a>
-									<ul class="dropdown-menu">
-										@forelse($festivals as $object)
-										<li class="nav-item">
-											<a href="{{ route('festival_product',['festival'=>$object->id]) }}">{{ $object->name }}</a>
-										</li>
-										@empty
-										<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
-										@endforelse
-									</ul>
-								</li>
+									<li class="nav-item submenu dropdown">
+										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Category</a>
+										<ul class="dropdown-menu">
+											@forelse($categories as $object)
+											<li class="nav-item">
+												<a href="{{ route('category_product', ['category' => $object->id]) }}">{{ $object->name }}</a>
+											</li>
+											@empty
+											<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
+											@endforelse
+										</ul>
+									</li>
 
-								{{-- FORM TÌM KIẾM ĐÃ ĐƯỢC CHỈNH LẠI KÍCH THƯỚC ĐỂ TRÁNH RỚT DÒNG --}}
-								<li class="nav-item d-flex align-items-center mx-2">
-									<form action="{{ route('home.search') }}" method="GET" class="m-0 position-relative">
-										<div class="position-relative">
-											<input type="text" name="keyword" id="search-input"
-												class="form-control form-control-sm shadow-none border-dark rounded-0"
+									<li class="nav-item submenu dropdown">
+										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Brand</a>
+										<ul class="dropdown-menu">
+											@forelse($brands as $object)
+											<li class="nav-item">
+												<a href="{{ route('brand_product', ['brand' => $object->id]) }}">{{ $object->name }}</a>
+											</li>
+											@empty
+											<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
+											@endforelse
+										</ul>
+									</li>
+
+									<li class="nav-item submenu dropdown">
+										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Festival</a>
+										<ul class="dropdown-menu">
+											@forelse($festivals as $object)
+											<li class="nav-item">
+												<a href="{{ route('festival_product', ['festival' => $object->id]) }}">{{ $object->name }}</a>
+											</li>
+											@empty
+											<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
+											@endforelse
+										</ul>
+									</li>
+
+									<li class="nav-item submenu dropdown">
+										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Pages</a>
+										<ul class="dropdown-menu">
+											<li class="nav-item"><a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a></li>
+											<li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Register</a></li>
+										</ul>
+									</li>
+
+									<li class="nav-item"><a class="nav-link" href="{{ route('contact.index') }}">Contact</a></li>
+								</ul>
+
+								<div class="header-actions">
+									<form action="{{ route('home.search') }}" method="GET" class="header-search-form position-relative">
+										<div class="header-search-wrap">
+											<input type="text"
+												name="keyword"
+												id="search-input"
+												class="form-control form-control-sm shadow-none border-dark rounded-0 header-search-input"
 												placeholder="Tìm kiếm..."
 												value="{{ request('keyword') }}"
-												required autocomplete="off"
-												style="padding-right: 25px; width: 160px; height: 34px; font-size: 13px;">
+												required
+												autocomplete="off">
 
-											<i class="fa-solid fa-magnifying-glass position-absolute text-muted"
-												style="top: 50%; right: 8px; transform: translateY(-50%); pointer-events: none; font-size: 12px;">
-											</i>
+											<i class="fa-solid fa-magnifying-glass position-absolute text-muted header-search-icon"></i>
 										</div>
 
-										<div id="search-suggestions" class="dropdown-menu w-100 p-0 shadow-sm border mt-1"
-											style="display: none; position: absolute; top: 100%; left: 0; z-index: 1050; border-radius: 0;">
-										</div>
+										<div id="search-suggestions" class="dropdown-menu w-100 p-0 shadow-sm border mt-1 header-search-suggestions"></div>
 									</form>
-								</li>
 
-								<li class="nav-item submenu dropdown">
-									<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-										aria-expanded="false">Pages</a>
-									<ul class="dropdown-menu">
-										<li class="nav-item"> <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a></li>
-										<li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Register</a></li>
-									</ul>
-								</li>
-								<li class="nav-item "><a class="nav-link" href="{{route('contact.index')}}">Contact</a></li>
-								<li class="nav-item active"><a class="nav-link" href="{{route('carts.index')}}"><i class="fa-solid fa-shopping-cart"></i></a></li>
-								<li class="nav-item active"><a class="nav-link" href="{{route('order.index')}}"><i class="fa-solid fa-shopping-cart"></i></a></li>
-
-								@if(Auth::check())
-								<li class="nav-item submenu dropdown">
-									<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-										<i class="fa-solid fa-user" style="font-size: 15px;"></i> <span class="ml-1">{{ Auth::user()->name }}</span>
+									@auth
+									<a href="{{ route('carts.index') }}" class="header-icon-link" title="Giỏ hàng">
+										<i class="fa-solid fa-shopping-cart"></i>
 									</a>
-									<ul class="dropdown-menu dropdown-menu-right" style="right: 0; left: auto;">
-										<li class="nav-item">
-											<a class="nav-link" href="{{ route('profile.index') }}">
-												<i class="fa-solid fa-id-card mr-2"></i> Hồ sơ
-											</a>
-										</li>
-										<li class="nav-item">
-											<a class="nav-link" href="{{ route('logout') }}"
-												onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-												<i class="fa-solid fa-right-from-bracket mr-2"></i> Đăng xuất
-											</a>
-											<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-												@csrf
-											</form>
-										</li>
-									</ul>
-								</li>
-								@endif
-							</ul>
+
+									<a href="{{ route('order.index') }}" class="header-icon-link" title="Thanh toán">
+										<i class="fa-solid fa-credit-card"></i>
+									</a>
 
 
+									<div class="nav-item submenu dropdown">
+										<a href="#" class="nav-link dropdown-toggle header-user-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+											<i class="fa-solid fa-user mr-1"></i>
+											<span>{{ Auth::user()->name }}</span>
+										</a>
+										<ul class="dropdown-menu dropdown-menu-right header-user-menu">
+											<li class="nav-item">
+												<a class="nav-link" href="{{ route('profile.index') }}">
+													<i class="fa-solid fa-id-card mr-2"></i> Hồ sơ
+												</a>
+											</li>
+											<li class="nav-item">
+												<a href="{{ route('order.history') }}" class="nav-link">
+													<i class="fa-solid fa-clock-rotate-left"></i> lịch sử
+												</a>
+											</li>
+
+											<li class="nav-item">
+												<a class="nav-link" href="{{ route('logout') }}"
+													onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+													<i class="fa-solid fa-right-from-bracket mr-2"></i> Đăng xuất
+												</a>
+												<form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+													@csrf
+												</form>
+											</li>
+										</ul>
+									</div>
+									@endauth
+								</div>
+							</div>
 						</div>
 					</div>
 				</nav>
@@ -226,9 +236,9 @@
 		<script src="vendors/mail-script.js"></script>
 		<script src="js/main.js"></script>
 
-	
+
 		<script src="{{ asset('js/live-search.js') }}"></script>
-		
+
 		@yield('script')
 	</body>
 

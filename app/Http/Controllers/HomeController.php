@@ -427,7 +427,13 @@ class HomeController extends Controller
 
     public function festival_product(Request $request, $id)
 {
-    $festival = Festival::find($id);
+    $festival = Festival::findOrFail($id);
+
+    if (!$festival->isActive()) {
+        return redirect()
+            ->route('show_products')
+            ->with('error', 'Chương trình khuyến mãi đã kết thúc hoặc chưa diễn ra.');
+    }
 
     $title = Title::all();
 
