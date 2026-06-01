@@ -20,6 +20,12 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
 // =========================================================================
+// ROUTE XÁC NHẬN NHẬN HÀNG (Public — khách quét QR không cần đăng nhập)
+// =========================================================================
+Route::get('/delivery/confirm/{code}', [OrderController::class, 'confirmDelivery'])->name('order.confirm-delivery');
+Route::post('/delivery/confirm/{code}', [OrderController::class, 'submitConfirmDelivery'])->name('order.submit-confirm-delivery');
+
+// =========================================================================
 // KHU VỰC 1: CÁC ROUTE KHÔNG CẦN ĐĂNG NHẬP (GIAO DIỆN CHỦ, SẢN PHẨM, SEARCH)
 // =========================================================================
 Route::get('/', [HomeController::class, 'index'])->name('welcome');
@@ -28,12 +34,10 @@ Route::get('/search-suggest', [HomeController::class, 'suggest'])->name('search.
 Route::get('/show-products', [ProductShowController::class, 'showProducts'])->name('show_products');
 Route::get('/product/{id}', [HomeController::class, 'single_product'])->name('single_product');
 
-// Lọc sản phẩm theo danh mục/thương hiệu
 Route::get('/category_product/{category}', [HomeController::class, 'category_product'])->name('category_product');
 Route::get('/brand_product/{brand}', [HomeController::class, 'brand_product'])->name('brand_product');
 Route::get('/festival_product/{festival}', [HomeController::class, 'festival_product'])->name('festival_product');
 
-// Đăng ký, đăng nhập hệ thống
 Route::get('/register', function () {
     return view('register');
 })->name('register');
@@ -51,21 +55,17 @@ Route::middleware('auth')->group(function () {
     Route::resource('carts', CartController::class);
     Route::resource('comments', App\Http\Controllers\CommentController::class);
 
-    // --- CỤM XỬ LÝ ĐƠN HÀNG (QUY TẮC: ROUTE LẺ ĐẶT LÊN TRÊN RESOURCE) ---
+    // --- CỤM XỬ LÝ ĐƠN HÀNG CỦA KHÁCH KHÁCH HÀNG ---
     Route::post('/order/checkout', [OrderController::class, 'checkout'])->name('order.checkout');
     Route::post('/order/place', [OrderController::class, 'placeOrder'])->name('order.place');
-    
-    // Đã đảo thứ tự: Các route lịch sử và thanh toán VietQR đưa lên trước resource
+
     Route::get('/order/history', [OrderController::class, 'history'])->name('order.history');
-    
-    // Đã sửa 'orderDetail' thành 'historyDetail' cho đồng bộ khớp với file Controller của bạn
     Route::get('/order/history/{id}', [OrderController::class, 'historyDetail'])->name('order.history.detail');
-    
+
     Route::get('/order/{id}/payment', [OrderController::class, 'paymentForm'])->name('order.payment');
     Route::post('/order/{id}/confirm-paid', [OrderController::class, 'confirmPaid'])->name('order.confirmPaid');
     Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder'])->name('order.cancel');
 
-    // Nằm dưới cùng cụm order để tránh nuốt mất các URL dạng chữ (/history)
     Route::resource('order', OrderController::class);
 
     // Sổ địa chỉ nhận hàng (AJAX)
@@ -79,19 +79,21 @@ Route::middleware('auth')->group(function () {
 // =========================================================================
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [App\Http\Controllers\admin\AdminController::class, 'index'])->name('dashboard');
-    
-    // Quản lý các tài nguyên danh mục, thương hiệu, sản phẩm
+
     Route::resource('category', CategoryController::class);
     Route::resource('brand', BrandController::class);
     Route::resource('concentration', ConcentrationController::class);
     Route::resource('festival', FestivalController::class);
     Route::resource('contacts', ContactAdminController::class);
+    
+    // ĐÃ CHUYỂN VỀ ĐÂY: Route lẻ xử lý cập nhật trạng thái nằm ĐÚNG KHU VỰC Admin và ĐỨNG TRÊN Resource
+    Route::post('/orders/{id}/update-status', [OrderAdminController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::resource('orders', OrderAdminController::class);
+    
     Route::resource('user', UserController::class);
     Route::resource('footer', FooterController::class);
     Route::resource('title', TitleController::class);
-    
-    // Các route bổ sung phục vụ tính năng Suggest sản phẩm và Festival
+
     Route::get('/product-suggest', [ProductController::class, 'suggest'])->name('product.suggest');
     Route::resource('product', ProductController::class);
     Route::get('/festival/{festival}/products', [FestivalController::class, 'selectProducts'])->name('festival.selectProducts');

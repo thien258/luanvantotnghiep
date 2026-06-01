@@ -95,6 +95,7 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
+            // Tất cả đơn hàng đều vào trạng thái chờ xuất kho, bất kể COD hay Bank Transfer
             $order = Order::create([
                 'idUser'         => Auth::id(),
                 'fullname'       => $request->fullname,
@@ -102,7 +103,7 @@ class OrderController extends Controller
                 'address'        => $request->address,
                 'payment_method' => $request->payment_method,
                 'total_price'    => $total,
-                'status'         => 0,
+                'status'         => 1,
                 'note'           => $request->note,
                 'tracking_code'  => 'TRACK-' . strtoupper(Str::random(10)),
             ]);
@@ -126,77 +127,18 @@ class OrderController extends Controller
 
             DB::commit();
 
-            if ($request->payment_method === 'COD') {
-                return redirect()->route('welcome')->with('success', 'Đặt hàng thành công! Đơn hàng sẽ được giao trong 3-5 ngày.');
-            } else {
+            if ($request->payment_method === 'BANK TRANSFER') {
                 return redirect()->route('order.payment', ['id' => $order->id]);
             }
+
+            return redirect()->route('welcome')
+                ->with('success', 'Đặt hàng thành công! Đơn hàng sẽ được giao trong 3-5 ngày.');
         } catch (\Exception $e) {
             DB::rollBack();
             \Illuminate\Support\Facades\Log::error('placeOrder exception: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
-    // Khách xác nhận đã quét QR / đã thanh toán → trừ tồn kho, status = 1
-    public function confirmPaid($id)
-    {
-        $order = Order::where('id', $id)
-            ->where('idUser', Auth::id())
-            ->where('status', 0)
-            ->with('detatil.product')
-            ->firstOrFail();
-
-        DB::beginTransaction();
-        try {
-            foreach ($order->detatil as $detail) {
-                if ($detail->product) {
-                    $detail->product->decrement('quantity', $detail->quantity);
-                }
-            }
-
-            $order->update(['status' => 1]);
-            DB::commit();
-
-            return redirect()->route('welcome')
-                ->with('success', 'Cảm ơn bạn đã thanh toán! Đơn hàng #' . $id . ' đang được xử lý.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
-        }
-    }
-
-    // Khách hủy đơn (chưa thanh toán) → status = -1, hoàn cart, redirect về cart
-    public function cancelOrder($id)
-    {
-        $order = Order::where('id', $id)
-            ->where('idUser', Auth::id())
-            ->where('status', 0)
-            ->with('detatil')
-            ->firstOrFail();
-
-        DB::beginTransaction();
-        try {
-            // Hoàn lại sản phẩm vào giỏ hàng
-            foreach ($order->detatil as $detail) {
-                Cart::create([
-                    'idUser'     => Auth::id(),
-                    'product_id' => $detail->idProduct,
-                    'quantity'   => $detail->quantity,
-                ]);
-            }
-
-            $order->update(['status' => -1]);
-            DB::commit();
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-        }
-
-        return redirect()->route('carts.index')
-            ->with('status', 'Đã hủy đơn hàng. Sản phẩm đã được hoàn lại vào giỏ hàng.');
-    }
-
     // Trang hiển thị mã VietQR động theo đơn hàng
     public function paymentForm($id)
     {
@@ -218,14 +160,73 @@ class OrderController extends Controller
         // 5. Trả dữ liệu ra file view thanh toán
         return view('order.order_payment', compact('order', 'qrCodeUrl', 'amount', 'addInfo'));
     }
-    public function history(){
+    public function history()
+    {
         $orders = Order::where('idUser', Auth::id())->orderBy('id', 'desc')->get();
         return view('order.history', compact('orders'));
-    
     }
-    public function historyDetail($id){
+    public function historyDetail($id)
+    {
         $order = Order::where('id', $id)->where('idUser', Auth::id())->firstOrFail();
         $orderDetails = OrderDetail::where('idOrder', $id)->with('product')->get();
         return view('order.history_detail', compact('order', 'orderDetails'));
+    }
+
+    // Khách xác nhận đã chuyển khoản → redirect về trang chủ, admin sẽ kiểm tra và xuất kho
+    public function confirmPaid($id)
+    {
+        $order = Order::where('id', $id)
+            ->where('idUser', Auth::id())
+            ->firstOrFail();
+
+        return redirect()->route('welcome')
+            ->with('success', "Cảm ơn bạn! Đơn hàng #{$id} đang chờ xác nhận từ shop.");
+    }
+
+    // Khách hủy đơn → xóa đơn, hoàn sản phẩm vào giỏ hàng
+    public function cancelOrder($id)
+    {
+        $order = Order::where('id', $id)
+            ->where('idUser', Auth::id())
+            ->where('status', 1)
+            ->with('detatil')
+            ->firstOrFail();
+
+        DB::beginTransaction();
+        try {
+            foreach ($order->detatil as $detail) {
+                Cart::create([
+                    'idUser'     => Auth::id(),
+                    'product_id' => $detail->idProduct,
+                    'quantity'   => $detail->quantity,
+                ]);
+            }
+            $order->delete();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+        }
+
+        return redirect()->route('carts.index')
+            ->with('status', 'Đã hủy đơn hàng. Sản phẩm đã được hoàn lại vào giỏ hàng.');
+    }
+
+    // Trang xác nhận nhận hàng — khách quét QR trên thùng hàng
+    public function confirmDelivery($code)
+    {
+        $order = Order::where('tracking_code', $code)->firstOrFail();
+        return view('order.confirm-delivery', compact('order'));
+    }
+
+    // Khách bấm xác nhận → status = 4 (Hoàn tất)
+    public function submitConfirmDelivery($code)
+    {
+        $order = Order::where('tracking_code', $code)
+            ->where('status', 3)
+            ->firstOrFail();
+
+        $order->update(['status' => 4]);
+
+        return view('order.confirm-delivery', compact('order'));
     }
 }

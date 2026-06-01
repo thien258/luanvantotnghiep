@@ -48,22 +48,19 @@
                     </div>
 
                     <div class="mt-4 pt-2 d-flex flex-column gap-2">
-                        {{-- Đã thanh toán: trừ tồn kho, về trang chủ --}}
                         <form action="{{ route('order.confirmPaid', $order->id) }}" method="POST">
                             @csrf
                             <button type="submit" class="btn btn-dark rounded-0 w-100 py-2 text-uppercase fw-semibold"
                                     style="font-size: 0.75rem; letter-spacing: 2px;">
-                                <i class="fa-solid fa-check me-2"></i>Tôi đã thanh toán
+                                <i class="fa-solid fa-check me-2"></i>Tôi đã chuyển khoản xong
                             </button>
                         </form>
-
-                        {{-- Chưa thanh toán: hủy đơn, về giỏ hàng --}}
                         <form action="{{ route('order.cancel', $order->id) }}" method="POST"
-                              onsubmit="return confirm('Hủy đơn hàng này? Sản phẩm sẽ được giữ lại trong giỏ hàng.')">
+                              onsubmit="return confirm('Hủy đơn hàng này? Sản phẩm sẽ được hoàn lại vào giỏ hàng.')">
                             @csrf
                             <button type="submit" class="btn btn-outline-secondary rounded-0 w-100 py-2 text-uppercase"
                                     style="font-size: 0.75rem; letter-spacing: 1px;">
-                                Chưa thanh toán — Quay lại
+                                Hủy đơn — Quay lại giỏ hàng
                             </button>
                         </form>
                     </div>

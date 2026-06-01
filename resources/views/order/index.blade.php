@@ -30,7 +30,7 @@
             <input type="hidden" name="fullname" id="input-fullname" value="{{ Auth::user()->name }}">
             <input type="hidden" name="phone" id="input-phone" value="{{ Auth::user()->phone ?? '' }}">
             <input type="hidden" name="address" id="input-address" value="{{ Auth::user()->address ?? '' }}">
-            <input type="hidden" name="payment_method" id="input-payment" value="CREDIT CARD">
+            <input type="hidden" name="payment_method" id="input-payment" value="BANK TRANSFER">
 
             <div class="row g-5">
 
@@ -84,15 +84,15 @@
                     </div>
                     <div class="row g-3 mb-4">
                     
-                        <div class="col-4">
-                            <div class="card rounded-0 p-4 text-center border-light-subtle bg-white btn-payment" style="cursor: pointer;" onclick="selectPayment(this, 'BANK TRANSFER')">
-                                <div class="text-secondary mb-2">
+                        <div class="col-6">
+                            <div class="card rounded-0 p-4 text-center border-dark bg-white btn-payment" style="cursor: pointer;" onclick="selectPayment(this, 'BANK TRANSFER')">
+                                <div class="text-dark mb-2">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="22" x2="21" y2="22"></line><line x1="6" y1="18" x2="6" y2="11"></line><line x1="10" y1="18" x2="10" y2="11"></line><line x1="14" y1="18" x2="14" y2="11"></line><line x1="18" y1="18" x2="18" y2="11"></line><polygon points="12 2 20 7 4 7 12 2"></polygon></svg>
                                 </div>
-                                <div class="text-uppercase fw-bold text-secondary" style="font-size: 0.7rem; letter-spacing: 1px;">Bank Transfer</div>
+                                <div class="text-uppercase fw-bold text-dark" style="font-size: 0.7rem; letter-spacing: 1px;">Bank Transfer</div>
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-6">
                             <div class="card rounded-0 p-4 text-center border-light-subtle bg-white btn-payment" style="cursor: pointer;" onclick="selectPayment(this, 'COD')">
                                 <div class="text-secondary mb-2">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"></path><path d="M18 12a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4v-6Z"></path></svg>
@@ -251,12 +251,4 @@ window.LaravelConfig = {
 };
 </script>
 <script src="{{ asset('js/checkout.js') }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('btn-submit-payment');
-    console.log('btn disabled:', btn ? btn.disabled : 'not found');
-    console.log('cart rows:', document.querySelectorAll('.cart-item-row').length);
-    console.log('total:', document.getElementById('summary-total') ? document.getElementById('summary-total').innerText : 'not found');
-});
-</script>
 @endsection

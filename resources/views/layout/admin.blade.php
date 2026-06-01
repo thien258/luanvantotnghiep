@@ -64,6 +64,12 @@
                     <span>Festival</span>
                 </a>
             </li>
+            <li class="nav-item {{ request()->routeIs('admin.orders.index') ? 'active font-weight-bold' : '' }}">
+                <a class="nav-link text-dark" href="{{route('admin.orders.index')}}">
+                    <i class="fa-solid fa-calendar-alt text-dark mr-3"></i>
+                    <span>Order</span>
+                </a>
+            </li>
             
 
             <li class="nav-item {{ request()->routeIs('admin.product.index') ? 'active font-weight-bold' : '' }}">
