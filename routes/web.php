@@ -27,6 +27,7 @@ Route::post('/delivery/confirm/{code}', [OrderController::class, 'submitConfirmD
 
 // PayOS callback — public, không cần đăng nhập
 Route::get('/order/payos-success', [OrderController::class, 'payosSuccess'])->name('payos.success');
+Route::get('/order/{id}/payos-cancel', [OrderController::class, 'payosCancel'])->name('order.payos-cancel');
 Route::post('/api/payos-webhook', [OrderController::class, 'payosWebhook'])->name('payos.webhook');
 
 // =========================================================================

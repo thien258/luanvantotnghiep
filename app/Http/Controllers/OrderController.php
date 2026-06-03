@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -104,7 +105,8 @@ class OrderController extends Controller
                 'address'        => $request->address,
                 'payment_method' => $request->payment_method,
                 'total_price'    => $total,
-                'status'         => 1,
+                // Bank Transfer = 0 (chờ PayOS xác nhận), COD = 1 (đang lấy hàng)
+                'status'         => $request->payment_method === 'BANK TRANSFER' ? 0 : 1,
                 'note'           => $request->note,
                 'tracking_code'  => 'TRACK-' . strtoupper(Str::random(10)),
             ]);
@@ -173,7 +175,10 @@ class OrderController extends Controller
     }
     public function history()
     {
-        $orders = Order::where('idUser', Auth::id())->orderBy('id', 'desc')->get();
+        $orders = Order::where('idUser', Auth::id())
+            ->where('status', '!=', 0) // Ẩn đơn chờ thanh toán PayOS
+            ->orderBy('id', 'desc')
+            ->get();
         return view('order.history', compact('orders'));
     }
     public function historyDetail($id)
@@ -253,7 +258,7 @@ class OrderController extends Controller
         $amount      = intval($order->total_price);
         $description = 'AROMA DH' . $order->id;
         $returnUrl   = route('payos.success');
-        $cancelUrl   = route('welcome');
+        $cancelUrl   = route('order.payos-cancel', ['id' => $order->id]);
 
         // PayOS signature: các field theo đúng thứ tự alphabet
         $signatureString = "amount={$amount}&cancelUrl={$cancelUrl}&description={$description}&orderCode={$orderCode}&returnUrl={$returnUrl}";
@@ -296,25 +301,56 @@ class OrderController extends Controller
     }
 
     /**
-     * TỰ ĐỘNG 2: WEBHOOK HỨNG TIỀN (PayOS gọi về Ngrok của bạn -> tự động đổi status = 2)
+     * PayOS hủy thanh toán → xóa đơn, hoàn cart, cộng lại tồn kho
+     */
+    public function payosCancel($id)
+    {
+        $order = Order::where('id', $id)
+            ->where('status', 0)
+            ->with('detatil')
+            ->first();
+
+        if ($order) {
+            DB::beginTransaction();
+            try {
+                foreach ($order->detatil as $detail) {
+                    Product::where('id', $detail->idProduct)
+                        ->increment('quantity', $detail->quantity);
+
+                    Cart::create([
+                        'idUser'     => $order->idUser,
+                        'product_id' => $detail->idProduct,
+                        'quantity'   => $detail->quantity,
+                    ]);
+                }
+                OrderDetail::where('idOrder', $order->id)->delete();
+                $order->delete();
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                \Illuminate\Support\Facades\Log::error('payosCancel error: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->route('carts.index')
+            ->with('status', 'Đã hủy thanh toán. Sản phẩm đã được hoàn lại vào giỏ hàng.');
+    }
+
+    /**
+     * WEBHOOK: PayOS xác nhận thanh toán xong → status 0 → 1
      */
     public function payosWebhook(Request $request)
     {
         $body = $request->all();
-        
-        // Kiểm tra mã phản hồi thành công từ PayOS
+
         if (isset($body['code']) && $body['code'] == '00' && isset($body['data'])) {
-            $description = $body['data']['description']; // Chuỗi trả về dạng: "AROMA DH52"
-            
-            // Dùng Regex bóc tách lấy ID đơn hàng nằm sau chữ DH
+            $description = $body['data']['description'];
             preg_match('/DH(\d+)/', $description, $matches);
             if (isset($matches[1])) {
-                $orderId = $matches[1];
-                
-                // Tìm đúng đơn hàng trong Database
-                $order = Order::find($orderId);
-                if ($order && $order->status == 1) { 
-                    $order->update(['status' => 2]); // Cập nhật thẳng sang trạng thái 2 (Đã thanh toán)
+                $order = Order::find($matches[1]);
+                if ($order && $order->status == 0) {
+                    $order->update(['status' => 1]);
+                    \Illuminate\Support\Facades\Log::info("PayOS webhook: order #{$order->id} → status 1");
                 }
             }
         }
@@ -323,7 +359,7 @@ class OrderController extends Controller
     }
 
     /**
-     * TỰ ĐỘNG 3: VIEW CHUYỂN HƯỚNG KHI KHÁCH QUÉT TIỀN XONG
+     * Trang thông báo thanh toán thành công
      */
     public function payosSuccess()
     {

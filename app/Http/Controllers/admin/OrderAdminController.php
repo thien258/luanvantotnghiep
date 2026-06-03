@@ -14,7 +14,8 @@ class OrderAdminController extends Controller
     {
         $keyword = $request->input('q', '');
 
-        $query = Order::orderBy('id', 'desc');
+        $query = Order::orderBy('id', 'desc')
+            ->where('status', '!=', 0); // Ẩn đơn chờ PayOS xác nhận
 
         if ($keyword) {
             $query->where(function($q) use ($keyword) {
