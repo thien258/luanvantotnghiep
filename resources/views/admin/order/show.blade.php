@@ -170,7 +170,7 @@
             <p><strong>Khách hàng:</strong> {{ $order->fullname }}</p>
             <p><strong>SĐT:</strong> {{ $order->phone }}</p>
             <p><strong>Địa chỉ:</strong> {{ $order->address }}</p>
-            <p><strong>Thu hộ:</strong> {{ $order->payment_method === 'COD' ? number_format($order->total_price).'đ' : '0đ (Đã chuyển khoản)' }}</p>
+            <p><strong>Thu hộ:</strong> {{ $order->payment_method === 'COD' ? number_format($order->total_price).'đ' : '0đ   (Đã chuyển khoản)' }}</p>
         </div>
     </div>
 </div>

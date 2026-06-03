@@ -9,6 +9,7 @@ use App\Models\OrderDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 class OrderController extends Controller
 {
@@ -116,7 +117,9 @@ class OrderController extends Controller
                     'quantity'  => $cart->quantity,
                     'price'     => $cart->product->getDiscountedPrice(),
                 ]);
-                // Không trừ tồn kho ở đây — chỉ trừ khi khách xác nhận đã thanh toán
+
+                // Trừ tồn kho ngay khi đặt hàng
+                $cart->product->decrement('quantity', $cart->quantity);
             }
 
             // Xóa các cart items đã đặt
@@ -128,6 +131,14 @@ class OrderController extends Controller
             DB::commit();
 
             if ($request->payment_method === 'BANK TRANSFER') {
+                // Thử gọi PayOS nếu đã config key
+                if (env('PAYOS_CLIENT_ID') && env('PAYOS_API_KEY') && env('PAYOS_CHECKSUM_KEY')) {
+                    $checkoutUrl = $this->createPayOSLink($order);
+                    if ($checkoutUrl) {
+                        return redirect($checkoutUrl);
+                    }
+                }
+                // Fallback: dùng trang QR VietQR nếu chưa config PayOS
                 return redirect()->route('order.payment', ['id' => $order->id]);
             }
 
@@ -145,20 +156,20 @@ class OrderController extends Controller
         // 1. Tìm đơn hàng hoặc báo lỗi 404 nếu cố tình gõ bậy ID trên URL
         $order = Order::where('id', $id)->where('idUser', Auth::id())->firstOrFail();
 
-        // 2. THAY THÔNG TIN NGÂN HÀNG THỰC TẾ CỦA BẠN VÀO ĐÂY
-        $BANK_ID      = 'TPBANK';            // Mã ngân hàng (MB, VCB, TCB, ACB, VietinBank...)
-        $ACCOUNT_NO   = '07178497601';    // Số tài khoản ngân hàng nhận tiền
-        $ACCOUNT_NAME = 'Tran Quang Thien';  // Tên chủ tài khoản (Viết hoa, không dấu)
+        $BANK_ID      = 'TPBANK';
+        $ACCOUNT_NO   = '07178497601';
+        $ACCOUNT_NAME = 'Tran Quang Thien';
+        $amount       = $order->total_price;
+        $addInfo      = "DH{$order->id} Thanh toan nuoc hoa";
 
-        // 3. Thiết lập thông tin đơn hàng tự động
-        $amount  = $order->total_price;                          // Lấy tổng tiền thực tế của đơn hàng
-        $addInfo = 'DH' . $order->id . ' Thanh toan nuoc hoa';   // Nội dung chuyển khoản tự động
+        // VietQR API — QR chuyển khoản ngân hàng
+        $qrCodeUrl = "https://img.vietqr.io/image/{$BANK_ID}-{$ACCOUNT_NO}-qr_only.png"
+            . "?amount={$amount}"
+            . "&addInfo=" . urlencode($addInfo)
+            . "&accountName=" . urlencode($ACCOUNT_NAME)
+            . "&t=" . time(); // cache-bust
 
-        // 4. Gọi API miễn phí của VietQR.io để sinh link ảnh QR động
-        $qrCodeUrl = "https://img.vietqr.io/image/{$BANK_ID}-{$ACCOUNT_NO}-qr_only.png?amount={$amount}&addInfo=" . urlencode($addInfo) . "&accountName=" . urlencode($ACCOUNT_NAME);
-
-        // 5. Trả dữ liệu ra file view thanh toán
-        return view('order.order_payment', compact('order', 'qrCodeUrl', 'amount', 'addInfo'));
+        return view('order.order_payment', compact('order', 'qrCodeUrl', 'amount', 'addInfo', 'BANK_ID', 'ACCOUNT_NO'));
     }
     public function history()
     {
@@ -228,5 +239,94 @@ class OrderController extends Controller
         $order->update(['status' => 4]);
 
         return view('order.confirm-delivery', compact('order'));
+    }
+    /**
+     * TỰ ĐỘNG 1: GỌI API PAYOS TẠO LINK QUET MÃ QR THANH TOÁN THẬT
+     */
+    private function createPayOSLink($order)
+    {
+        $clientId    = env('PAYOS_CLIENT_ID');
+        $apiKey      = env('PAYOS_API_KEY');
+        $checksumKey = env('PAYOS_CHECKSUM_KEY');
+
+        $orderCode   = intval($order->id);
+        $amount      = intval($order->total_price);
+        $description = 'AROMA DH' . $order->id;
+        $returnUrl   = route('payos.success');
+        $cancelUrl   = route('welcome');
+
+        // PayOS signature: các field theo đúng thứ tự alphabet
+        $signatureString = "amount={$amount}&cancelUrl={$cancelUrl}&description={$description}&orderCode={$orderCode}&returnUrl={$returnUrl}";
+        $signature = hash_hmac('sha256', $signatureString, $checksumKey);
+
+        $payload = [
+            'orderCode'   => $orderCode,
+            'amount'      => $amount,
+            'description' => $description,
+            'returnUrl'   => $returnUrl,
+            'cancelUrl'   => $cancelUrl,
+            'signature'   => $signature,
+        ];
+
+        \Illuminate\Support\Facades\Log::info('PayOS request', [
+            'orderCode'   => $orderCode,
+            'amount'      => $amount,
+            'description' => $description,
+            'clientId'    => substr($clientId, 0, 8) . '...',
+        ]);
+
+        $response = Http::withoutVerifying()->withHeaders([
+            'x-client-id'  => $clientId,
+            'x-api-key'    => $apiKey,
+            'Content-Type' => 'application/json',
+        ])->post('https://api-merchant.payos.vn/v2/payment-requests', $payload);
+
+        if ($response->successful()) {
+            $result = $response->json();
+            \Illuminate\Support\Facades\Log::info('PayOS response', $result);
+            if (isset($result['code']) && $result['code'] === '00') {
+                return $result['data']['checkoutUrl'];
+            }
+            \Illuminate\Support\Facades\Log::error('PayOS error: ' . json_encode($result));
+        } else {
+            \Illuminate\Support\Facades\Log::error('PayOS HTTP error: ' . $response->status() . ' - ' . $response->body());
+        }
+
+        return null;
+    }
+
+    /**
+     * TỰ ĐỘNG 2: WEBHOOK HỨNG TIỀN (PayOS gọi về Ngrok của bạn -> tự động đổi status = 2)
+     */
+    public function payosWebhook(Request $request)
+    {
+        $body = $request->all();
+        
+        // Kiểm tra mã phản hồi thành công từ PayOS
+        if (isset($body['code']) && $body['code'] == '00' && isset($body['data'])) {
+            $description = $body['data']['description']; // Chuỗi trả về dạng: "AROMA DH52"
+            
+            // Dùng Regex bóc tách lấy ID đơn hàng nằm sau chữ DH
+            preg_match('/DH(\d+)/', $description, $matches);
+            if (isset($matches[1])) {
+                $orderId = $matches[1];
+                
+                // Tìm đúng đơn hàng trong Database
+                $order = Order::find($orderId);
+                if ($order && $order->status == 1) { 
+                    $order->update(['status' => 2]); // Cập nhật thẳng sang trạng thái 2 (Đã thanh toán)
+                }
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * TỰ ĐỘNG 3: VIEW CHUYỂN HƯỚNG KHI KHÁCH QUÉT TIỀN XONG
+     */
+    public function payosSuccess()
+    {
+        return view('order.payos_success_page');
     }
 }

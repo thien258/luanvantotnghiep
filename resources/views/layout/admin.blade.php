@@ -6,14 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Aura & Essence - Atelier Admin">
-    <base href="{{asset('public/')}}">
     
     <title>Aura & Essence - Dashboard</title>
 
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
 </head>
 
 <body id="page-top" class="bg-white">
@@ -90,6 +87,12 @@
                 <a class="nav-link text-dark" href="{{ route('admin.orders.index') }}">
                     <i class="fa-solid fa-bag-shopping text-dark mr-3"></i>
                     <span>Order</span>
+                </a>
+            </li>
+            <li class="nav-item {{ request()->routeIs('admin.orders.damaged') ? 'active font-weight-bold' : '' }}">
+                <a class="nav-link text-dark" href="{{ route('admin.orders.damaged') }}">
+                    <i class="fa-solid fa-triangle-exclamation text-danger mr-3"></i>
+                    <span>Hàng Hỏng</span>
                 </a>
             </li>
             <li class="nav-item {{ request()->routeIs('admin.title.index') ? 'active font-weight-bold' : '' }}">
@@ -195,15 +198,10 @@
         </div>
     </div>
 
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <script src="js/sb-admin-2.min.js"></script>
-	<script src="{{ asset('js/editProduct.js') }}"></script>
-		<script src="{{ asset('js/addProduct.js') }}"></script>
-        <script src="{{ asset('js/adminProduct_search.js') }}"></script>
+    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+    <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
 
 </body>
 

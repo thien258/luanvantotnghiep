@@ -25,6 +25,10 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/delivery/confirm/{code}', [OrderController::class, 'confirmDelivery'])->name('order.confirm-delivery');
 Route::post('/delivery/confirm/{code}', [OrderController::class, 'submitConfirmDelivery'])->name('order.submit-confirm-delivery');
 
+// PayOS callback — public, không cần đăng nhập
+Route::get('/order/payos-success', [OrderController::class, 'payosSuccess'])->name('payos.success');
+Route::post('/api/payos-webhook', [OrderController::class, 'payosWebhook'])->name('payos.webhook');
+
 // =========================================================================
 // KHU VỰC 1: CÁC ROUTE KHÔNG CẦN ĐĂNG NHẬP (GIAO DIỆN CHỦ, SẢN PHẨM, SEARCH)
 // =========================================================================
@@ -85,11 +89,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('concentration', ConcentrationController::class);
     Route::resource('festival', FestivalController::class);
     Route::resource('contacts', ContactAdminController::class);
-    
+
     // ĐÃ CHUYỂN VỀ ĐÂY: Route lẻ xử lý cập nhật trạng thái nằm ĐÚNG KHU VỰC Admin và ĐỨNG TRÊN Resource
     Route::post('/orders/{id}/update-status', [OrderAdminController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::get('/orders/{order}/return', [OrderAdminController::class, 'returnOrder'])->name('orders.return');
+    Route::post('/orders/{order}/return', [OrderAdminController::class, 'processReturn'])->name('orders.processReturn');
+    Route::get('/orders-damaged', [OrderAdminController::class, 'damagedList'])->name('orders.damaged');
     Route::resource('orders', OrderAdminController::class);
-    
+
     Route::resource('user', UserController::class);
     Route::resource('footer', FooterController::class);
     Route::resource('title', TitleController::class);

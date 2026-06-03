@@ -6,15 +6,37 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class OrderAdminController extends Controller
 {
     // 1. Giao diện danh sách đơn hàng
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::orderBy('id', 'desc')->get();
-        return view('admin.order.order-list', compact('orders'));
+        $keyword = $request->input('q', '');
+
+        $query = Order::orderBy('id', 'desc');
+
+        if ($keyword) {
+            $query->where(function($q) use ($keyword) {
+                $numericId = preg_replace('/^(dh|#dh|#)/i', '', trim($keyword));
+                if (is_numeric($numericId)) {
+                    $q->orWhere('id', $numericId);
+                }
+                $q->orWhere('fullname', 'like', "%{$keyword}%")
+                  ->orWhere('phone', 'like', "%{$keyword}%")
+                  ->orWhere('tracking_code', 'like', "%{$keyword}%");
+            });
+        }
+
+        $orders = $query->get();
+
+        // AJAX request → trả về HTML rows + count
+        if ($request->ajax() || $request->wantsJson()) {
+            $html = view('admin.order.partials.order-rows', compact('orders'))->render();
+            return response()->json(['html' => $html, 'count' => $orders->count()]);
+        }
+
+        return view('admin.order.order-list', compact('orders', 'keyword'));
     }
 
     // 2. Giao diện chi tiết đơn hàng (Đồng bộ chuẩn tên biến)
@@ -36,48 +58,60 @@ class OrderAdminController extends Controller
 
         // HÀNH ĐỘNG 1: BẤM NÚT XUẤT KHO TỪ TRANG CHI TIẾT
         if ($actionType === 'export_warehouse' && $order->status == 1) {
-            $orderDetails = OrderDetail::where('idOrder', $id)->get();
-
-            foreach ($orderDetails as $detail) {
-                // Nếu hệ thống đồ án của bạn có lưu cột idVariant trong bảng order_details
-                if (!empty($detail->idVariant)) {
-                    DB::table('product_variants')
-                        ->where('id', $detail->idVariant)
-                        ->decrement('stock', $detail->quantity);
-                } else {
-                    // Phương án dự phòng: Nếu chưa kịp map bảng biến thể, hệ thống sẽ trừ cột quantity của bảng product gốc
-                    if ($detail->product) {
-                        $detail->product->decrement('quantity', $detail->quantity);
-                    }
-                }
-            }
-
-            $order->status = 3; // Ép trạng thái nhảy sang: 3. Đang giao hàng
+            // Stock đã trừ lúc khách đặt hàng — chỉ cần chuyển trạng thái
+            $order->status = 3;
             $order->save();
-            return redirect()->back()->with('success', 'Đã xuất kho thành công các biến thể nước hoa và chuyển giao shipper!');
-        }
-
-        // HÀNH ĐỘNG 2: BIẾN CỐ HỦY ĐƠN (Cập nhật nhanh từ Select Box bảng ngoài)
-        if ($nextStatus == 4 && $order->status != 4 && $order->status != 3) {
-            $orderDetails = OrderDetail::where('idOrder', $id)->get();
-            foreach ($orderDetails as $detail) {
-                if (!empty($detail->idVariant)) {
-                    DB::table('product_variants')
-                        ->where('id', $detail->idVariant)
-                        ->increment('stock', $detail->quantity);
-                } else {
-                    // Dự phòng hoàn kho lại cho bảng product gốc
-                    if ($detail->product) {
-                        $detail->product->increment('quantity', $detail->quantity);
-                    }
-                }
-            }
+            return redirect()->back()->with('success', 'Đã xuất kho và chuyển giao shipper!');
         }
 
         // Cập nhật trạng thái thông thường từ select box
         $order->status = $nextStatus;
         $order->save();
 
-        return redirect()->back()->with('success', 'Đã cập nhật trạng thái tiến trình đơn hàng thành công.');
+        return redirect()->back()->with('success', 'Đã cập nhật trạng thái đơn hàng.');
+    }
+
+    // 4. Trang xử lý hoàn hàng — hiện khi đơn đang giao (status = 3)
+    public function returnOrder(Order $order)
+    {
+        if ($order->status != 3) {
+            return redirect()->route('admin.orders.index')
+                ->with('error', 'Chỉ xử lý hoàn hàng khi đơn đang ở trạng thái Đang Giao Hàng.');
+        }
+        $orderdetail = OrderDetail::where('idOrder', $order->id)->with('product')->get();
+        return view('admin.order.return', compact('order', 'orderdetail'));
+    }
+
+    // 5. Xử lý submit hoàn hàng
+    public function processReturn(Request $request, Order $order)
+    {
+        $request->validate(['condition' => 'required|in:intact,damaged']);
+
+        if ($request->condition === 'intact') {
+            // Hàng nguyên vẹn → cộng lại stock vào products.quantity
+            $orderDetails = OrderDetail::where('idOrder', $order->id)->with('product')->get();
+            foreach ($orderDetails as $detail) {
+                if ($detail->product) {
+                    $detail->product->increment('quantity', $detail->quantity);
+                }
+            }
+            $order->update(['status' => 5, 'note' => ($order->note ? $order->note . ' | ' : '') . 'Hoàn hàng nguyên vẹn.']);
+            return redirect()->route('admin.orders.index')
+                ->with('success', "Hoàn hàng nguyên vẹn — đã cộng lại tồn kho đơn #{$order->id}.");
+        } else {
+            $order->update(['status' => 6, 'note' => ($order->note ? $order->note . ' | ' : '') . 'Hoàn hàng lỗi/hỏng — không nhập kho.']);
+            return redirect()->route('admin.orders.damaged')
+                ->with('success', "Đã ghi nhận hàng hỏng đơn #{$order->id}.");
+        }
+    }
+
+    // 6. Danh sách hàng hỏng (status = 6)
+    public function damagedList()
+    {
+        $orders = Order::with(['detatil.product'])
+            ->where('status', 6)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+        return view('admin.order.damaged', compact('orders'));
     }
 }
