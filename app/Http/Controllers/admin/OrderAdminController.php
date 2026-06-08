@@ -13,20 +13,26 @@ class OrderAdminController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('q', '');
-            // set theo name
+        $status = $request->input('status', '');
+
         $query = Order::where('status', '!=', 0)
-        ->orderByRaw("FIELD(payment_method, 'BANK TRANSFER', 'COD')ASC")
-        ->orderBy('created_at', 'ASC'); // Ẩn đơn chờ PayOS xác nhận
+            ->orderByRaw("FIELD(status, 1, 3, 4, 5, 6) ASC")
+            ->orderByRaw("FIELD(payment_method, 'BANK TRANSFER', 'COD') ASC")
+            ->orderBy('created_at', 'ASC');
+
+        if ($status != '') {
+            $query->where('status', $status);
+        }
 
         if ($keyword) {
-            $query->where(function($q) use ($keyword) {
+            $query->where(function ($q) use ($keyword) {
                 $numericId = preg_replace('/^(dh|#dh|#)/i', '', trim($keyword));
                 if (is_numeric($numericId)) {
                     $q->orWhere('id', $numericId);
                 }
                 $q->orWhere('fullname', 'like', "%{$keyword}%")
-                  ->orWhere('phone', 'like', "%{$keyword}%")
-                  ->orWhere('tracking_code', 'like', "%{$keyword}%");
+                    ->orWhere('phone', 'like', "%{$keyword}%")
+                    ->orWhere('tracking_code', 'like', "%{$keyword}%");
             });
         }
 
@@ -38,19 +44,18 @@ class OrderAdminController extends Controller
             return response()->json(['html' => $html, 'count' => $orders->count()]);
         }
 
-        return view('admin.order.order-list', compact('orders', 'keyword'));
+        return view('admin.order.order-list', compact('orders', 'keyword', 'status'));
     }
 
-    // 2. Giao diện chi tiết đơn hàng (Đồng bộ chuẩn tên biến)
+    // 2. Giao diện chi tiết đơn hàng
     public function show($id)
     {
         $order = Order::findOrFail($id);
-
-        // Đảm bảo tên biến viết liền là $orderdetail để file Blade đọc trúng
         $orderdetail = OrderDetail::where('idOrder', $id)->with('product')->get();
 
         return view('admin.order.show', compact('order', 'orderdetail'));
     }
+
     // 3. Cập nhật trạng thái và xử lý xuất kho biến thể
     public function updateStatus(Request $request, $id)
     {
@@ -58,9 +63,8 @@ class OrderAdminController extends Controller
         $nextStatus = $request->input('status');
         $actionType = $request->input('action_type');
 
-        // HÀNH ĐỘNG 1: BẤM NÚT XUẤT KHO TỪ TRANG CHI TIẾT
+        // HÀNH ĐỘNG: BẤM NÚT XUẤT KHO TỪ TRANG CHI TIẾT
         if ($actionType === 'export_warehouse' && $order->status == 1) {
-            // Trừ tồn kho khi xuất kho
             $orderDetails = OrderDetail::where('idOrder', $id)->with('product')->get();
             foreach ($orderDetails as $detail) {
                 if ($detail->product) {
@@ -72,45 +76,50 @@ class OrderAdminController extends Controller
             return redirect()->back()->with('success', 'Đã xuất kho và chuyển giao shipper!');
         }
 
-        // Cập nhật trạng thái thông thường từ select box
         $order->status = $nextStatus;
         $order->save();
 
         return redirect()->back()->with('success', 'Đã cập nhật trạng thái đơn hàng.');
     }
-
-    // 4. Trang xử lý hoàn hàng — hiện khi đơn đang giao (status = 3)
-    public function returnOrder(Order $order)
+    // 4. Trang xử lý hoàn hàng — Hiện khi đơn đang giao (3) hoặc hỗ trợ kiểm tra đơn đã hoàn (5)
+    public function returnOrder($id)
     {
-        if ($order->status != 3) {
+        // Tìm đơn hàng bằng ID để tránh lỗi lệch tên tham số Route
+        $order = Order::findOrFail($id);
+
+        // Kiểm tra điều kiện trạng thái của đơn hàng
+        if ($order->status != 3 && $order->status != 5) {
             return redirect()->route('admin.orders.index')
-                ->with('error', 'Chỉ xử lý hoàn hàng khi đơn đang ở trạng thái Đang Giao Hàng.');
+                ->with('error', 'Đơn hàng không đủ điều kiện xử lý hoàn trả.');
         }
-        $orderdetail = OrderDetail::where('idOrder', $order->id)->with('product')->get();
+
+        // Lấy chi tiết đơn hàng chuẩn tên biến $orderdetail
+        $orderdetail = OrderDetail::where('idOrder', $id)->with('product')->get();
+
         return view('admin.order.return', compact('order', 'orderdetail'));
     }
 
-    // 5. Xử lý submit hoàn hàng
-    public function processReturn(Request $request, Order $order)
+    // 5. XỬ LÝ SUBMIT HOÀN HÀNG — tất cả chờ trả nhà sản xuất, không nhập kho
+    public function processReturn(Request $request, $id)
     {
-        $request->validate(['condition' => 'required|in:intact,damaged']);
+       // 1. Tìm đơn hàng dựa vào ID nhận từ Form gửi lên
+        $order = Order::findOrFail($id);
 
-        if ($request->condition === 'intact') {
-            // Hàng nguyên vẹn → cộng lại stock vào products.quantity
-            $orderDetails = OrderDetail::where('idOrder', $order->id)->with('product')->get();
-            foreach ($orderDetails as $detail) {
-                if ($detail->product) {
-                    $detail->product->increment('quantity', $detail->quantity);
-                }
-            }
-            $order->update(['status' => 5, 'note' => ($order->note ? $order->note . ' | ' : '') . 'Hoàn hàng nguyên vẹn.']);
-            return redirect()->route('admin.orders.index')
-                ->with('success', "Hoàn hàng nguyên vẹn — đã cộng lại tồn kho đơn #{$order->id}.");
-        } else {
-            $order->update(['status' => 6, 'note' => ($order->note ? $order->note . ' | ' : '') . 'Hoàn hàng lỗi/hỏng — không nhập kho.']);
-            return redirect()->route('admin.orders.damaged')
-                ->with('success', "Đã ghi nhận hàng hỏng đơn #{$order->id}.");
-        }
+        $request->validate([
+            'condition' => 'required|in:intact,damaged',
+        ]);
+
+        // Tất cả hàng hoàn chuyển sang hàng hỏng (status = 6)
+        $finalStatus = 6;
+
+        // 2. Cập nhật trạng thái, GIỮ NGUYÊN VẸN trường note cũ của khách hàng, không thêm thắt bất cứ gì
+        $order->update([
+            'status' => $finalStatus,
+            'note'   => $order->note // Giữ nguyên lý do gốc của khách hàng
+        ]);
+
+        return redirect()->route('admin.orders.damaged')
+            ->with('success', "Đã ghi nhận và chuyển đơn #{$order->id} sang danh sách hàng hỏng.");
     }
 
     // 6. Danh sách hàng hỏng (status = 6)
@@ -120,6 +129,7 @@ class OrderAdminController extends Controller
             ->where('status', 6)
             ->orderBy('updated_at', 'desc')
             ->get();
+
         return view('admin.order.damaged', compact('orders'));
     }
 }

@@ -70,7 +70,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/order/{id}/payment', [OrderController::class, 'paymentForm'])->name('order.payment');
     Route::post('/order/{id}/confirm-paid', [OrderController::class, 'confirmPaid'])->name('order.confirmPaid');
     Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder'])->name('order.cancel');
-
+    Route::post('/order/history/return/{id}', [OrderController::class, 'customerReturn'])->name('order.customer-return');
     Route::resource('order', OrderController::class);
 
     // Sổ địa chỉ nhận hàng (AJAX)

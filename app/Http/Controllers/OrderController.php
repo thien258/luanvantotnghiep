@@ -365,4 +365,34 @@ class OrderController extends Controller
     {
         return view('order.payos_success_page');
     }
+   
+
+    public function customerReturn(Request $request, $id)
+    {
+        // 1. Validate dữ liệu chặt chẽ hơn (loại bỏ khoảng trống thừa bằng trim)
+        $request->validate([
+            'reason' => 'required|string|min:5|max:1000' // Bắt buộc nhập ít nhất 5 ký tự để tránh bấm nhầm dữ liệu trống
+        ], [
+            'reason.required' => 'Vui lòng nhập lý do hoàn hàng.',
+            'reason.min' => 'Lý do hoàn hàng phải có ít nhất 5 ký tự.'
+        ]);
+
+        // 2. Tìm đơn hàng, nếu không có tự động bắn lỗi 404
+        $order = Order::findOrFail($id);
+
+        // 3. Kiểm tra điều kiện: Chỉ cho phép hoàn khi đơn ở trạng thái "Hoàn tất" (status = 4)
+        if ($order->status == 4) {
+            $order->status = 5; // Chuyển trạng thái sang "Hoàn hàng"
+
+            // MẸO TỐI ƯU: Nên NỐI THÊM vào ghi chú cũ (nếu có) thay vì GHI ĐÈ mất thông tin cũ của đơn
+            $oldNote = $order->note ? $order->note . " | " : "";
+            $order->note = $oldNote . "Lý do hoàn: " . trim($request->input('reason'));
+
+            $order->save();
+
+            return redirect()->back()->with('success', 'Yêu cầu hoàn trả đơn hàng #DH' . $id . ' cùng lý do đã được gửi thành công!');
+        }
+
+        return redirect()->back()->with('error', 'Đơn hàng không hợp lệ hoặc không đủ điều kiện hoàn trả.');
+    }
 }

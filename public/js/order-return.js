@@ -1,30 +1,27 @@
 /**
- * order-return.js
- * Xử lý UI trang hoàn hàng admin
+ * Xử lý sự kiện nhấn nút "Hoàn hàng" để truyền dữ liệu động vào Modal
  */
-function highlightOption() {
-    document.getElementById('label-intact').style.borderColor  = '';
-    document.getElementById('label-damaged').style.borderColor = '';
+$(document).ready(function() {
+    const RETURN_MODAL_CONFIG = {
+        triggerBtn: '.btn-trigger-return',
+        orderText: '#modal-order-text',
+        returnForm: '#returnOrderForm',
+        reasonTextarea: '#return_reason'
+    };
 
-    var selected = document.querySelector('input[name="condition"]:checked');
-    if (selected) {
-        document.getElementById('label-' + selected.value).style.borderColor = '#000';
-    }
-}
-
-function handleReasonChange(radio) {
-    // Reset border lý do
-    ['label-reason-bomb', 'label-reason-return'].forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el) el.style.borderColor = '';
+    // Dùng $(document).on('click') để chống lỗi nút bấm bị liệt 
+    $(document).on('click', RETURN_MODAL_CONFIG.triggerBtn, function() {
+        let orderId = $(this).data('order-id');
+        
+        $(RETURN_MODAL_CONFIG.orderText).text('#DH' + orderId);
+        
+        if (window.returnRouteTemplate) {
+            let actionUrl = window.returnRouteTemplate.replace(':id', orderId);
+            $(RETURN_MODAL_CONFIG.returnForm).attr('action', actionUrl);
+        } else {
+            console.error("Lỗi: Không tìm thấy biến toàn cục window.returnRouteTemplate.");
+        }
+        
+        $(RETURN_MODAL_CONFIG.reasonTextarea).val('');
     });
-
-    var parentLabel = radio.closest('label');
-    if (parentLabel) parentLabel.style.borderColor = '#000';
-
-    // Hiện/ẩn nút hoàn tiền
-    var refundSection = document.getElementById('refund-section');
-    if (refundSection) {
-        refundSection.style.display = radio.value === 'return' ? 'block' : 'none';
-    }
-}
+});
