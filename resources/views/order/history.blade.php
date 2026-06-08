@@ -36,10 +36,10 @@
                                     <span class="badge rounded-0 bg-primary text-white px-2 py-1 text-uppercase" style="font-size:0.65rem; letter-spacing:0.5px;">Đang giao hàng</span>
                                 @elseif($order->status == 4)
                                     <span class="badge rounded-0 bg-success text-white px-2 py-1 text-uppercase" style="font-size:0.65rem; letter-spacing:0.5px;">Hoàn tất</span>
-                                @elseif($order->status == 5)
+                                @elseif($order->status == 5 || $order->status == 6)
                                     <span class="badge rounded-0 bg-secondary text-white px-2 py-1 text-uppercase" style="font-size:0.65rem; letter-spacing:0.5px;">Hoàn hàng</span>
                                 @else
-                                    <span class="badge rounded-0 bg-secondary text-white px-2 py-1 text-uppercase" style="font-size:0.65rem; letter-spacing:0.5px;">Không xác định</span>
+                                    <span class="badge rounded-0 bg-danger text-white px-2 py-1 text-uppercase" style="font-size:0.65rem; letter-spacing:0.5px;">Đã hủy</span>
                                 @endif
                             </td>
                             <td class="py-3 pe-4 text-end">
