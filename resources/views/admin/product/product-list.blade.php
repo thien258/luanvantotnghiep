@@ -1,12 +1,37 @@
 @extends('layout/admin')
 @section('body')
-<div class="card-footer small text-mutted">
+<div class="card-footer small text-muted">
     <h3>Quản lý Sản phẩm</h3>
-    <a href="{{ route('admin.product.create') }}" class="btn btn-warning mb-3">Thêm Sản phẩm</a>
-    <div class="position-relative" style="width: 350px;">
+
+    <div class="mb-3 d-flex align-items-center">
+        <a href="{{ route('admin.product.create') }}" class="btn btn-warning">
+            <i class="fas fa-plus"></i> Thêm Sản phẩm
+        </a>
+
+        <form action="{{ route('admin.product.import') }}" method="POST" enctype="multipart/form-data" class="d-flex ml-3" style="margin-bottom: 0;">
+            @csrf
+            <div class="input-group">
+                <input type="file" name="import_file" class="form-control" accept=".xlsx, .xls, .csv" required>
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-file-excel"></i> Nhập hàng
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="position-relative mb-3" style="width: 350px;">
         <input type="text" id="admin-search-input" class="form-control shadow-none" placeholder="Lọc nhanh tên sản phẩm..." autocomplete="off">
         <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="top: 50%; right: 15px; transform: translateY(-50%);"></i>
     </div>
+
+    @if(session('success'))
+    <div class="alert alert-success mt-2">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+    <div class="alert alert-danger mt-2">{{ session('error') }}</div>
+    @endif
 </div>
 <table class="table table-bordered table-hover align-middle">
     <thead class="table-light">

@@ -97,6 +97,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/orders/{order}/return', [OrderAdminController::class, 'processReturn'])->name('orders.processReturn');
     Route::get('/orders-damaged', [OrderAdminController::class, 'damagedList'])->name('orders.damaged');
     Route::resource('orders', OrderAdminController::class);
+    Route::post('/product/import', [ProductController::class, 'importProducts'])->name('product.import');
 
     Route::resource('user', UserController::class);
     Route::resource('footer', FooterController::class);

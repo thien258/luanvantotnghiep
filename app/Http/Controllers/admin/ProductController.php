@@ -10,6 +10,8 @@ use App\Models\Festival;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
+use \App\Imports\ProductImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -122,6 +124,25 @@ class ProductController extends Controller
         return redirect()->route('admin.product.index');
     }
 
+    public function importProducts(Request $request)
+    {
+        $request->validate([
+            'import_file' => 'required|file|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        try {
+            Excel::import(
+                new ProductImport,
+                $request->file('import_file')
+            );
+            return redirect()->route('admin.product.index')
+                ->with('success', 'Nhập hàng thành công!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Lỗi khi nhập file: ' . $e->getMessage());
+        }
+    }
+
     public function suggest(Request $request)
     {
         $keyword = $request->keyword;
@@ -137,4 +158,5 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
+   
 }

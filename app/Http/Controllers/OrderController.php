@@ -230,7 +230,9 @@ class OrderController extends Controller
     // Trang xác nhận nhận hàng — khách quét QR trên thùng hàng
     public function confirmDelivery($code)
     {
-        $order = Order::where('tracking_code', $code)->firstOrFail();
+        $order = Order::where('tracking_code', $code)
+            ->with('detatil.product')
+            ->firstOrFail();
         return view('order.confirm-delivery', compact('order'));
     }
 
@@ -239,6 +241,7 @@ class OrderController extends Controller
     {
         $order = Order::where('tracking_code', $code)
             ->where('status', 3)
+            ->with('detatil.product')
             ->firstOrFail();
 
         $order->update(['status' => 4]);

@@ -406,4 +406,3 @@
 <script src="{{ asset('js/showProduct.js') }}"></script>
 
 @endsection
-```
