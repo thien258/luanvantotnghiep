@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Aura & Essence - Atelier Admin">
-    
+
     <title>Aura & Essence - Dashboard</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -53,21 +53,16 @@
                 </a>
             </li>
 
-       
-            
+
+
             <li class="nav-item {{ request()->routeIs('admin.festival.index') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{route('admin.festival.index')}}">
                     <i class="fa-solid fa-calendar-alt text-dark mr-3"></i>
                     <span>Festival</span>
                 </a>
             </li>
-            <li class="nav-item {{ request()->routeIs('admin.orders.index') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{route('admin.orders.index')}}">
-                    <i class="fa-solid fa-calendar-alt text-dark mr-3"></i>
-                    <span>Order</span>
-                </a>
-            </li>
-            
+
+
 
             <li class="nav-item {{ request()->routeIs('admin.product.index') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{route('admin.product.index')}}">
@@ -143,7 +138,7 @@
 
                     <ul class="navbar-nav ml-auto align-items-center">
 
-                     
+
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle text-dark" href="#" id="alertsDropdown" role="button" data-toggle="dropdown">
                                 <i class="fa-regular fa-bell h5 mb-0"></i>
@@ -173,9 +168,9 @@
                 <div class="container-fluid px-4 bg-white">
                     @yield('body')
                 </div>
-                </div>
             </div>
         </div>
+    </div>
     <a class="scroll-to-top rounded-0 bg-dark" href="#page-top">
         <i class="fas fa-angle-up text-white"></i>
     </a>

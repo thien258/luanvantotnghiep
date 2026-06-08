@@ -13,9 +13,10 @@ class OrderAdminController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('q', '');
-
-        $query = Order::orderBy('id', 'desc')
-            ->where('status', '!=', 0); // Ẩn đơn chờ PayOS xác nhận
+            // set theo name
+        $query = Order::where('status', '!=', 0)
+        ->orderByRaw("FIELD(payment_method, 'BANK TRANSFER', 'COD')ASC")
+        ->orderBy('created_at', 'ASC'); // Ẩn đơn chờ PayOS xác nhận
 
         if ($keyword) {
             $query->where(function($q) use ($keyword) {
@@ -59,7 +60,13 @@ class OrderAdminController extends Controller
 
         // HÀNH ĐỘNG 1: BẤM NÚT XUẤT KHO TỪ TRANG CHI TIẾT
         if ($actionType === 'export_warehouse' && $order->status == 1) {
-            // Stock đã trừ lúc khách đặt hàng — chỉ cần chuyển trạng thái
+            // Trừ tồn kho khi xuất kho
+            $orderDetails = OrderDetail::where('idOrder', $id)->with('product')->get();
+            foreach ($orderDetails as $detail) {
+                if ($detail->product) {
+                    $detail->product->decrement('quantity', $detail->quantity);
+                }
+            }
             $order->status = 3;
             $order->save();
             return redirect()->back()->with('success', 'Đã xuất kho và chuyển giao shipper!');

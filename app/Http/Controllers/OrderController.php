@@ -119,9 +119,7 @@ class OrderController extends Controller
                     'quantity'  => $cart->quantity,
                     'price'     => $cart->product->getDiscountedPrice(),
                 ]);
-
-                // Trừ tồn kho ngay khi đặt hàng
-                $cart->product->decrement('quantity', $cart->quantity);
+                // Tồn kho sẽ bị trừ khi admin bấm Xuất kho, không trừ tại đây
             }
 
             // Xóa các cart items đã đặt
@@ -211,6 +209,7 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             foreach ($order->detatil as $detail) {
+                // Không cộng lại tồn kho — tồn kho chỉ bị trừ khi xuất kho
                 Cart::create([
                     'idUser'     => Auth::id(),
                     'product_id' => $detail->idProduct,
@@ -317,9 +316,7 @@ class OrderController extends Controller
             DB::beginTransaction();
             try {
                 foreach ($order->detatil as $detail) {
-                    Product::where('id', $detail->idProduct)
-                        ->increment('quantity', $detail->quantity);
-
+                    // Không cộng lại tồn kho — tồn kho chỉ bị trừ khi xuất kho
                     Cart::create([
                         'idUser'     => $order->idUser,
                         'product_id' => $detail->idProduct,

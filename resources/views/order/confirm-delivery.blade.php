@@ -86,7 +86,7 @@
                 <div>
                     <div class="fw-bold text-dark small">{{ $detail->name }}</div>
 
-                    <div class="text-dark fw-semibold mt-1" style="font-size: 0.75rem;">
+                    <div class="text-dark fw-semibold mt-1 " style="font-size: 0.75rem;">
                         SL: {{ $detail->quantity }} &nbsp;·&nbsp; {{ number_format($detail->price) }}đ
                     </div>
                 </div>

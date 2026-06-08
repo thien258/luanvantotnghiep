@@ -47,6 +47,7 @@
                                     Xem chi tiết
                                 </a>
                             </td>
+                           
                         </tr>
                     @empty
                         <tr>
