@@ -12,11 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->integer('idUser')->index('fk_orders_user');
-            $table->integer('idProduct')->index('fk_orders_product');
-            $table->integer('price');
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('idUser')->index('fk_orders_user');
+            $table->string('fullname')->nullable();
+            $table->string('phone')->nullable();
             $table->string('address');
+            $table->string('payment_method')->default('CREDIT CARD');
+            $table->integer('total_price')->default(0);
+            $table->integer('status')->default(0);
+            $table->text('note')->nullable();
+            $table->string('tracking_code')->nullable();
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
         });

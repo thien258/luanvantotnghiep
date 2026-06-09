@@ -25,7 +25,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'address',
         'role',
         'remember_token',
-    
+
     ];
 
     /**
@@ -50,7 +50,14 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
-    public function isAdmin(){
-        return $this->role==='admin';
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+    public function orders()
+    {
+        // 'idUser' là tên cột khóa ngoại ở bảng orders
+        // 'id' là khóa chính của bảng users
+        return $this->hasMany(Order::class, 'idUser', 'id');
     }
 }

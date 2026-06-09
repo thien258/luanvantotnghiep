@@ -6,16 +6,18 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+
 class UserController extends Controller
 {
     //
-    public function index(){
-        $users= User::all();
-        return view('admin.user.user-list',compact('users'));
+    public function index()
+    {
+        $users = User::all();
+        return view('admin.user.user-list', compact('users'));
     }
     public function update(User $user)
     {
-       
+
 
         if ($user->id === Auth::id()) {
             return redirect()->back();
@@ -26,15 +28,27 @@ class UserController extends Controller
 
         return redirect()->back();
     }
-        public function destroy($id)
+    public function destroy($id)
     {
         $user = User::find($id);
-        $user->delete();
-        if ($user)
+
+        if ($user) {
+            // 1. Duyệt qua từng đơn hàng của user
+            foreach ($user->orders as $order) {
+                // Sửa lỗi hiện tại: Xóa hết chi tiết của đơn hàng này trước
+                // (Đảm bảo Model Order đã có relationship 'details' hoặc 'orderDetails')
+                $order->details()->delete();
+            }
+
+            // 2. Sau khi các chi tiết đơn hàng đã sạch, xóa các đơn hàng
+            $user->orders()->delete();
+
+            // 3. Cuối cùng là xóa user
+            $user->delete();
+
             return redirect()->route('admin.user.index');
-        else {
-            return back();
         }
+
+        return back();
     }
-    
 }

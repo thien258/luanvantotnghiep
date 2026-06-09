@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('festival_product_variant', function (Blueprint $table) {
-            //
+        Schema::create('festivals', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('festival_id')->constrained('festivals')->onDelete('cascade');
-            $table->foreignId('product_variant_id')->constrained('product_variants')->onDelete('cascade');
+            $table->string('name', 150);
             $table->integer('discount')->default(0);
-             $table->timestamps();
+            $table->integer('status')->default(1);
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->timestamps();
         });
     }
 
@@ -26,9 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-
-            //
-                Schema::dropIfExists('festival_product_variant');
-       
+        Schema::dropIfExists('festivals');
     }
 };

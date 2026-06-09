@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('volumes', function (Blueprint $table) {
+        Schema::create('festival_product_variant', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');
-            $table->integer('status')->default(0);
+            $table->unsignedBigInteger('festival_id')->index('festival_product_variant_festival_id_foreign');
+            $table->integer('discount')->default(0);
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('volumes');
+        Schema::dropIfExists('festival_product_variant');
     }
 };

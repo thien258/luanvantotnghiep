@@ -18,10 +18,7 @@ return new class extends Migration
             $table->text('chat');
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
-       
-                   $table->foreign(['idProduct'], 'FK_comment_product')->references(['id'])->on('products')->onUpdate('no action')->onDelete('cascade');
-
-            });
+        });
     }
 
     /**

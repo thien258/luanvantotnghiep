@@ -15,11 +15,8 @@ return new class extends Migration
             $table->bigInteger('id', true);
             $table->integer('quantity')->default(1);
             $table->unsignedBigInteger('idUser')->index('fk_carts_user');
-            $table->unsignedBigInteger('idPV')->index('fk_carts_pv');
+            $table->unsignedBigInteger('product_id')->index('carts_product_id_foreign');
             $table->timestamps();
-
-             $table->foreign(['idPV'], 'FK_carts_pv')->references(['id'])->on('product_variants')->onUpdate('restrict')->onDelete('restrict');
-            $table->foreign(['idUser'], 'FK_carts_user')->references(['id'])->on('users')->onUpdate('restrict')->onDelete('restrict');
         });
     }
 
