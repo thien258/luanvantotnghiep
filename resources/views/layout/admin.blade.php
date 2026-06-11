@@ -28,7 +28,7 @@
 
             <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{ route('admin.dashboard') }}">
-                    <i class="fa-solid fa-t text-dark mr-3"></i>
+                    <i class="fa-solid fa-chart-line text-dark mr-3"></i>
                     <span>Dashboard Overview</span>
                 </a>
             </li>
@@ -53,8 +53,6 @@
                 </a>
             </li>
 
-
-
             <li class="nav-item {{ request()->routeIs('admin.festival.index') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{route('admin.festival.index')}}">
                     <i class="fa-solid fa-calendar-alt text-dark mr-3"></i>
@@ -62,12 +60,24 @@
                 </a>
             </li>
 
-
-
             <li class="nav-item {{ request()->routeIs('admin.product.index') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{route('admin.product.index')}}">
                     <i class="fa-solid fa-bottle-droplet text-dark mr-3"></i>
                     <span>Product</span>
+                </a>
+            </li>
+
+            <li class="nav-item {{ request()->routeIs('admin.product.warehouse.index') ? 'active font-weight-bold' : '' }}">
+                <a class="nav-link text-dark" href="{{ route('admin.product.warehouse.index') }}">
+                    <i class="fa-solid fa-boxes-packing text-dark mr-3"></i>
+                    <span>Kho & Cảnh báo Sale</span>
+                </a>
+            </li>
+
+            <li class="nav-item {{ request()->routeIs('admin.warehouse.imports') || request()->routeIs('admin.warehouse.imports.show') ? 'active font-weight-bold' : '' }}">
+                <a class="nav-link text-dark" href="{{ route('admin.warehouse.imports') }}">
+                    <i class="fa-solid fa-file-arrow-up text-dark mr-3"></i>
+                    <span>Nhập Kho</span>
                 </a>
             </li>
 
@@ -101,7 +111,6 @@
                     <i class="fa-solid fa-user text-dark mr-3"></i>
                     <span>User</span>
                 </a>
-            </li>
             </li>
 
             <li class="nav-item {{ request()->routeIs('admin.footer.index') ? 'active font-weight-bold' : '' }}">
@@ -138,7 +147,6 @@
 
                     <ul class="navbar-nav ml-auto align-items-center">
 
-
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle text-dark" href="#" id="alertsDropdown" role="button" data-toggle="dropdown">
                                 <i class="fa-regular fa-bell h5 mb-0"></i>
@@ -165,12 +173,14 @@
 
                     </ul>
                 </nav>
+                
                 <div class="container-fluid px-4 bg-white">
                     @yield('body')
                 </div>
             </div>
         </div>
     </div>
+    
     <a class="scroll-to-top rounded-0 bg-dark" href="#page-top">
         <i class="fas fa-angle-up text-white"></i>
     </a>

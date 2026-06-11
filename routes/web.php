@@ -18,6 +18,7 @@ use App\Http\Controllers\ProductShowController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use \App\Http\Controllers\UserAddressController;
 
 // =========================================================================
 // ROUTE XÁC NHẬN NHẬN HÀNG (Public — khách quét QR không cần đăng nhập)
@@ -74,8 +75,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('order', OrderController::class);
 
     // Sổ địa chỉ nhận hàng (AJAX)
-    Route::resource('addresses', \App\Http\Controllers\UserAddressController::class);
-    Route::patch('/addresses/{id}/default', [\App\Http\Controllers\UserAddressController::class, 'setDefault'])->name('addresses.setDefault');
+    Route::resource('addresses', UserAddressController::class);
+    Route::patch('/addresses/{id}/default', [UserAddressController::class, 'setDefault'])->name('addresses.setDefault');
 });
 
 
@@ -90,6 +91,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('concentration', ConcentrationController::class);
     Route::resource('festival', FestivalController::class);
     Route::resource('contacts', ContactAdminController::class);
+    // Route hiển thị giao diện 3 Tab kho và đối soát bán chậm
+    Route::get('product/warehouse', [ProductController::class, 'warehouseIndex'])->name('product.warehouse.index');
+    Route::post('product/warehouse/store', [ProductController::class, 'warehouseStore'])->name('product.warehouse.store');
+
+    // NHÂN VIÊN KHO: Upload file chờ admin duyệt
+    Route::get('warehouse/imports', [ProductController::class, 'importList'])->name('warehouse.imports');
+    Route::post('warehouse/imports/upload', [ProductController::class, 'importUpload'])->name('warehouse.imports.upload');
+
+    // ADMIN: Xem chi tiết + duyệt
+    Route::get('warehouse/imports/{import}', [ProductController::class, 'importShow'])->name('warehouse.imports.show');
+    Route::post('warehouse/imports/{import}/approve', [ProductController::class, 'importApprove'])->name('warehouse.imports.approve');
+    Route::post('warehouse/imports/{import}/reject', [ProductController::class, 'importReject'])->name('warehouse.imports.reject');
+
 
     // ĐÃ CHUYỂN VỀ ĐÂY: Route lẻ xử lý cập nhật trạng thái nằm ĐÚNG KHU VỰC Admin và ĐỨNG TRÊN Resource
     Route::post('/orders/{id}/update-status', [OrderAdminController::class, 'updateStatus'])->name('orders.updateStatus');
@@ -97,14 +111,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/orders/{order}/return', [OrderAdminController::class, 'processReturn'])->name('orders.processReturn');
     Route::get('/orders-damaged', [OrderAdminController::class, 'damagedList'])->name('orders.damaged');
     Route::resource('orders', OrderAdminController::class);
-    Route::post('/product/import', [ProductController::class, 'importProducts'])->name('product.import');
-
+    Route::get('/product-suggest', [ProductController::class, 'suggest'])->name('product.suggest');
+    Route::resource('product', ProductController::class);
     Route::resource('user', UserController::class);
     Route::resource('footer', FooterController::class);
     Route::resource('title', TitleController::class);
-
-    Route::get('/product-suggest', [ProductController::class, 'suggest'])->name('product.suggest');
-    Route::resource('product', ProductController::class);
     Route::get('/festival/{festival}/products', [FestivalController::class, 'selectProducts'])->name('festival.selectProducts');
     Route::post('/festival/{festival}/products/update', [FestivalController::class, 'updateProducts'])->name('festival.updateProducts');
 });

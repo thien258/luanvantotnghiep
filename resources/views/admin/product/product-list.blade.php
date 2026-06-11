@@ -7,18 +7,6 @@
         <a href="{{ route('admin.product.create') }}" class="btn btn-warning">
             <i class="fas fa-plus"></i> Thêm Sản phẩm
         </a>
-
-        <form action="{{ route('admin.product.import') }}" method="POST" enctype="multipart/form-data" class="d-flex ml-3" style="margin-bottom: 0;">
-            @csrf
-            <div class="input-group">
-                <input type="file" name="import_file" class="form-control" accept=".xlsx, .xls, .csv" required>
-                <div class="input-group-append">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-file-excel"></i> Nhập hàng
-                    </button>
-                </div>
-            </div>
-        </form>
     </div>
 
     <div class="position-relative mb-3" style="width: 350px;">
