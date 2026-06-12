@@ -1,42 +1,67 @@
-@extends('layout.admin')
-
+@extends('layout/admin')
 @section('body')
-<div class="container">
-    <div class="row">
 
-        <form action="{{route('admin.festival.store')  }}" method="POST">
-            @csrf()
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-light rounded p-4" style="max-width: 600px;">
+
+        <h5 class="fw-bold mb-4 border-bottom pb-3">Thêm Sự Kiện Mới</h5>
+
+        {{-- Hiển thị lỗi validation --}}
+        @if($errors->any())
+        <div class="alert alert-danger rounded-0 mb-4">
+            <ul class="mb-0 ps-3 small">
+                @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+
+        <form action="{{ route('admin.festival.store') }}" method="POST">
+            @csrf
             <div class="mb-3">
-                <label for="name" class="form-label font-weight-bold">Tên sự kiện</label>
-                <input type="text" class="form-control" id="name" name="name" placeholder="Ví dụ: Tết Nguyên Đán, Giáng Sinh..." required>
+                <label class="form-label fw-bold">Tên sự kiện <span class="text-danger">*</span></label>
+                <input type="text" class="form-control rounded-0" name="name"
+                       value="{{ old('name') }}"
+                       placeholder="Ví dụ: Tết Nguyên Đán, Giáng Sinh...">
             </div>
 
             <div class="mb-3">
-                <label for="discount" class="form-label font-weight-bold">Giảm giá (%)</label>
-                <input type="number" class="form-control" id="discount" name="discount" placeholder="Nhập phần trăm giảm giá, ví dụ: 10, 20..." required>
+                <label class="form-label fw-bold">Giảm giá (%) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control rounded-0" name="discount"
+                       value="{{ old('discount') }}"
+                       min="0" max="100"
+                       placeholder="Nhập phần trăm giảm giá, ví dụ: 10, 20...">
             </div>
-            <div class="mb-3">
-                <label for="start_date" class="form-label font-weight-bold">Thời gian bắt đầu</label>
-                <input type="date" class="form-control" id="start_date" name="start_date" required>
+
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label fw-bold">Ngày bắt đầu <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control rounded-0" name="start_date"
+                           value="{{ old('start_date') }}">
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-bold">Ngày kết thúc <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control rounded-0" name="end_date"
+                           value="{{ old('end_date') }}">
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="end_date" class="form-label font-weight-bold">Thời gian kết thúc</label>
-                <input type="date" class="form-control" id="end_date" name="end_date" required>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Trạng thái</label>
+                <select name="status" class="form-select rounded-0">
+                    <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Bật (ON)</option>
+                    <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Tắt (OFF)</option>
+                </select>
             </div>
-            <div class="mb-3"></div>
-            <label for="status" class="form-label font-weight-bold">Status (Trạng thái)</label>
-            <select name="status" id="status" class="form-control">
-                <option value="1">ON</option>
-                <option value="0">Off</option>
-            </select>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary rounded-0 px-4">Lưu sự kiện</button>
+                <a href="{{ route('admin.festival.index') }}" class="btn btn-secondary rounded-0 px-4">Quay lại</a>
+            </div>
+        </form>
+
     </div>
-
-
-    <button type="submit" class="btn btn-primary">Submit</button>
-    <a href="{{ route('admin.festival.index') }} " class='btn btn-secondary'>BACK</a>
-    </form>
-
-</div>
 </div>
 
 @endsection

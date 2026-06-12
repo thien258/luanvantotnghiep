@@ -41,6 +41,13 @@ class UserAddressController extends Controller
             'name'    => 'required|string|max:100',
             'phone'   => 'required|string|max:20',
             'address' => 'required|string|max:255',
+        ], [
+            'name.required'    => 'Vui lòng nhập họ tên người nhận.',
+            'name.max'         => 'Họ tên không được vượt quá 100 ký tự.',
+            'phone.required'   => 'Vui lòng nhập số điện thoại.',
+            'phone.max'        => 'Số điện thoại không được vượt quá 20 ký tự.',
+            'address.required' => 'Vui lòng nhập địa chỉ.',
+            'address.max'      => 'Địa chỉ không được vượt quá 255 ký tự.',
         ]);
 
         if ($request->boolean('is_default')) {
@@ -67,6 +74,13 @@ class UserAddressController extends Controller
             'name'    => 'required|string|max:100',
             'phone'   => 'required|string|max:20',
             'address' => 'required|string|max:255',
+        ], [
+            'name.required'    => 'Vui lòng nhập họ tên người nhận.',
+            'name.max'         => 'Họ tên không được vượt quá 100 ký tự.',
+            'phone.required'   => 'Vui lòng nhập số điện thoại.',
+            'phone.max'        => 'Số điện thoại không được vượt quá 20 ký tự.',
+            'address.required' => 'Vui lòng nhập địa chỉ.',
+            'address.max'      => 'Địa chỉ không được vượt quá 255 ký tự.',
         ]);
 
         if ($request->boolean('is_default')) {

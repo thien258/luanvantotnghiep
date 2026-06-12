@@ -2,6 +2,17 @@
 @section('body')
 <div style="margin-left: 280px; margin-top: 100px; padding: 20px;">
 
+  {{-- Hiển thị lỗi validation --}}
+  @if($errors->any())
+  <div class="alert alert-danger rounded-0 mb-4">
+      <ul class="mb-0 ps-3 small">
+          @foreach($errors->all() as $error)
+          <li>{{ $error }}</li>
+          @endforeach
+      </ul>
+  </div>
+  @endif
+
   <form action="{{route('admin.festival.update',['festival'=>$festival->id])}}" method="POST">
     @csrf()
     {{method_field('put')}}

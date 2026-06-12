@@ -65,8 +65,13 @@
 
             <td>{{ $object->concentration?->concentration ?? 'Trống' }}</td>
 
-            {{-- Hiển thị số lượng kho trực tiếp --}}
-            <td class="text-center fw-bold">{{ $object->quantity }}</td>
+            {{-- Hiển thị số lượng kho — đỏ nếu < 5, vàng nếu < 10, bình thường nếu >= 10 --}}
+            <td class="text-center fw-bold
+                @if($object->quantity < 5) text-danger
+                @elseif($object->quantity < 10) text-warning
+                @else text-dark @endif">
+                {{ $object->quantity }}
+            </td>
 
             <td>
                 <div class="d-flex flex-wrap gap-1">

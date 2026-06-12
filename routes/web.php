@@ -92,17 +92,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('festival', FestivalController::class);
     Route::resource('contacts', ContactAdminController::class);
     // Route hiển thị giao diện 3 Tab kho và đối soát bán chậm
-    Route::get('product/warehouse', [ProductController::class, 'warehouseIndex'])->name('product.warehouse.index');
-    Route::post('product/warehouse/store', [ProductController::class, 'warehouseStore'])->name('product.warehouse.store');
+    Route::get('product/warehouse', [\App\Http\Controllers\admin\WarehouseController::class, 'index'])->name('product.warehouse.index');
+    Route::post('product/warehouse/store', [\App\Http\Controllers\admin\WarehouseController::class, 'store'])->name('product.warehouse.store');
 
     // NHÂN VIÊN KHO: Upload file chờ admin duyệt
-    Route::get('warehouse/imports', [ProductController::class, 'importList'])->name('warehouse.imports');
-    Route::post('warehouse/imports/upload', [ProductController::class, 'importUpload'])->name('warehouse.imports.upload');
+    Route::get('warehouse/imports', [\App\Http\Controllers\admin\WarehouseController::class, 'importList'])->name('warehouse.imports');
+    Route::post('warehouse/imports/upload', [\App\Http\Controllers\admin\WarehouseController::class, 'importUpload'])->name('warehouse.imports.upload');
 
     // ADMIN: Xem chi tiết + duyệt
-    Route::get('warehouse/imports/{import}', [ProductController::class, 'importShow'])->name('warehouse.imports.show');
-    Route::post('warehouse/imports/{import}/approve', [ProductController::class, 'importApprove'])->name('warehouse.imports.approve');
-    Route::post('warehouse/imports/{import}/reject', [ProductController::class, 'importReject'])->name('warehouse.imports.reject');
+    Route::get('warehouse/imports/{import}', [\App\Http\Controllers\admin\WarehouseController::class, 'importShow'])->name('warehouse.imports.show');
+    Route::post('warehouse/imports/{import}/approve', [\App\Http\Controllers\admin\WarehouseController::class, 'importApprove'])->name('warehouse.imports.approve');
+    Route::post('warehouse/imports/{import}/reject', [\App\Http\Controllers\admin\WarehouseController::class, 'importReject'])->name('warehouse.imports.reject');
 
 
     // ĐÃ CHUYỂN VỀ ĐÂY: Route lẻ xử lý cập nhật trạng thái nằm ĐÚNG KHU VỰC Admin và ĐỨNG TRÊN Resource

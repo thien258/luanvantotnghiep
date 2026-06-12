@@ -40,8 +40,20 @@ class Product extends Model
     }
 
     /**
+     * Tự động chuyển status = 0 (off) khi số lượng về 0.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (Product $product) {
+            if ($product->isDirty('quantity') && $product->quantity <= 0) {
+                $product->quantity = 0;
+                $product->status   = 0; // Hết hàng → tắt tự động
+            }
+        });
+    }
+
+    /**
      * Tính toán giá đã giảm dựa trên các sự kiện (Festivals) đang diễn ra.
-     * Đã bỏ tham số $originalPrice vì hàm tự lấy trực tiếp từ thuộc tính $this->price
      */
     public function getDiscountedPrice()
     {

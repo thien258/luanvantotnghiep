@@ -2,6 +2,16 @@
 
 @section('body')
 <div class="container py-4">
+    {{-- [FIX] Hiển thị lỗi validation --}}
+    @if($errors->any())
+    <div class="alert alert-danger rounded-0 mb-3">
+        <ul class="mb-0 ps-3 small">
+            @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
     <div class="card shadow-sm">
         <div class="card-header bg-warning text-dark fw-bold">CHỈNH SỬA SẢN PHẨM: {{ $product->title }}</div>
         <div class="card-body">

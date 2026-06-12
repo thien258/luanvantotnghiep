@@ -59,6 +59,16 @@ class OrderAdminController extends Controller
     // 3. Cập nhật trạng thái và xử lý xuất kho biến thể
     public function updateStatus(Request $request, $id)
     {
+        // [VALIDATION] Chỉ chấp nhận status hợp lệ, tránh inject giá trị lạ
+        $request->validate([
+            'status'      => 'nullable|integer|in:1,3,4,5,6',
+            'action_type' => 'nullable|in:export_warehouse',
+        ], [
+            'status.integer' => 'Trạng thái không hợp lệ.',
+            'status.in'      => 'Trạng thái đơn hàng không hợp lệ.',
+            'action_type.in' => 'Hành động không được hỗ trợ.',
+        ]);
+
         $order = Order::findOrFail($id);
         $nextStatus = $request->input('status');
         $actionType = $request->input('action_type');
@@ -107,6 +117,9 @@ class OrderAdminController extends Controller
 
         $request->validate([
             'condition' => 'required|in:intact,damaged',
+        ], [
+            'condition.required' => 'Vui lòng chọn tình trạng hàng hoàn.',
+            'condition.in'       => 'Tình trạng hàng không hợp lệ.',
         ]);
 
         // Tất cả hàng hoàn chuyển sang hàng hỏng (status = 6)

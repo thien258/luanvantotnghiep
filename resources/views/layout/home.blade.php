@@ -69,18 +69,18 @@
 										</ul>
 									</li>
 
-									<li class="nav-item submenu dropdown">
-										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Festival</a>
-										<ul class="dropdown-menu">
-											@forelse($festivals as $object)
-											<li class="nav-item">
-												<a href="{{ route('festival_product', ['festival' => $object->id]) }}">{{ $object->name }}</a>
-											</li>
-											@empty
-											<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
-											@endforelse
-										</ul>
-									</li>
+                                    @if($festivals->isNotEmpty())
+                                    <li class="nav-item submenu dropdown">
+                                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Festival</a>
+                                        <ul class="dropdown-menu">
+                                            @foreach($festivals as $object)
+                                            <li class="nav-item">
+                                                <a href="{{ route('festival_product', ['festival' => $object->id]) }}">{{ $object->name }}</a>
+                                            </li>
+                                            @endforeach
+                                        </ul>
+                                    </li>
+                                    @endif
 
 									<li class="nav-item submenu dropdown">
 										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Pages</a>

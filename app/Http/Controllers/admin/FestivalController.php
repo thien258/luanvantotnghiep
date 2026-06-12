@@ -41,7 +41,28 @@ class FestivalController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name'       => 'required|string|max:255',
+            'discount'   => 'required|numeric|min:0|max:100',
+            'status'     => 'required|in:0,1',
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+        ], [
+            'name.required'              => 'Vui lòng nhập tên sự kiện.',
+            'name.max'                   => 'Tên sự kiện không được vượt quá 255 ký tự.',
+            'discount.required'          => 'Vui lòng nhập mức giảm giá.',
+            'discount.numeric'           => 'Mức giảm giá phải là số.',
+            'discount.min'               => 'Mức giảm giá không được nhỏ hơn 0%.',
+            'discount.max'               => 'Mức giảm giá không được vượt quá 100%.',
+            'status.required'            => 'Vui lòng chọn trạng thái.',
+            'status.in'                  => 'Trạng thái không hợp lệ.',
+            'start_date.required'        => 'Vui lòng chọn ngày bắt đầu.',
+            'start_date.date'            => 'Ngày bắt đầu không đúng định dạng.',
+            'end_date.required'          => 'Vui lòng chọn ngày kết thúc.',
+            'end_date.date'              => 'Ngày kết thúc không đúng định dạng.',
+            'end_date.after_or_equal'    => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+        ]);
+
         $festival = Festival::create([
             'name' => $request->name,
             'discount' => $request->discount,
@@ -79,7 +100,28 @@ class FestivalController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name'       => 'required|string|max:255',
+            'discount'   => 'required|numeric|min:0|max:100',
+            'status'     => 'required|in:0,1',
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+        ], [
+            'name.required'              => 'Vui lòng nhập tên sự kiện.',
+            'name.max'                   => 'Tên sự kiện không được vượt quá 255 ký tự.',
+            'discount.required'          => 'Vui lòng nhập mức giảm giá.',
+            'discount.numeric'           => 'Mức giảm giá phải là số.',
+            'discount.min'               => 'Mức giảm giá không được nhỏ hơn 0%.',
+            'discount.max'               => 'Mức giảm giá không được vượt quá 100%.',
+            'status.required'            => 'Vui lòng chọn trạng thái.',
+            'status.in'                  => 'Trạng thái không hợp lệ.',
+            'start_date.required'        => 'Vui lòng chọn ngày bắt đầu.',
+            'start_date.date'            => 'Ngày bắt đầu không đúng định dạng.',
+            'end_date.required'          => 'Vui lòng chọn ngày kết thúc.',
+            'end_date.date'              => 'Ngày kết thúc không đúng định dạng.',
+            'end_date.after_or_equal'    => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+        ]);
+
         $festival = Festival::find($id);
         $festival->update([
             'name' => $request->name,

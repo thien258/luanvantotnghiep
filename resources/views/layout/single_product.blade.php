@@ -110,6 +110,16 @@
             <div class="col-lg-5 offset-lg-1">
                 <div class="p-4 bg-white shadow-sm border">
                     <h4 class="fw-bold mb-4">Leave a Review</h4>
+                    {{-- [FIX] Hiển thị lỗi validation khi gửi bình luận thất bại --}}
+                    @if($errors->any())
+                    <div class="alert alert-danger rounded-0 mb-3">
+                        <ul class="mb-0 ps-3 small">
+                            @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
                     <form action="{{ route('comments.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="idProduct" value="{{ $product->id }}">

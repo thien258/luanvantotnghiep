@@ -66,16 +66,20 @@ class OrderController extends Controller
 
     public function placeOrder(Request $request)
     {
+        // [VALIDATION] Ràng buộc dữ liệu đầu vào form checkout
         $request->validate([
-            'fullname'       => 'required|string',
-            'phone'          => 'required|string',
-            'address'        => 'required|string',
-            'payment_method' => 'required|string',
+            'fullname'       => 'required|string|max:255',                    // Tên người nhận, tối đa 255 ký tự
+            'phone'          => 'required|string|max:20|regex:/^[0-9]{9,11}$/', // Số điện thoại 9-11 số
+            'address'        => 'required|string|max:500',                    // Địa chỉ giao hàng
+            'payment_method' => 'required|in:COD,BANK TRANSFER',             // Chỉ chấp nhận 2 hình thức
+            'note'           => 'nullable|string|max:1000',                   // Ghi chú tùy chọn
         ], [
-            'fullname.required'       => 'Vui lòng nhập họ tên người nhận.',
-            'phone.required'          => 'Vui lòng nhập số điện thoại.',
-            'address.required'        => 'Vui lòng nhập địa chỉ giao hàng.',
-            'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
+            'fullname.required'          => 'Vui lòng nhập họ tên người nhận.',
+            'phone.required'             => 'Vui lòng nhập số điện thoại.',
+            'phone.regex'                => 'Số điện thoại phải từ 9-11 chữ số.',
+            'address.required'           => 'Vui lòng nhập địa chỉ giao hàng.',
+            'payment_method.required'    => 'Vui lòng chọn phương thức thanh toán.',
+            'payment_method.in'          => 'Phương thức thanh toán không hợp lệ.',
         ]);
 
         $cartIds = session('checkout_cart_ids', []);

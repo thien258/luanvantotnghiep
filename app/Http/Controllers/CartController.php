@@ -16,7 +16,19 @@ class CartController extends Controller
             return redirect()->route('login');
         }
 
-        $productId = $request->product_id;
+        // [VALIDATION] product_id phải tồn tại, quantity tối thiểu 1
+        $request->validate([
+            'product_id' => 'required|integer|exists:products,id',
+            'quantity'   => 'nullable|integer|min:1|max:100',
+        ], [
+            'product_id.required' => 'Vui lòng chọn sản phẩm.',
+            'product_id.exists'   => 'Sản phẩm không tồn tại trong hệ thống.',
+            'quantity.integer'    => 'Số lượng phải là số nguyên.',
+            'quantity.min'        => 'Số lượng phải ít nhất là 1.',
+            'quantity.max'        => 'Số lượng không được vượt quá 100.',
+        ]);
+
+        $productId     = $request->product_id;
         $quantityToAdd = $request->quantity ?? 1;
 
         $product = Product::findOrFail($productId);
