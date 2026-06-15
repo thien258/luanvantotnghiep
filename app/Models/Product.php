@@ -54,25 +54,34 @@ class Product extends Model
 
     /**
      * Tính toán giá đã giảm dựa trên các sự kiện (Festivals) đang diễn ra.
+     *
+     * @param  Festival|null  $festival  Nếu truyền vào, chỉ áp dụng discount của festival đó.
+     *                                   Nếu null, lấy discount cao nhất từ tất cả festival đang active.
      */
-    public function getDiscountedPrice()
+    public function getDiscountedPrice(?Festival $festival = null)
     {
-        // 1. Lấy ngày hôm nay chuẩn định dạng YYYY-MM-DD
-        $today = Carbon::today()->toDateString(); 
+        $today = Carbon::today()->toDateString();
 
-        // 2. Tìm mức giảm giá cao nhất từ các sự kiện đang diễn ra
-        $maxDiscount = $this->festivals()
-            ->where('status', 1)
-            ->where('start_date', '<=', $today)
-            ->where('end_date', '>=', $today)
-            ->max('discount') ?? 0;
+        if ($festival !== null) {
+            // Chỉ áp dụng discount của festival được chỉ định (nếu nó đang active)
+            $maxDiscount = ($festival->status == 1
+                && $festival->start_date->toDateString() <= $today
+                && $festival->end_date->toDateString() >= $today)
+                ? $festival->discount
+                : 0;
+        } else {
+            // Lấy mức giảm giá cao nhất từ tất cả sự kiện đang diễn ra
+            $maxDiscount = $this->festivals()
+                ->where('status', 1)
+                ->where('start_date', '<=', $today)
+                ->where('end_date', '>=', $today)
+                ->max('discount') ?? 0;
+        }
 
-        // 3. Nếu có giảm giá, tính dựa trên giá bán gốc nằm tại bảng products
         if ($maxDiscount > 0) {
             return $this->price * (1 - ($maxDiscount / 100));
         }
 
-        // 4. Nếu không có giảm giá, trả về giá bán gốc của sản phẩm
         return $this->price;
     }
 }

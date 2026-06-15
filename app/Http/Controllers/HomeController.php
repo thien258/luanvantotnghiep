@@ -480,7 +480,25 @@ class HomeController extends Controller
         ->with('festivals')
         ->get();
 
-    // FILTER PRICE (theo giá khuyến mãi)
+    // Lọc: chỉ hiển thị sản phẩm khi festival đang xem có discount CAO NHẤT
+    // trong tất cả festival đang active của sản phẩm đó
+    $today = \Carbon\Carbon::today()->toDateString();
+    $products = $products->filter(function ($product) use ($festival, $today) {
+        // Tìm discount cao nhất từ tất cả festival đang active của sản phẩm này
+        $maxActiveDiscount = $product->festivals
+            ->where('status', 1)
+            ->filter(fn($f) =>
+                $f->start_date->toDateString() <= $today &&
+                $f->end_date->toDateString() >= $today
+            )
+            ->max('discount') ?? 0;
+
+        // Chỉ hiển thị nếu festival đang xem CÓ discount bằng discount cao nhất
+        // (tức là không có festival nào khác đang active với discount cao hơn)
+        return $festival->discount >= $maxActiveDiscount;
+    })->values();
+
+    // FILTER PRICE (theo giá khuyến mãi của đúng festival đang xem)
     if (
         $request->has('min_price') &&
         $request->has('max_price')
@@ -491,10 +509,10 @@ class HomeController extends Controller
         $max = (int) $request->max_price;
 
         $products = $products->filter(
-            function ($product) use ($min, $max) {
+            function ($product) use ($min, $max, $festival) {
 
                 $finalPrice =
-                    $product->getDiscountedPrice();
+                    $product->getDiscountedPrice($festival);
 
                 return
                     $finalPrice >= $min &&
@@ -503,17 +521,17 @@ class HomeController extends Controller
         );
     }
 
-    // SORT (theo giá khuyến mãi)
+    // SORT (theo giá khuyến mãi của đúng festival đang xem)
     if ($request->sort == 'price_asc') {
 
         $products = $products
-            ->sortBy(fn($p) => $p->getDiscountedPrice())
+            ->sortBy(fn($p) => $p->getDiscountedPrice($festival))
             ->values();
 
     } elseif ($request->sort == 'price_desc') {
 
         $products = $products
-            ->sortByDesc(fn($p) => $p->getDiscountedPrice())
+            ->sortByDesc(fn($p) => $p->getDiscountedPrice($festival))
             ->values();
 
     } else {

@@ -259,16 +259,28 @@
 
                     $originalPrice = $product->price;
 
-                    $productDiscount = $product->festivals
-                    ? $product->festivals
-                        ->where('status', 1)
-                        ->filter(fn($f) => $f->start_date <= $today && $f->end_date >= $today)
-                        ->max('discount') ?? 0
-                    : 0;
+                    // Nếu đang xem từ trang festival cụ thể, dùng discount của festival đó
+                    // Nếu không (trang sản phẩm thường), lấy max discount từ tất cả festival đang active
+                    if (isset($festival)) {
+                        $maxDiscount = ($festival->status == 1
+                            && $festival->start_date->toDateString() <= $today
+                            && $festival->end_date->toDateString() >= $today)
+                            ? $festival->discount
+                            : 0;
+                    } else {
+                        $maxDiscount = $product->festivals
+                            ? $product->festivals
+                                ->where('status', 1)
+                                ->filter(fn($f) =>
+                                    $f->start_date->toDateString() <= $today &&
+                                    $f->end_date->toDateString() >= $today
+                                )
+                                ->max('discount') ?? 0
+                            : 0;
+                    }
 
-                    $maxDiscount = $productDiscount;
-
-                    $finalPrice = $product->getDiscountedPrice();
+                    // Truyền $festival vào để chỉ áp dụng discount đúng festival đang xem
+                    $finalPrice = $product->getDiscountedPrice($festival ?? null);
 
                     @endphp
 
