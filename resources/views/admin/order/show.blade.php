@@ -175,5 +175,5 @@
     </div>
 </div>
 
-<script src="{{ asset('js/order-show.js') }}"></script>
+<script src="{{ asset('js/admin/order-show.js') }}"></script>
 @endsection

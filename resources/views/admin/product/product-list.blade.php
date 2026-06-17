@@ -142,5 +142,5 @@
 </div>
 @endsection
 @section('script')
-<script src="{{ asset('js/adminProduct_search.js') }}"></script>
+<script src="{{ asset('js/admin/adminProduct_search.js') }}"></script>
 @endsection

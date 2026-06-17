@@ -201,6 +201,6 @@
 
 {{-- ── CHART.JS ─────────────────────────────────────────────────────── --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{{ asset('js/dashboard-chart.js') }}"></script>
+<script src="{{ asset('js/admin/dashboard-chart.js') }}"></script>
 
 @endsection

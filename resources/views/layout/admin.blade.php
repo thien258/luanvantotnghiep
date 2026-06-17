@@ -73,7 +73,12 @@
                     <span>Kho & Cảnh báo Sale</span>
                 </a>
             </li>
-
+            <li class="nav-item {{ request()->routeIs('admin.manufacturer.index') ? 'active font-weight-bold' : '' }}">
+                <a class="nav-link text-dark" href="{{ route('admin.manufacturer.index') }}">
+                    <i class="fa-solid fa-boxes-packing text-dark mr-3"></i>
+                    <span>Quản lý Nhà Sản Xuất</span>
+                </a>
+            </li>
             <li class="nav-item {{ request()->routeIs('admin.warehouse.imports') || request()->routeIs('admin.warehouse.imports.show') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{ route('admin.warehouse.imports') }}">
                     <i class="fa-solid fa-file-arrow-up text-dark mr-3"></i>
@@ -173,14 +178,14 @@
 
                     </ul>
                 </nav>
-                
+
                 <div class="container-fluid px-4 bg-white">
                     @yield('body')
                 </div>
             </div>
         </div>
     </div>
-    
+
     <a class="scroll-to-top rounded-0 bg-dark" href="#page-top">
         <i class="fas fa-angle-up text-white"></i>
     </a>
@@ -206,7 +211,7 @@
     <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-    <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
+    <script src="{{ asset('js/admin/sb-admin-2.min.js') }}"></script>
     @yield('script')
 
 </body>

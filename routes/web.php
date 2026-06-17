@@ -10,6 +10,7 @@ use App\Http\Controllers\admin\ContactAdminController;
 use App\Http\Controllers\admin\FestivalController;
 use App\Http\Controllers\admin\OrderAdminController;
 use App\Http\Controllers\admin\UserController;
+use App\Http\Controllers\admin\ManufacturerController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CartController;
@@ -92,6 +93,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('concentration', ConcentrationController::class);
     Route::resource('festival', FestivalController::class);
     Route::resource('contacts', ContactAdminController::class);
+  
+    Route::resource('manufacturer', ManufacturerController::class);
+
     // Route hiển thị giao diện 3 Tab kho và đối soát bán chậm
     Route::get('product/warehouse', [WarehouseController::class, 'index'])->name('product.warehouse.index');
     Route::post('product/warehouse/store', [WarehouseController::class, 'store'])->name('product.warehouse.store');

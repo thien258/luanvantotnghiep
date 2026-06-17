@@ -8,10 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $table = "products";
-    
+
     protected $fillable = [
-        "id", "title", 'image', 'decription', 'price', 'quantity', 'volume', 
-        'status', 'idConcentration', 'idBrand', 'idCategory'
+        "id",
+        "title",
+        'image',
+        'decription',
+        'price',
+        'quantity',
+        'volume',
+        'status',
+        'idConcentration',
+        'idBrand',
+        'idCategory'
     ];
 
     public function category()
@@ -33,12 +42,15 @@ class Product extends Model
     {
         return $this->belongsToMany('App\Models\Festival', 'festival_product', 'idProduct', 'idFestival');
     }
-  
+
     public function comment()
     {
         return $this->hasMany('App\Models\Comment', 'idProduct', 'id');
     }
-
+    public function manufacturers()
+    {
+        return $this->belongsToMany(ManuFacturer::class, 'manufacturers_product', 'product_id', 'manufacturer_id');
+    }
     /**
      * Tự động chuyển status = 0 (off) khi số lượng về 0.
      */

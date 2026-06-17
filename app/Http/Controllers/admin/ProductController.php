@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Concentration;
 use App\Models\Brand;
 use App\Models\Festival;
+use App\Models\ManuFacturer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
@@ -39,12 +40,16 @@ class ProductController extends Controller
             'categories'     => Category::all(),
             'concentrations' => Concentration::all(),
             'brands'         => Brand::all(),
+            'manufacturers'  => ManuFacturer::all(),
             'festivals'      => Festival::where('status', 1)->get(),
         ]);
     }
 
     public function store(Request $request)
     {
+
+
+
         $request->validate([
             'title'           => 'required|string|max:255',
             'price'           => 'required|numeric|min:0',
@@ -95,6 +100,9 @@ class ProductController extends Controller
             if ($request->has('idFestival') && is_array($request->idFestival)) {
                 $product->festivals()->attach($request->idFestival);
             }
+            if ($request->has('idManufacturer') && is_array($request->idManufacturer)) {
+                $product->manufacturers()->attach($request->idManufacturer);
+            }
             return redirect()->route('admin.product.index');
         }
         return back();
@@ -110,6 +118,8 @@ class ProductController extends Controller
             'brands'              => Brand::all(),
             'festivals'           => Festival::where('status', 1)->get(),
             'selectedFestivalIds' => $product->festivals()->pluck('festivals.id')->toArray(),
+            'manufacturers'       => ManuFacturer::all(),
+            'selectedManufacturerIds' => $product->manufacturers()->pluck('manufacturers.id')->toArray(),
         ]);
     }
 
@@ -161,6 +171,7 @@ class ProductController extends Controller
         ]);
 
         $product->festivals()->sync($request->input('idFestival', []));
+        $product->manufacturers()->sync($request->input('idManufacturer', []));
         return redirect()->route('admin.product.index');
     }
 

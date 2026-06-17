@@ -163,5 +163,5 @@
 @endsection
 
 @section('script')
-<script src="{{ asset('js/order-return.js') }}"></script>
+<script src="{{ asset('js/admin/order-return.js') }}"></script>
 @endsection
