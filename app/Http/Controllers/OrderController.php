@@ -12,11 +12,36 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 
+/**
+ * OrderController — Xử lý đơn hàng phía khách hàng.
+ *
+ * Luồng đặt hàng:
+ *   1. checkout()    — Lưu cart IDs vào session, redirect sang trang thanh toán
+ *   2. index()       — Trang nhập thông tin giao hàng + chọn phương thức
+ *   3. placeOrder()  — Tạo Order + OrderDetail, xử lý PayOS hoặc COD
+ *
+ * Luồng PayOS (Bank Transfer):
+ *   placeOrder → createPayOSLink() → redirect sang PayOS QR
+ *   → khách thanh toán → payosWebhook() cập nhật status 0→1
+ *   → hoặc hủy → payosCancel() xóa đơn + hoàn giỏ hàng
+ *
+ * Lưu ý:
+ *   - Tồn kho KHÔNG trừ khi đặt hàng
+ *   - Tồn kho chỉ trừ khi admin bấm "Xuất kho" (OrderAdminController::updateStatus)
+ *   - tracking_code: mã QR trên thùng hàng để khách xác nhận nhận hàng
+ */
 class OrderController extends Controller
 {
     public function store(Request $request) {}
 
-    // Nhận cart IDs từ trang cart, lưu vào session rồi redirect sang trang order
+    // =========================================================================
+    // CHECKOUT — Lưu giỏ hàng đã chọn vào session
+    // =========================================================================
+
+    /**
+     * Nhận danh sách cart_ids từ trang giỏ hàng (checkbox),
+     * lưu vào session để trang thanh toán biết cần mua gì.
+     */
     public function checkout(Request $request)
     {
         $cartIds = $request->input('cart_ids', []);
@@ -25,25 +50,32 @@ class OrderController extends Controller
             return redirect()->route('carts.index')->with('error', 'Vui lòng chọn ít nhất 1 sản phẩm!');
         }
 
+        // Lưu session để index() đọc được
         session(['checkout_cart_ids' => $cartIds]);
 
         return redirect()->route('order.index');
     }
 
-    // Trang thanh toán — lấy cart items từ DB theo IDs đã lưu trong session
+    // =========================================================================
+    // INDEX — Trang thanh toán
+    // =========================================================================
+
     public function index()
     {
+        // Lấy IDs đã chọn từ session
         $cartIds = session('checkout_cart_ids', []);
 
         if (empty($cartIds)) {
             return redirect()->route('carts.index')->with('error', 'Vui lòng chọn sản phẩm trước khi thanh toán!');
         }
 
+        // Query cart items của user hiện tại, kèm festivals để tính giá giảm
         $carts = Cart::whereIn('id', $cartIds)
             ->where('idUser', Auth::id())
             ->with('product.festivals')
             ->get();
 
+        // Chuẩn bị dữ liệu hiển thị — giá đã áp discount festival nếu có
         $orderItems = $carts->map(function ($cart) {
             $product = $cart->product;
             return [
@@ -52,34 +84,38 @@ class OrderController extends Controller
                 'title'    => $product->title,
                 'image'    => $product->image,
                 'volume'   => $product->volume,
-                'price'    => $product->getDiscountedPrice(),
+                'price'    => $product->getDiscountedPrice(), // giá sau giảm
                 'quantity' => $cart->quantity,
             ];
         });
 
         $total = $orderItems->sum(fn($item) => $item['price'] * $item['quantity']);
 
+        // Lịch sử đơn hàng cũ để hiển thị bên cạnh
         $orders = Order::where('idUser', Auth::id())->orderBy('id', 'desc')->get();
 
         return view('order.index', compact('orders', 'orderItems', 'total'));
     }
 
+    // =========================================================================
+    // PLACE ORDER — Tạo đơn hàng
+    // =========================================================================
+
     public function placeOrder(Request $request)
     {
-        // [VALIDATION] Ràng buộc dữ liệu đầu vào form checkout
         $request->validate([
-            'fullname'       => 'required|string|max:255',                    // Tên người nhận, tối đa 255 ký tự
-            'phone'          => 'required|string|max:20|regex:/^[0-9]{9,11}$/', // Số điện thoại 9-11 số
-            'address'        => 'required|string|max:500',                    // Địa chỉ giao hàng
-            'payment_method' => 'required|in:COD,BANK TRANSFER',             // Chỉ chấp nhận 2 hình thức
-            'note'           => 'nullable|string|max:1000',                   // Ghi chú tùy chọn
+            'fullname'       => 'required|string|max:255',
+            'phone'          => 'required|string|max:20|regex:/^[0-9]{9,11}$/',
+            'address'        => 'required|string|max:500',
+            'payment_method' => 'required|in:COD,BANK TRANSFER',
+            'note'           => 'nullable|string|max:1000',
         ], [
-            'fullname.required'          => 'Vui lòng nhập họ tên người nhận.',
-            'phone.required'             => 'Vui lòng nhập số điện thoại.',
-            'phone.regex'                => 'Số điện thoại phải từ 9-11 chữ số.',
-            'address.required'           => 'Vui lòng nhập địa chỉ giao hàng.',
-            'payment_method.required'    => 'Vui lòng chọn phương thức thanh toán.',
-            'payment_method.in'          => 'Phương thức thanh toán không hợp lệ.',
+            'fullname.required'       => 'Vui lòng nhập họ tên người nhận.',
+            'phone.required'          => 'Vui lòng nhập số điện thoại.',
+            'phone.regex'             => 'Số điện thoại phải từ 9-11 chữ số.',
+            'address.required'        => 'Vui lòng nhập địa chỉ giao hàng.',
+            'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
+            'payment_method.in'       => 'Phương thức thanh toán không hợp lệ.',
         ]);
 
         $cartIds = session('checkout_cart_ids', []);
@@ -101,7 +137,6 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
-            // Tất cả đơn hàng đều vào trạng thái chờ xuất kho, bất kể COD hay Bank Transfer
             $order = Order::create([
                 'idUser'         => Auth::id(),
                 'fullname'       => $request->fullname,
@@ -109,9 +144,10 @@ class OrderController extends Controller
                 'address'        => $request->address,
                 'payment_method' => $request->payment_method,
                 'total_price'    => $total,
-                // Bank Transfer = 0 (chờ PayOS xác nhận), COD = 1 (đang lấy hàng)
+                // Bank Transfer → status=0 (chờ PayOS), COD → status=1 (đã đặt)
                 'status'         => $request->payment_method === 'BANK TRANSFER' ? 0 : 1,
                 'note'           => $request->note,
+                // Mã QR duy nhất để khách xác nhận nhận hàng bằng cách quét
                 'tracking_code'  => 'TRACK-' . strtoupper(Str::random(10)),
             ]);
 
@@ -121,43 +157,46 @@ class OrderController extends Controller
                     'idProduct' => $cart->product->id,
                     'name'      => $cart->product->title,
                     'quantity'  => $cart->quantity,
-                    'price'     => $cart->product->getDiscountedPrice(),
+                    'price'     => $cart->product->getDiscountedPrice(), // snapshot giá lúc mua
                 ]);
-                // Tồn kho sẽ bị trừ khi admin bấm Xuất kho, không trừ tại đây
+                // Tồn kho KHÔNG trừ ở đây — trừ khi admin xuất kho
             }
 
-            // Xóa các cart items đã đặt
+            // Xóa cart items đã được đặt hàng
             Cart::whereIn('id', $cartIds)->delete();
-
-            // Xóa session checkout
             session()->forget('checkout_cart_ids');
 
             DB::commit();
 
             if ($request->payment_method === 'BANK TRANSFER') {
-                // Thử gọi PayOS nếu đã config key
+                // Thử tạo link PayOS nếu đã cấu hình
                 if (env('PAYOS_CLIENT_ID') && env('PAYOS_API_KEY') && env('PAYOS_CHECKSUM_KEY')) {
                     $checkoutUrl = $this->createPayOSLink($order);
                     if ($checkoutUrl) {
                         return redirect($checkoutUrl);
                     }
                 }
-                // Fallback: dùng trang QR VietQR nếu chưa config PayOS
+                // Fallback: trang QR VietQR nếu chưa cấu hình PayOS
                 return redirect()->route('order.payment', ['id' => $order->id]);
             }
 
             return redirect()->route('welcome')
                 ->with('success', 'Đặt hàng thành công! Đơn hàng sẽ được giao trong 3-5 ngày.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             \Illuminate\Support\Facades\Log::error('placeOrder exception: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
-    // Trang hiển thị mã VietQR động theo đơn hàng
+
+    // =========================================================================
+    // PAYMENT FORM — Trang hiển thị mã QR VietQR (fallback)
+    // =========================================================================
+
     public function paymentForm($id)
     {
-        // 1. Tìm đơn hàng hoặc báo lỗi 404 nếu cố tình gõ bậy ID trên URL
+        // Chỉ cho user đặt đơn đó xem — bảo mật bằng where idUser
         $order = Order::where('id', $id)->where('idUser', Auth::id())->firstOrFail();
 
         $BANK_ID      = 'TPBANK';
@@ -166,44 +205,60 @@ class OrderController extends Controller
         $amount       = $order->total_price;
         $addInfo      = "DH{$order->id} Thanh toan nuoc hoa";
 
-        // VietQR API — QR chuyển khoản ngân hàng
+        // Tạo URL QR từ VietQR API
         $qrCodeUrl = "https://img.vietqr.io/image/{$BANK_ID}-{$ACCOUNT_NO}-qr_only.png"
             . "?amount={$amount}"
             . "&addInfo=" . urlencode($addInfo)
             . "&accountName=" . urlencode($ACCOUNT_NAME)
-            . "&t=" . time(); // cache-bust
+            . "&t=" . time(); // thêm timestamp để tránh cache trình duyệt
 
         return view('order.order_payment', compact('order', 'qrCodeUrl', 'amount', 'addInfo', 'BANK_ID', 'ACCOUNT_NO'));
     }
+
+    // =========================================================================
+    // HISTORY — Lịch sử đơn hàng của khách
+    // =========================================================================
+
     public function history()
     {
+        // Ẩn đơn status=0 (chưa thanh toán PayOS) khỏi lịch sử
         $orders = Order::where('idUser', Auth::id())
-            ->where('status', '!=', 0) // Ẩn đơn chờ thanh toán PayOS
+            ->where('status', '!=', 0)
             ->orderBy('id', 'desc')
             ->get();
+
         return view('order.history', compact('orders'));
     }
+
     public function historyDetail($id)
     {
-        $order = Order::where('id', $id)->where('idUser', Auth::id())->firstOrFail();
+        // Bảo mật: chỉ cho xem đơn của chính mình
+        $order        = Order::where('id', $id)->where('idUser', Auth::id())->firstOrFail();
         $orderDetails = OrderDetail::where('idOrder', $id)->with('product')->get();
+
         return view('order.history_detail', compact('order', 'orderDetails'));
     }
 
-    // Khách xác nhận đã chuyển khoản → redirect về trang chủ, admin sẽ kiểm tra và xuất kho
+    // =========================================================================
+    // CONFIRM PAID — Khách xác nhận đã chuyển khoản (manual)
+    // =========================================================================
+
     public function confirmPaid($id)
     {
-        $order = Order::where('id', $id)
-            ->where('idUser', Auth::id())
-            ->firstOrFail();
+        // Chỉ redirect về trang chủ — admin sẽ kiểm tra bank statement và xuất kho
+        $order = Order::where('id', $id)->where('idUser', Auth::id())->firstOrFail();
 
         return redirect()->route('welcome')
             ->with('success', "Cảm ơn bạn! Đơn hàng #{$id} đang chờ xác nhận từ shop.");
     }
 
-    // Khách hủy đơn → xóa đơn, hoàn sản phẩm vào giỏ hàng
+    // =========================================================================
+    // CANCEL ORDER — Khách hủy đơn (chỉ hủy được khi status=1)
+    // =========================================================================
+
     public function cancelOrder($id)
     {
+        // Chỉ cho hủy đơn status=1 (chưa xuất kho)
         $order = Order::where('id', $id)
             ->where('idUser', Auth::id())
             ->where('status', 1)
@@ -213,14 +268,15 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             foreach ($order->detatil as $detail) {
-                // Không cộng lại tồn kho — tồn kho chỉ bị trừ khi xuất kho
+                // Hoàn sản phẩm về giỏ hàng để khách đặt lại
+                // KHÔNG cộng lại tồn kho vì chưa trừ (trừ khi xuất kho)
                 Cart::create([
                     'idUser'     => Auth::id(),
                     'product_id' => $detail->idProduct,
                     'quantity'   => $detail->quantity,
                 ]);
             }
-            $order->delete();
+            $order->delete(); // xóa đơn hoàn toàn
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -230,20 +286,30 @@ class OrderController extends Controller
             ->with('status', 'Đã hủy đơn hàng. Sản phẩm đã được hoàn lại vào giỏ hàng.');
     }
 
-    // Trang xác nhận nhận hàng — khách quét QR trên thùng hàng
+    // =========================================================================
+    // CONFIRM DELIVERY — Khách xác nhận nhận hàng qua QR
+    // =========================================================================
+
+    /**
+     * Trang hiển thị khi khách quét QR trên thùng hàng.
+     * Không yêu cầu đăng nhập (public route).
+     */
     public function confirmDelivery($code)
     {
         $order = Order::where('tracking_code', $code)
             ->with('detatil.product')
             ->firstOrFail();
+
         return view('order.confirm-delivery', compact('order'));
     }
 
-    // Khách bấm xác nhận → status = 4 (Hoàn tất)
+    /**
+     * Khách bấm xác nhận → đơn chuyển sang status=4 (Hoàn tất).
+     */
     public function submitConfirmDelivery($code)
     {
         $order = Order::where('tracking_code', $code)
-            ->where('status', 3)
+            ->where('status', 3) // chỉ xác nhận khi đang giao
             ->with('detatil.product')
             ->firstOrFail();
 
@@ -251,8 +317,47 @@ class OrderController extends Controller
 
         return view('order.confirm-delivery', compact('order'));
     }
+
+    // =========================================================================
+    // CUSTOMER RETURN — Khách yêu cầu hoàn hàng
+    // =========================================================================
+
+    public function customerReturn(Request $request, $id)
+    {
+        $request->validate([
+            'reason' => 'required|string|min:5|max:1000',
+        ], [
+            'reason.required' => 'Vui lòng nhập lý do hoàn hàng.',
+            'reason.min'      => 'Lý do hoàn hàng phải có ít nhất 5 ký tự.',
+        ]);
+
+        $order = Order::findOrFail($id);
+
+        // Chỉ cho hoàn khi đơn đã giao thành công (status=4)
+        if ($order->status == 4) {
+            $order->status = 5; // Chuyển sang "Yêu cầu hoàn hàng"
+
+            // Nối thêm lý do vào ghi chú, giữ nguyên ghi chú cũ của khách
+            $oldNote    = $order->note ? $order->note . " | " : "";
+            $order->note = $oldNote . "Lý do hoàn: " . trim($request->input('reason'));
+            $order->save();
+
+            return redirect()->back()->with('success', 'Yêu cầu hoàn trả đơn hàng #DH' . $id . ' đã được gửi thành công!');
+        }
+
+        return redirect()->back()->with('error', 'Đơn hàng không hợp lệ hoặc không đủ điều kiện hoàn trả.');
+    }
+
+    // =========================================================================
+    // PAYOS — Tích hợp thanh toán PayOS
+    // =========================================================================
+
     /**
-     * TỰ ĐỘNG 1: GỌI API PAYOS TẠO LINK QUET MÃ QR THANH TOÁN THẬT
+     * Tạo link thanh toán PayOS.
+     * Gọi API PayOS merchant, nhận về checkoutUrl để redirect khách sang trang QR PayOS.
+     *
+     * Signature: HMAC-SHA256 của chuỗi "amount=...&cancelUrl=...&description=...&orderCode=...&returnUrl=..."
+     * (sắp xếp theo alphabet, đây là yêu cầu của PayOS)
      */
     private function createPayOSLink($order)
     {
@@ -262,13 +367,13 @@ class OrderController extends Controller
 
         $orderCode   = intval($order->id);
         $amount      = intval($order->total_price);
-        $description = 'AROMA DH' . $order->id;
+        $description = 'AROMA DH' . $order->id; // max 25 ký tự theo PayOS
         $returnUrl   = route('payos.success');
         $cancelUrl   = route('order.payos-cancel', ['id' => $order->id]);
 
-        // PayOS signature: các field theo đúng thứ tự alphabet
+        // Chuỗi ký theo đúng thứ tự alphabet của PayOS
         $signatureString = "amount={$amount}&cancelUrl={$cancelUrl}&description={$description}&orderCode={$orderCode}&returnUrl={$returnUrl}";
-        $signature = hash_hmac('sha256', $signatureString, $checksumKey);
+        $signature       = hash_hmac('sha256', $signatureString, $checksumKey);
 
         $payload = [
             'orderCode'   => $orderCode,
@@ -279,13 +384,6 @@ class OrderController extends Controller
             'signature'   => $signature,
         ];
 
-        \Illuminate\Support\Facades\Log::info('PayOS request', [
-            'orderCode'   => $orderCode,
-            'amount'      => $amount,
-            'description' => $description,
-            'clientId'    => substr($clientId, 0, 8) . '...',
-        ]);
-
         $response = Http::withoutVerifying()->withHeaders([
             'x-client-id'  => $clientId,
             'x-api-key'    => $apiKey,
@@ -294,25 +392,23 @@ class OrderController extends Controller
 
         if ($response->successful()) {
             $result = $response->json();
-            \Illuminate\Support\Facades\Log::info('PayOS response', $result);
+            // code='00' là thành công theo PayOS
             if (isset($result['code']) && $result['code'] === '00') {
                 return $result['data']['checkoutUrl'];
             }
-            \Illuminate\Support\Facades\Log::error('PayOS error: ' . json_encode($result));
-        } else {
-            \Illuminate\Support\Facades\Log::error('PayOS HTTP error: ' . $response->status() . ' - ' . $response->body());
         }
 
-        return null;
+        return null; // thất bại → fallback về VietQR
     }
 
     /**
-     * PayOS hủy thanh toán → xóa đơn, hoàn cart, cộng lại tồn kho
+     * PayOS hủy thanh toán → xóa đơn, hoàn sản phẩm về giỏ.
+     * Không cộng lại tồn kho vì chưa xuất kho.
      */
     public function payosCancel($id)
     {
         $order = Order::where('id', $id)
-            ->where('status', 0)
+            ->where('status', 0) // chỉ hủy đơn chưa thanh toán
             ->with('detatil')
             ->first();
 
@@ -320,7 +416,6 @@ class OrderController extends Controller
             DB::beginTransaction();
             try {
                 foreach ($order->detatil as $detail) {
-                    // Không cộng lại tồn kho — tồn kho chỉ bị trừ khi xuất kho
                     Cart::create([
                         'idUser'     => $order->idUser,
                         'product_id' => $detail->idProduct,
@@ -341,20 +436,25 @@ class OrderController extends Controller
     }
 
     /**
-     * WEBHOOK: PayOS xác nhận thanh toán xong → status 0 → 1
+     * Webhook từ PayOS sau khi khách thanh toán xong.
+     * PayOS gọi POST về server → cập nhật status 0→1.
+     * Route public, không cần auth.
      */
     public function payosWebhook(Request $request)
     {
         $body = $request->all();
 
+        // code='00' = thanh toán thành công
         if (isset($body['code']) && $body['code'] == '00' && isset($body['data'])) {
             $description = $body['data']['description'];
+
+            // Lấy ID đơn hàng từ description (VD: "AROMA DH85")
             preg_match('/DH(\d+)/', $description, $matches);
+
             if (isset($matches[1])) {
                 $order = Order::find($matches[1]);
                 if ($order && $order->status == 0) {
-                    $order->update(['status' => 1]);
-                    \Illuminate\Support\Facades\Log::info("PayOS webhook: order #{$order->id} → status 1");
+                    $order->update(['status' => 1]); // xác nhận đã thanh toán
                 }
             }
         }
@@ -363,40 +463,10 @@ class OrderController extends Controller
     }
 
     /**
-     * Trang thông báo thanh toán thành công
+     * Trang thông báo sau khi PayOS thanh toán thành công.
      */
     public function payosSuccess()
     {
         return view('order.payos_success_page');
-    }
-   
-
-    public function customerReturn(Request $request, $id)
-    {
-        // 1. Validate dữ liệu chặt chẽ hơn (loại bỏ khoảng trống thừa bằng trim)
-        $request->validate([
-            'reason' => 'required|string|min:5|max:1000' // Bắt buộc nhập ít nhất 5 ký tự để tránh bấm nhầm dữ liệu trống
-        ], [
-            'reason.required' => 'Vui lòng nhập lý do hoàn hàng.',
-            'reason.min' => 'Lý do hoàn hàng phải có ít nhất 5 ký tự.'
-        ]);
-
-        // 2. Tìm đơn hàng, nếu không có tự động bắn lỗi 404
-        $order = Order::findOrFail($id);
-
-        // 3. Kiểm tra điều kiện: Chỉ cho phép hoàn khi đơn ở trạng thái "Hoàn tất" (status = 4)
-        if ($order->status == 4) {
-            $order->status = 5; // Chuyển trạng thái sang "Hoàn hàng"
-
-            // MẸO TỐI ƯU: Nên NỐI THÊM vào ghi chú cũ (nếu có) thay vì GHI ĐÈ mất thông tin cũ của đơn
-            $oldNote = $order->note ? $order->note . " | " : "";
-            $order->note = $oldNote . "Lý do hoàn: " . trim($request->input('reason'));
-
-            $order->save();
-
-            return redirect()->back()->with('success', 'Yêu cầu hoàn trả đơn hàng #DH' . $id . ' cùng lý do đã được gửi thành công!');
-        }
-
-        return redirect()->back()->with('error', 'Đơn hàng không hợp lệ hoặc không đủ điều kiện hoàn trả.');
     }
 }

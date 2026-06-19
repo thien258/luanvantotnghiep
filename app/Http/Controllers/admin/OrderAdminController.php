@@ -7,38 +7,58 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Http\Request;
 
+/**
+ * OrderAdminController — Quản lý đơn hàng khách trong trang admin.
+ *
+ * Luồng trạng thái đơn hàng:
+ *   0 → Chờ thanh toán PayOS (không hiện trong danh sách)
+ *   1 → Đã thanh toán / COD đã đặt, chờ xuất kho
+ *   3 → Đã xuất kho (trừ tồn kho), đang giao shipper
+ *   4 → Giao thành công (khách xác nhận qua QR)
+ *   5 → Khách yêu cầu hoàn hàng
+ *   6 → Hàng hỏng / chờ trả nhà sản xuất
+ */
 class OrderAdminController extends Controller
 {
-    // 1. Giao diện danh sách đơn hàng
+    // =========================================================================
+    // INDEX — Danh sách đơn hàng, hỗ trợ tìm kiếm + lọc trạng thái
+    // =========================================================================
+
     public function index(Request $request)
     {
+        // Lấy từ khóa tìm kiếm và filter trạng thái từ query string
         $keyword = $request->input('q', '');
-        $status = $request->input('status', '');
+        $status  = $request->input('status', '');
 
+        // Query cơ bản: bỏ đơn status=0 (chờ PayOS chưa thanh toán)
+        // Sắp xếp: ưu tiên đơn chờ xử lý (1) lên đầu, rồi theo thanh toán
         $query = Order::where('status', '!=', 0)
             ->orderByRaw("FIELD(status, 1, 3, 4, 5, 6) ASC")
             ->orderByRaw("FIELD(payment_method, 'BANK TRANSFER', 'COD') ASC")
             ->orderBy('created_at', 'ASC');
 
+        // Lọc theo trạng thái nếu có chọn
         if ($status != '') {
             $query->where('status', $status);
         }
 
+        // Tìm kiếm theo ID đơn, tên, SĐT, tracking code
         if ($keyword) {
             $query->where(function ($q) use ($keyword) {
+                // Cho phép tìm theo "#DH85", "DH85", "#85", "85"
                 $numericId = preg_replace('/^(dh|#dh|#)/i', '', trim($keyword));
                 if (is_numeric($numericId)) {
                     $q->orWhere('id', $numericId);
                 }
                 $q->orWhere('fullname', 'like', "%{$keyword}%")
-                    ->orWhere('phone', 'like', "%{$keyword}%")
-                    ->orWhere('tracking_code', 'like', "%{$keyword}%");
+                  ->orWhere('phone', 'like', "%{$keyword}%")
+                  ->orWhere('tracking_code', 'like', "%{$keyword}%");
             });
         }
 
         $orders = $query->get();
 
-        // AJAX request → trả về HTML rows + count
+        // AJAX request (từ filter JS) → trả về HTML rows + count để cập nhật bảng không reload trang
         if ($request->ajax() || $request->wantsJson()) {
             $html = view('admin.order.partials.order-rows', compact('orders'))->render();
             return response()->json(['html' => $html, 'count' => $orders->count()]);
@@ -47,19 +67,26 @@ class OrderAdminController extends Controller
         return view('admin.order.order-list', compact('orders', 'keyword', 'status'));
     }
 
-    // 2. Giao diện chi tiết đơn hàng
+    // =========================================================================
+    // SHOW — Chi tiết 1 đơn hàng
+    // =========================================================================
+
     public function show($id)
     {
         $order = Order::findOrFail($id);
+
+        // Lấy các dòng sản phẩm, eager load product để tránh N+1
         $orderdetail = OrderDetail::where('idOrder', $id)->with('product')->get();
 
         return view('admin.order.show', compact('order', 'orderdetail'));
     }
 
-    // 3. Cập nhật trạng thái và xử lý xuất kho biến thể
+    // =========================================================================
+    // UPDATE STATUS — Cập nhật trạng thái + xuất kho khi giao shipper
+    // =========================================================================
+
     public function updateStatus(Request $request, $id)
     {
-        // [VALIDATION] Chỉ chấp nhận status hợp lệ, tránh inject giá trị lạ
         $request->validate([
             'status'      => 'nullable|integer|in:1,3,4,5,6',
             'action_type' => 'nullable|in:export_warehouse',
@@ -69,50 +96,67 @@ class OrderAdminController extends Controller
             'action_type.in' => 'Hành động không được hỗ trợ.',
         ]);
 
-        $order = Order::findOrFail($id);
+        $order      = Order::findOrFail($id);
         $nextStatus = $request->input('status');
         $actionType = $request->input('action_type');
 
-        // HÀNH ĐỘNG: BẤM NÚT XUẤT KHO TỪ TRANG CHI TIẾT
+        // HÀNH ĐỘNG ĐẶC BIỆT: Xuất kho → giao shipper
+        // Chỉ thực hiện khi đơn đang ở status=1 (đã thanh toán, chờ xuất)
         if ($actionType === 'export_warehouse' && $order->status == 1) {
             $orderDetails = OrderDetail::where('idOrder', $id)->with('product')->get();
+
+            // Trừ tồn kho từng sản phẩm trong đơn
             foreach ($orderDetails as $detail) {
                 if ($detail->product) {
                     $detail->product->decrement('quantity', $detail->quantity);
+                    // decrement() tự gọi Model::saving → Product::booted()
+                    // → nếu quantity về 0 thì status SP tự chuyển sang 0 (off)
                 }
             }
+
+            // Chuyển đơn sang status=3 (đang giao)
             $order->status = 3;
             $order->save();
+
             return redirect()->back()->with('success', 'Đã xuất kho và chuyển giao shipper!');
         }
 
+        // Cập nhật trạng thái thông thường
         $order->status = $nextStatus;
         $order->save();
 
         return redirect()->back()->with('success', 'Đã cập nhật trạng thái đơn hàng.');
     }
-    // 4. Trang xử lý hoàn hàng — Hiện khi đơn đang giao (3) hoặc hỗ trợ kiểm tra đơn đã hoàn (5)
+
+    // =========================================================================
+    // RETURN ORDER — Trang xử lý hoàn hàng
+    // =========================================================================
+
+    /**
+     * Hiện form hoàn hàng.
+     * Chỉ cho phép đơn ở status=3 (đang giao) hoặc status=5 (khách yêu cầu hoàn).
+     */
     public function returnOrder($id)
     {
-        // Tìm đơn hàng bằng ID để tránh lỗi lệch tên tham số Route
         $order = Order::findOrFail($id);
 
-        // Kiểm tra điều kiện trạng thái của đơn hàng
         if ($order->status != 3 && $order->status != 5) {
             return redirect()->route('admin.orders.index')
                 ->with('error', 'Đơn hàng không đủ điều kiện xử lý hoàn trả.');
         }
 
-        // Lấy chi tiết đơn hàng chuẩn tên biến $orderdetail
         $orderdetail = OrderDetail::where('idOrder', $id)->with('product')->get();
 
         return view('admin.order.return', compact('order', 'orderdetail'));
     }
 
-    // 5. XỬ LÝ SUBMIT HOÀN HÀNG — tất cả chờ trả nhà sản xuất, không nhập kho
+    /**
+     * Xử lý submit form hoàn hàng.
+     * Tất cả hàng hoàn đều chuyển sang status=6 (hàng hỏng/chờ trả NSX).
+     * Không nhập lại tồn kho — hàng chờ bên kho NSX xử lý.
+     */
     public function processReturn(Request $request, $id)
     {
-       // 1. Tìm đơn hàng dựa vào ID nhận từ Form gửi lên
         $order = Order::findOrFail($id);
 
         $request->validate([
@@ -122,23 +166,25 @@ class OrderAdminController extends Controller
             'condition.in'       => 'Tình trạng hàng không hợp lệ.',
         ]);
 
-        // Tất cả hàng hoàn chuyển sang hàng hỏng (status = 6)
-        $finalStatus = 6;
-
-        // 2. Cập nhật trạng thái, GIỮ NGUYÊN VẸN trường note cũ của khách hàng, không thêm thắt bất cứ gì
+        // Dù hàng nguyên vẹn hay hỏng → đều đẩy vào hàng hỏng (status=6)
+        // để chờ trả về nhà sản xuất, không nhập kho lại
         $order->update([
-            'status' => $finalStatus,
-            'note'   => $order->note // Giữ nguyên lý do gốc của khách hàng
+            'status' => 6,
+            'note'   => $order->note, // giữ nguyên ghi chú gốc của khách
         ]);
 
         return redirect()->route('admin.orders.damaged')
             ->with('success', "Đã ghi nhận và chuyển đơn #{$order->id} sang danh sách hàng hỏng.");
     }
 
-    // 6. Danh sách hàng hỏng (status = 6)
+    // =========================================================================
+    // DAMAGED LIST — Danh sách hàng hỏng (status = 6)
+    // =========================================================================
+
     public function damagedList()
     {
-        $orders = Order::with(['detatil.product'])
+        // Eager load details.product để hiện tên SP trong bảng
+        $orders = Order::with(['details.product'])
             ->where('status', 6)
             ->orderBy('updated_at', 'desc')
             ->get();

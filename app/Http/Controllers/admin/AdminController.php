@@ -5,16 +5,29 @@ namespace App\Http\Controllers\admin;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-
 use App\Models\Product;
 use App\Models\WarehouseStockLog;
 
+/**
+ * AdminController — Trang tổng quan (Dashboard) của admin.
+ *
+ * Hiển thị các số liệu thống kê:
+ *   - 4 thẻ tổng quan: doanh thu, đơn hàng, người dùng, sản phẩm
+ *   - Biểu đồ doanh thu theo tháng (năm hiện tại)
+ *   - Top 5 sản phẩm bán chạy
+ *   - Sản phẩm bán chậm (tỷ lệ bán ≤ 5% so với nhập)
+ *   - Sản phẩm sắp hết kho (tồn < 5)
+ *
+ * Chỉ user có role = 'admin' mới truy cập được (middleware trong constructor).
+ */
 class AdminController extends Controller
 {
     public function __construct()
     {
+        // Yêu cầu đăng nhập
         $this->middleware('auth');
+
+        // Chỉ admin mới vào được — user thường bị chặn 403
         $this->middleware(function ($request, $next) {
             if (Auth::user()->role !== 'admin') {
                 abort(403, 'Bạn không có quyền truy cập trang này.');
@@ -26,32 +39,34 @@ class AdminController extends Controller
     public function index()
     {
         // ── 1. TỔNG QUAN ──────────────────────────────────────────────
+
         // Doanh thu: tổng total_price của các đơn đã giao thành công (status = 4)
         $totalRevenue = DB::table('orders')->where('status', 4)->sum('total_price');
 
-        // Tổng đơn hàng (không tính đơn chờ thanh toán PayOS status=0)
+        // Tổng đơn hàng — bỏ qua đơn chờ thanh toán PayOS (status = 0)
         $totalOrders = DB::table('orders')->where('status', '!=', 0)->count();
 
-        // Tổng người dùng (không tính admin)
+        // Tổng người dùng — không tính tài khoản admin
         $totalUsers = DB::table('users')->where('role', '!=', 'admin')->count();
 
-        // Tổng sản phẩm đang bán
+        // Tổng sản phẩm đang bán (status = 1)
         $totalProducts = Product::where('status', 1)->count();
 
         // ── 2. DOANH THU THEO THÁNG (năm hiện tại) ────────────────────
+
         $year = now()->year;
 
-        // Query doanh thu theo tháng từ đơn hoàn tất (status=4)
+        // Gom doanh thu theo tháng từ các đơn hoàn tất (status = 4)
         $revenueRows = DB::table('orders')
             ->selectRaw('MONTH(updated_at) as month, SUM(total_price) as revenue')
             ->where('status', 4)
             ->whereYear('updated_at', $year)
             ->groupBy(DB::raw('MONTH(updated_at)'))
             ->get()
-            ->keyBy('month'); // key bằng số tháng để tra nhanh
+            ->keyBy('month'); // index bằng số tháng để tra nhanh (1-12)
 
-        // Đảm bảo đủ 12 tháng, tháng chưa có doanh thu = 0
-        // Đơn vị: triệu VNĐ (chia 1.000.000 để biểu đồ gọn)
+        // Đảm bảo đủ 12 phần tử, tháng chưa có doanh thu = 0
+        // Đơn vị: triệu VNĐ (chia 1_000_000) để biểu đồ gọn
         $monthlyRevenue = [];
         for ($m = 1; $m <= 12; $m++) {
             $monthlyRevenue[] = isset($revenueRows[$m])
@@ -59,8 +74,9 @@ class AdminController extends Controller
                 : 0;
         }
 
-        // ── 3. TOP SẢN PHẨM BÁN CHẠY ─────────────────────────────────
-        // Chỉ tính từ đơn đã hoàn tất (status=4) để phản ánh đúng doanh số thực
+        // ── 3. TOP 5 SẢN PHẨM BÁN CHẠY ───────────────────────────────
+
+        // Chỉ tính từ đơn hoàn tất (status = 4) — phản ánh doanh số thực
         $topSelling = DB::table('order_details')
             ->join('orders', 'order_details.idOrder', '=', 'orders.id')
             ->join('products', 'order_details.idProduct', '=', 'products.id')
@@ -77,34 +93,43 @@ class AdminController extends Controller
             ->get();
 
         // ── 4. SẢN PHẨM BÁN CHẬM ─────────────────────────────────────
-        // Bán chậm = tổng đã bán / tổng đã nhập kho <= 5%
+
+        // Định nghĩa "bán chậm": tổng đã bán / tổng đã nhập kho ≤ 5%
         $slowProducts = [];
         $products = Product::where('quantity', '>', 0)->get();
 
         foreach ($products as $product) {
+            // Tổng số đã nhập kho từ warehouse_stock_logs (type = 'import')
             $totalImport = WarehouseStockLog::where('product_id', $product->id)
                 ->where('type', 'import')
                 ->sum('quantity');
 
+            // Tổng số đã bán từ đơn hoàn tất (status = 4)
             $totalSold = DB::table('order_details')
                 ->join('orders', 'order_details.idOrder', '=', 'orders.id')
                 ->where('order_details.idProduct', $product->id)
                 ->where('orders.status', 4)
                 ->sum('order_details.quantity');
 
+            // Tỷ lệ bán = đã bán / đã nhập × 100
+            // Nếu chưa nhập kho → saleRate = 0 (không có log) → vẫn hiện vào bán chậm
             $saleRate = $totalImport > 0 ? ($totalSold / $totalImport) * 100 : 0;
 
             if ($saleRate <= 5) {
-                $product->total_sold = $totalSold;
+                $product->total_sold = $totalSold; // gán thêm để dùng trong view
                 $slowProducts[] = $product;
             }
         }
+
+        // Giới hạn 5 sản phẩm để tránh bảng quá dài
         $slowProducts = \array_slice($slowProducts, 0, 5);
 
-        // ── 5. SẢN PHẨM SẮP HẾT KHO (đồng nhất với product-list: < 5) ─
+        // ── 5. SẢN PHẨM SẮP HẾT KHO ──────────────────────────────────
+
+        // Ngưỡng < 5 — đồng nhất với màu cảnh báo trong product-list.blade.php
         $lowStockProducts = Product::where('quantity', '>', 0)
             ->where('quantity', '<', 5)
-            ->orderBy('quantity', 'asc')
+            ->orderBy('quantity', 'asc') // sắp xếp theo tồn kho tăng dần (nguy hiểm nhất lên đầu)
             ->take(5)
             ->get();
 

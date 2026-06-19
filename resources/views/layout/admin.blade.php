@@ -33,76 +33,138 @@
                 </a>
             </li>
 
-            <li class="nav-item {{ request()->routeIs('admin.category.index') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{route('admin.category.index')}}">
-                    <i class="fa-solid fa-shapes text-dark mr-3"></i>
-                    <span>Category</span>
+            {{-- ── DROPDOWN DANH MỤC & SẢN PHẨM ───────────────────── --}}
+            @php
+                $catalogActive = request()->routeIs('admin.category.*')
+                              || request()->routeIs('admin.brand.*')
+                              || request()->routeIs('admin.concentration.*')
+                              || request()->routeIs('admin.festival.*')
+                              || request()->routeIs('admin.product.*');
+            @endphp
+            <li class="nav-item">
+                <a class="nav-link text-dark d-flex justify-content-between align-items-center"
+                   href="#catalogSubmenu" data-toggle="collapse" role="button"
+                   aria-expanded="{{ $catalogActive ? 'true' : 'false' }}"
+                   aria-controls="catalogSubmenu">
+                    <span>
+                        <i class="fa-solid fa-layer-group text-dark mr-3"></i>
+                        <span>Danh mục &amp; Sản phẩm</span>
+                    </span>
                 </a>
-            </li>
-            <li class="nav-item {{ request()->routeIs('admin.brand.index') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{route('admin.brand.index')}}">
-                    <i class="fa-solid fa-tag text-dark mr-3"></i>
-                    <span>Brand</span>
-                </a>
+                <div class="collapse {{ $catalogActive ? 'show' : '' }}" id="catalogSubmenu">
+                    <ul class="nav flex-column pl-4 pb-1">
+                        <li class="nav-item {{ request()->routeIs('admin.category.*') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.category.index') }}">
+                                <i class="fa-solid fa-shapes text-muted mr-2"></i>Category
+                            </a>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('admin.brand.*') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.brand.index') }}">
+                                <i class="fa-solid fa-tag text-muted mr-2"></i>Brand
+                            </a>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('admin.concentration.*') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.concentration.index') }}">
+                                <i class="fa-solid fa-droplet text-muted mr-2"></i>Concentration
+                            </a>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('admin.festival.*') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.festival.index') }}">
+                                <i class="fa-solid fa-calendar-alt text-muted mr-2"></i>Festival
+                            </a>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('admin.product.index') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.product.index') }}">
+                                <i class="fa-solid fa-bottle-droplet text-muted mr-2"></i>Product
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
 
-            <li class="nav-item {{ request()->routeIs('admin.concentration.index') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{route('admin.concentration.index')}}">
-                    <i class="fa-solid fa-droplet text-dark mr-3"></i>
-                    <span>Concentration</span>
+            {{-- ── DROPDOWN ORDER & KHO ─────────────────────────────── --}}
+            @php
+                $orderKhoActive = request()->routeIs('admin.orders.*')
+                               || request()->routeIs('admin.product.warehouse.index')
+                               || request()->routeIs('admin.warehouse.imports*');
+            @endphp
+            <li class="nav-item">
+                <a class="nav-link text-dark d-flex justify-content-between align-items-center"
+                   href="#orderKhoSubmenu" data-toggle="collapse" role="button"
+                   aria-expanded="{{ $orderKhoActive ? 'true' : 'false' }}"
+                   aria-controls="orderKhoSubmenu">
+                    <span>
+                        <i class="fa-solid fa-boxes-stacked text-dark mr-3"></i>
+                        <span>Order &amp; Kho</span>
+                    </span>
                 </a>
+                <div class="collapse {{ $orderKhoActive ? 'show' : '' }}" id="orderKhoSubmenu">
+                    <ul class="nav flex-column pl-4 pb-1">
+                        <li class="nav-item {{ request()->routeIs('admin.orders.index') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.orders.index') }}">
+                                <i class="fa-solid fa-bag-shopping text-muted mr-2"></i>Order
+                            </a>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('admin.orders.damaged') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.orders.damaged') }}">
+                                <i class="fa-solid fa-triangle-exclamation text-danger mr-2"></i>Hàng Hỏng
+                            </a>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('admin.product.warehouse.index') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.product.warehouse.index') }}">
+                                <i class="fa-solid fa-boxes-packing text-muted mr-2"></i>Kho &amp; Cảnh báo Sale
+                            </a>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('admin.warehouse.imports') || request()->routeIs('admin.warehouse.imports.show') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.warehouse.imports') }}">
+                                <i class="fa-solid fa-file-arrow-up text-muted mr-2"></i>Nhập Kho
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.festival.index') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{route('admin.festival.index')}}">
-                    <i class="fa-solid fa-calendar-alt text-dark mr-3"></i>
-                    <span>Festival</span>
+            {{-- ── DROPDOWN NSX ──────────────────────────────────────── --}}
+            @php
+                $nsxActive = request()->routeIs('admin.manufacturer.*')
+                          || request()->routeIs('admin.supplier-offers.*')
+                          || request()->routeIs('admin.purchase-orders.*');
+            @endphp
+            <li class="nav-item">
+                <a class="nav-link text-dark d-flex justify-content-between align-items-center"
+                   href="#nsxSubmenu" data-toggle="collapse" role="button"
+                   aria-expanded="{{ $nsxActive ? 'true' : 'false' }}"
+                   aria-controls="nsxSubmenu">
+                    <span>
+                        <i class="fa-solid fa-building text-dark mr-3"></i>
+                        <span>Nhà Sản Xuất</span>
+                    </span>
+               
                 </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.product.index') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{route('admin.product.index')}}">
-                    <i class="fa-solid fa-bottle-droplet text-dark mr-3"></i>
-                    <span>Product</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.product.warehouse.index') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{ route('admin.product.warehouse.index') }}">
-                    <i class="fa-solid fa-boxes-packing text-dark mr-3"></i>
-                    <span>Kho & Cảnh báo Sale</span>
-                </a>
-            </li>
-            <li class="nav-item {{ request()->routeIs('admin.manufacturer.index') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{ route('admin.manufacturer.index') }}">
-                    <i class="fa-solid fa-boxes-packing text-dark mr-3"></i>
-                    <span>Quản lý Nhà Sản Xuất</span>
-                </a>
-            </li>
-            <li class="nav-item {{ request()->routeIs('admin.warehouse.imports') || request()->routeIs('admin.warehouse.imports.show') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{ route('admin.warehouse.imports') }}">
-                    <i class="fa-solid fa-file-arrow-up text-dark mr-3"></i>
-                    <span>Nhập Kho</span>
-                </a>
+                <div class="collapse {{ $nsxActive ? 'show' : '' }}" id="nsxSubmenu">
+                    <ul class="nav flex-column pl-4 pb-1">
+                        <li class="nav-item {{ request()->routeIs('admin.manufacturer.*') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.manufacturer.index') }}">
+                                <i class="fa-solid fa-boxes-packing text-muted mr-2"></i>Quản lý NSX
+                            </a>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('admin.supplier-offers.*') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.supplier-offers.index') }}">
+                                <i class="fa-solid fa-file-invoice text-muted mr-2"></i>Báo giá NSX
+                            </a>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('admin.purchase-orders.*') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.purchase-orders.index') }}">
+                                <i class="fa-solid fa-cart-flatbed text-muted mr-2"></i>Đơn đặt hàng
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
 
             <li class="nav-item {{ request()->routeIs('admin.contacts.index') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{ route('admin.contacts.index') }}">
                     <i class="fa-regular fa-circle-question text-dark mr-3"></i>
                     <span>Contact</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.orders.index') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{ route('admin.orders.index') }}">
-                    <i class="fa-solid fa-bag-shopping text-dark mr-3"></i>
-                    <span>Order</span>
-                </a>
-            </li>
-            <li class="nav-item {{ request()->routeIs('admin.orders.damaged') ? 'active font-weight-bold' : '' }}">
-                <a class="nav-link text-dark" href="{{ route('admin.orders.damaged') }}">
-                    <i class="fa-solid fa-triangle-exclamation text-danger mr-3"></i>
-                    <span>Hàng Hỏng</span>
                 </a>
             </li>
             <li class="nav-item {{ request()->routeIs('admin.title.index') ? 'active font-weight-bold' : '' }}">

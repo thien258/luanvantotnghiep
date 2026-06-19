@@ -37,7 +37,11 @@
                             <td>{{ $nsx->address ?? 'Chưa cập nhật' }}</td>
                             <td>
                                 <a href="{{ route('admin.manufacturer.edit', $nsx->id) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Sửa</a>
-                                <a href="{{ route('admin.manufacturer.delete', $nsx->id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa không?')"><i class="fas fa-trash"></i> Xóa</a>
+                                <form action="{{ route('admin.manufacturer.destroy', $nsx->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa không?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Xóa</button>
+                                </form>
                             </td>
                         </tr>
                         @endforeach

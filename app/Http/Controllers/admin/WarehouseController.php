@@ -21,11 +21,23 @@ use Maatwebsite\Excel\Facades\Excel;
 /**
  * WarehouseController — Quản lý kho hàng và nhập kho qua file.
  *
- * Tách ra từ ProductController để giảm kích thước file và tăng tính rõ ràng.
- * Bao gồm:
- *  - Trang tổng quan kho (3 tab: bán chậm, biến động, lịch sử nhập)
- *  - Nhập kho thủ công
- *  - Luồng upload file → duyệt / từ chối
+ * Tách ra từ ProductController để file gọn hơn.
+ *
+ * Gồm 2 luồng chính:
+ *
+ * LUỒNG 1 — Kho tổng quan (3 tab):
+ *   index()  → trang warehouse.blade.php với 3 tab:
+ *     Tab 1: Sản phẩm bán chậm (tỷ lệ bán < 20% so với nhập)
+ *     Tab 2: Lịch sử biến động tồn kho (warehouse_stock_logs)
+ *     Tab 3: Lịch sử phiếu nhập (warehouse_receipts)
+ *   store()  → nhập kho thủ công qua form
+ *
+ * LUỒNG 2 — Upload file → duyệt:
+ *   importList()    → danh sách file đã upload, chờ duyệt
+ *   importUpload()  → nhân viên kho upload file CSV/Excel
+ *   importShow()    → admin xem preview sản phẩm trong file
+ *   importApprove() → admin duyệt → cộng tồn kho + tạo receipt + log
+ *   importReject()  → admin từ chối file
  */
 class WarehouseController extends Controller
 {
@@ -35,11 +47,11 @@ class WarehouseController extends Controller
     }
 
     // =========================================================================
-    // KHO TỔNG QUAN (3 TAB)
+    // LUỒNG 1: KHO TỔNG QUAN
     // =========================================================================
 
     /**
-     * Trang tổng quan kho (admin.product.warehouse.index).
+     * Trang tổng quan kho — load dữ liệu cho 3 tab.
      */
     public function index()
     {
@@ -48,8 +60,8 @@ class WarehouseController extends Controller
     }
 
     /**
-     * Nhập kho thủ công qua form (admin.product.warehouse.store).
-     * Admin nhập tên + số lượng, hệ thống tự tìm hoặc tạo sản phẩm.
+     * Nhập kho thủ công qua form trực tiếp.
+     * Nếu SP đã tồn tại → cộng thêm, nếu chưa → tạo mới SP.
      */
     public function store(Request $request)
     {
@@ -58,7 +70,7 @@ class WarehouseController extends Controller
         $prices       = $request->input('price', []);
         $notes        = $request->input('note', []);
 
-        // Lọc dòng hợp lệ: có tên và số lượng > 0
+        // Lọc chỉ giữ các dòng có tên SP và số lượng > 0
         $validItems = [];
         foreach ($productNames as $index => $name) {
             if (!empty($name) && !empty($quantities[$index]) && (int)$quantities[$index] > 0) {
@@ -75,6 +87,7 @@ class WarehouseController extends Controller
             return redirect()->back()->with('error', 'Không tìm thấy dữ liệu hợp lệ để nhập kho.');
         }
 
+        // Tạo phiếu nhập kho — mã tự sinh theo timestamp
         $receiptCode = 'PN' . Carbon::now()->format('ymdHis');
         $receipt = WarehouseReceipt::create([
             'receipt_code' => $receiptCode,
@@ -88,9 +101,11 @@ class WarehouseController extends Controller
             $product = Product::where('title', $item['product_name'])->first();
 
             if ($product) {
+                // SP đã có → cộng thêm số lượng
                 $product->increment('quantity', $item['quantity']);
                 $reasonText = "Nhập kho bổ sung từ phiếu {$receiptCode}";
             } else {
+                // SP chưa có → tạo mới với thông tin mặc định
                 $product = Product::create([
                     'title'           => $item['product_name'],
                     'image'           => '',
@@ -106,6 +121,7 @@ class WarehouseController extends Controller
                 $reasonText = "Tạo mới sản phẩm từ phiếu {$receiptCode}";
             }
 
+            // Ghi log biến động tồn kho
             WarehouseStockLog::create([
                 'receipt_id'  => $receipt->id,
                 'product_id'  => $product->id,
@@ -122,22 +138,25 @@ class WarehouseController extends Controller
     }
 
     // =========================================================================
-    // LUỒNG FILE: NHÂN VIÊN UPLOAD → ADMIN DUYỆT
+    // LUỒNG 2: UPLOAD FILE → DUYỆT
     // =========================================================================
 
     /**
-     * Danh sách file nhập kho (admin.warehouse.imports).
+     * Danh sách tất cả file đã upload, sắp theo mới nhất.
      */
     public function importList()
     {
         $imports = WarehouseImport::with('uploader')
             ->orderBy('created_at', 'desc')
             ->get();
+
         return view('admin.product.import-list', compact('imports'));
     }
 
     /**
-     * Nhân viên upload file CSV/Excel (admin.warehouse.imports.upload).
+     * Nhân viên kho upload file CSV/Excel.
+     * File được lưu vào storage/app/private/warehouse_imports/
+     * Tạo bản ghi WarehouseImport với status='pending' chờ admin duyệt.
      */
     public function importUpload(Request $request)
     {
@@ -150,12 +169,10 @@ class WarehouseController extends Controller
             'excel_file.file'     => 'File không hợp lệ.',
             'excel_file.mimes'    => 'File phải có định dạng CSV, XLSX hoặc XLS.',
             'excel_file.max'      => 'File không được vượt quá 5MB.',
-            'supplier.max'        => 'Tên nhà cung cấp không được vượt quá 255 ký tự.',
-            'note.max'            => 'Ghi chú không được vượt quá 1000 ký tự.',
         ]);
 
         $file = $request->file('excel_file');
-        $path = $file->store('warehouse_imports', 'local');
+        $path = $file->store('warehouse_imports', 'local'); // lưu private
 
         WarehouseImport::create([
             'file_path'     => $path,
@@ -163,7 +180,7 @@ class WarehouseController extends Controller
             'supplier'      => $request->input('supplier'),
             'note'          => $request->input('note'),
             'uploaded_by'   => Auth::id(),
-            'status'        => 'pending',
+            'status'        => 'pending', // chờ admin xem
         ]);
 
         return redirect()->route('admin.warehouse.imports')
@@ -171,7 +188,9 @@ class WarehouseController extends Controller
     }
 
     /**
-     * Admin xem chi tiết file + preview sản phẩm (admin.warehouse.imports.show).
+     * Admin xem chi tiết file — đọc file và hiện preview bảng sản phẩm.
+     * CSV: đọc trực tiếp bằng fgetcsv, auto-detect delimiter (,  hoặc ;)
+     * Excel: dùng RawArrayImport để lấy mảng thô
      */
     public function importShow(WarehouseImport $import)
     {
@@ -182,26 +201,37 @@ class WarehouseController extends Controller
         if (file_exists($filePath)) {
             if ($ext === 'csv') {
                 $fileContent = file_get_contents($filePath);
+
+                // Detect và convert encoding về UTF-8 nếu cần
                 $enc = mb_detect_encoding($fileContent, ['UTF-8', 'GBK', 'ISO-8859-1'], true);
                 if ($enc && $enc !== 'UTF-8') {
                     $fileContent = mb_convert_encoding($fileContent, 'UTF-8', $enc);
                 }
+
                 $stream = fopen('php://memory', 'r+');
                 fwrite($stream, $fileContent);
                 rewind($stream);
+
+                // Thử đọc dòng đầu với dấu phẩy → nếu chỉ có 1 cột → đổi sang dấu chấm phẩy
                 $headerLine = fgetcsv($stream, 1000, ',');
                 $delimiter  = (count($headerLine) <= 1) ? ';' : ',';
-                if ($delimiter === ';') { rewind($stream); fgetcsv($stream, 1000, ';'); }
+                if ($delimiter === ';') {
+                    rewind($stream);
+                    fgetcsv($stream, 1000, ';'); // bỏ qua dòng header
+                }
+
                 while (($data = fgetcsv($stream, 1000, $delimiter)) !== false) {
                     if (!empty($data[0])) $productsPreview[] = $this->mapRow($data);
                 }
                 fclose($stream);
             } else {
+                // Excel: dùng RawArrayImport để lấy mảng 2D thô
                 $importer = new \App\Imports\RawArrayImport();
                 Excel::import($importer, $filePath);
                 $sheet = $importer->data;
+
                 if (!empty($sheet)) {
-                    array_shift($sheet);
+                    array_shift($sheet); // bỏ dòng header
                     foreach ($sheet as $data) {
                         if (!empty($data[0])) $productsPreview[] = $this->mapRow(array_values($data));
                     }
@@ -213,12 +243,16 @@ class WarehouseController extends Controller
     }
 
     /**
-     * Admin duyệt file → nhập kho (admin.warehouse.imports.approve).
+     * Admin duyệt file → nhập kho.
+     * Chỉ nhập các SP được tick chọn.
+     * SP đã có → cộng qty + cập nhật giá/ảnh/mô tả nếu có.
+     * SP chưa có → tạo mới từ thông tin trong file.
      */
     public function importApprove(Request $request, WarehouseImport $import)
     {
         if ($import->status !== 'pending') {
-            return redirect()->route('admin.warehouse.imports')->with('error', 'File này đã được xử lý rồi.');
+            return redirect()->route('admin.warehouse.imports')
+                ->with('error', 'File này đã được xử lý rồi.');
         }
 
         $selected = $request->input('selected_products', []);
@@ -226,9 +260,10 @@ class WarehouseController extends Controller
             return back()->with('error', 'Bạn chưa chọn sản phẩm nào.');
         }
 
+        // Lấy tất cả dữ liệu từ form (indexed theo số thứ tự dòng)
         $titles  = $request->input('product_name', []);
         $qtys    = $request->input('quantity', []);
-        $prices  = $request->input('price', []);
+        $prices  = $request->input('price', []);      // giá bán sau khi áp % markup
         $images  = $request->input('image', []);
         $descs   = $request->input('decription', []);
         $volumes = $request->input('volume', []);
@@ -236,6 +271,7 @@ class WarehouseController extends Controller
         $brands  = $request->input('brand', []);
         $concs   = $request->input('concentration', []);
 
+        // Tạo phiếu nhập kho
         $code    = 'PN' . now()->format('ymdHis');
         $receipt = WarehouseReceipt::create([
             'receipt_code' => $code,
@@ -248,6 +284,7 @@ class WarehouseController extends Controller
         foreach ($selected as $i) {
             $title = $titles[$i] ?? null;
             $qty   = (int)($qtys[$i] ?? 0);
+
             if (!$title || $qty <= 0) continue;
 
             $price = (float)($prices[$i] ?? 0);
@@ -255,16 +292,20 @@ class WarehouseController extends Controller
             $desc  = $descs[$i] ?? '';
 
             $product = Product::where('title', $title)->first();
+
             if ($product) {
+                // SP đã có → cộng tồn kho + cập nhật thông tin nếu admin đã chỉnh
                 $product->increment('quantity', $qty);
                 if ($price > 0) $product->update(['price' => $price]);
                 if ($image)     $product->update(['image' => $image]);
                 if ($desc)      $product->update(['decription' => $desc]);
                 $reason = "Nhập kho từ phiếu {$code}";
             } else {
-                $catId   = Category::where('name', $cats[$i] ?? '')->value('id') ?? Category::value('id') ?? 1;
-                $brandId = Brand::where('name', $brands[$i] ?? '')->value('id') ?? Brand::value('id') ?? 1;
+                // SP chưa có → tìm category/brand/concentration theo tên, fallback về ID đầu tiên
+                $catId   = Category::where('name', $cats[$i] ?? '')->value('id')          ?? Category::value('id')      ?? 1;
+                $brandId = Brand::where('name', $brands[$i] ?? '')->value('id')           ?? Brand::value('id')         ?? 1;
                 $concId  = Concentration::where('concentration', $concs[$i] ?? '')->value('id') ?? Concentration::value('id') ?? 1;
+
                 $product = Product::create([
                     'title'           => $title,
                     'image'           => $image,
@@ -280,6 +321,7 @@ class WarehouseController extends Controller
                 $reason = "Tạo mới sản phẩm từ phiếu {$code}";
             }
 
+            // Ghi log tồn kho
             WarehouseStockLog::create([
                 'receipt_id'  => $receipt->id,
                 'product_id'  => $product->id,
@@ -291,17 +333,30 @@ class WarehouseController extends Controller
             $count++;
         }
 
-        $import->update(['status' => 'approved', 'reviewed_by' => Auth::id(), 'reviewed_at' => now()]);
-        return redirect()->route('admin.warehouse.imports')->with('success', "Đã duyệt! Cập nhật {$count} sản phẩm.");
+        // Đánh dấu file đã duyệt
+        $import->update([
+            'status'      => 'approved',
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return redirect()->route('admin.warehouse.imports')
+            ->with('success', "Đã duyệt! Cập nhật {$count} sản phẩm.");
     }
 
     /**
-     * Admin từ chối file (admin.warehouse.imports.reject).
+     * Admin từ chối file — không nhập kho, chỉ đổi status.
      */
     public function importReject(WarehouseImport $import)
     {
-        $import->update(['status' => 'rejected', 'reviewed_by' => Auth::id(), 'reviewed_at' => now()]);
-        return redirect()->route('admin.warehouse.imports')->with('success', 'Đã từ chối file nhập kho.');
+        $import->update([
+            'status'      => 'rejected',
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return redirect()->route('admin.warehouse.imports')
+            ->with('success', 'Đã từ chối file nhập kho.');
     }
 
     // =========================================================================
@@ -309,21 +364,33 @@ class WarehouseController extends Controller
     // =========================================================================
 
     /**
-     * Lấy dữ liệu cho 3 tab trang kho.
+     * Lấy dữ liệu cho 3 tab trang kho tổng quan.
+     * Trả về: [receipts, stockLogs, slowProducts]
      */
     private function getWarehouseData(): array
     {
-        $receipt    = WarehouseReceipt::orderBy('created_at', 'desc')->get();
-        $stockLogs  = WarehouseStockLog::with('product')->orderBy('created_at', 'desc')->get();
-        $slowProducts = [];
+        // Tab 3: Tất cả phiếu nhập kho
+        $receipt = WarehouseReceipt::orderBy('created_at', 'desc')->get();
 
+        // Tab 2: Log biến động tồn kho (kèm tên SP)
+        $stockLogs = WarehouseStockLog::with('product')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Tab 1: Sản phẩm bán chậm (tỷ lệ bán / nhập < 20%)
+        $slowProducts = [];
         foreach (Product::where('quantity', '>', 0)->get() as $product) {
-            $totalImport = WarehouseStockLog::where('product_id', $product->id)->where('type', 'import')->sum('quantity');
-            $totalSold   = Schema::hasTable('order_details')
+            $totalImport = WarehouseStockLog::where('product_id', $product->id)
+                ->where('type', 'import')
+                ->sum('quantity');
+
+            $totalSold = Schema::hasTable('order_details')
                 ? DB::table('order_details')->where('idProduct', $product->id)->sum('quantity')
                 : 0;
-            $importBase  = $totalImport > 0 ? $totalImport : $product->quantity;
-            $saleRate    = $importBase > 0 ? ($totalSold / $importBase) * 100 : 0;
+
+            // Nếu chưa có log nhập → dùng quantity hiện tại làm base
+            $importBase = $totalImport > 0 ? $totalImport : $product->quantity;
+            $saleRate   = $importBase > 0 ? ($totalSold / $importBase) * 100 : 0;
 
             if ($saleRate < 20) {
                 $product->total_import = $importBase;
@@ -337,8 +404,18 @@ class WarehouseController extends Controller
     }
 
     /**
-     * Map 1 dòng CSV/Excel thành array preview chuẩn.
-     * Thứ tự: title | image | decription | price | quantity | volume | category | brand | concentration
+     * Ánh xạ 1 dòng CSV/Excel thành array chuẩn để hiển thị preview.
+     *
+     * Format file chuẩn (theo thứ tự cột):
+     *   [0] title         — Tên sản phẩm
+     *   [1] image         — URL ảnh
+     *   [2] decription    — Mô tả (typo giữ nguyên)
+     *   [3] price         — Giá bán
+     *   [4] quantity      — Số lượng nhập
+     *   [5] volume        — Dung tích (VD: 100ml)
+     *   [6] category      — Tên danh mục
+     *   [7] brand         — Tên thương hiệu
+     *   [8] concentration — Nồng độ (VD: EDP)
      */
     private function mapRow(array $d): array
     {

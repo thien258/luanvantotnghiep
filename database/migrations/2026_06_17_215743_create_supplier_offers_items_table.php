@@ -6,22 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('supplier_offers_items', function (Blueprint $table) {
+        Schema::create('supplier_offer_items', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('offer_id')->constrained('supplier_offers')->onDelete('cascade');
+            // product_id nullable: NSX có thể chào sp chưa có trong hệ thống
+            $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('set null');
+            $table->string('product_name');               // NSX tự nhập tên (dự phòng)
+            $table->decimal('unit_price', 15, 2);         // Giá NSX chào — KHÔNG có qty (admin tự quyết)
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('supplier_offers_items');
+        Schema::dropIfExists('supplier_offer_items');
     }
 };

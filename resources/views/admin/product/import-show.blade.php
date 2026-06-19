@@ -33,8 +33,18 @@
                     <span class="fw-bold text-uppercase text-muted small">
                         <i class="fa fa-list me-1"></i>Danh sách sản phẩm trong file — chỉnh sửa rồi duyệt
                     </span>
-                    <div>
-                        <label class="small text-muted me-2">
+                    <div class="d-flex align-items-center gap-3">
+                        {{-- % tăng chung — áp cho tất cả sản phẩm 1 lần --}}
+                        <div class="input-group input-group-sm" style="width:180px;">
+                            <span class="input-group-text rounded-0 text-muted" style="font-size:0.75rem;">% tăng tất cả</span>
+                            <input type="number" id="globalMarkup" value="30" min="0" max="1000" step="1"
+                                   class="form-control form-control-sm rounded-0 text-center">
+                            <span class="input-group-text rounded-0 px-1" style="font-size:0.75rem;">%</span>
+                        </div>
+                        <button type="button" class="btn btn-dark btn-sm rounded-0" id="applyGlobalMarkup">
+                            Áp dụng
+                        </button>
+                        <label class="small text-muted mb-0">
                             <input type="checkbox" id="selectAll" class="me-1">Chọn tất cả
                         </label>
                     </div>
@@ -46,11 +56,14 @@
                                 <th class="text-center" width="4%">✓</th>
                                 <th>Tên sản phẩm</th>
                                 <th width="8%">Ảnh</th>
-                                <th width="10%">SL nhập</th>
-                                <th width="12%">Giá bán</th>
+                                <th width="8%">SL Order</th>
+                                <th width="10%">SL thực tế</th>
+                                <th width="12%">Giá nhập (₫)</th>
+                                <th width="12%">Giá bán (₫)</th>
                                 <th width="8%">Volume</th>
                                 <th width="10%">Category</th>
                                 <th width="10%">Brand</th>
+                                <th width="10%">Nồng độ</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -84,13 +97,23 @@
                                            class="form-control form-control-sm rounded-0 text-center fw-bold">
                                 </td>
                                 <td>
+                                    {{-- Giá nhập từ file — chỉ đọc, dùng để tính giá bán --}}
+                                    <input type="number"
+                                           value="{{ $p['price'] }}" min="0" readonly
+                                           class="form-control form-control-sm rounded-0 text-center text-muted cost-input"
+                                           data-index="{{ $index }}">
+                                </td>
+                                <td>
+                                    {{-- Giá bán = giá nhập × (1 + %/100), tính tự động từ % chung --}}
                                     <input type="number" name="price[{{ $index }}]"
-                                           value="{{ $p['price'] }}" min="0"
-                                           class="form-control form-control-sm rounded-0 text-center">
+                                           value="{{ round($p['price'] * 1.3) }}" min="0"
+                                           class="form-control form-control-sm rounded-0 text-center sell-input"
+                                           data-index="{{ $index }}">
                                 </td>
                                 <td class="text-center text-muted" style="font-size:0.78rem;">{{ $p['volume'] }}</td>
                                 <td class="text-muted" style="font-size:0.78rem;">{{ $p['category'] }}</td>
                                 <td class="text-muted" style="font-size:0.78rem;">{{ $p['brand'] }}</td>
+                                <td class="text-muted" style="font-size:0.78rem;">{{ $p['concentration'] }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -145,6 +168,21 @@
 <script>
 document.getElementById('selectAll')?.addEventListener('change', function() {
     document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = this.checked);
+});
+
+// Tính giá bán = giá nhập × (1 + % / 100)
+function calcSellPrice(index, markup) {
+    const cost   = parseFloat(document.querySelector(`.cost-input[data-index="${index}"]`)?.value) || 0;
+    const sellEl = document.querySelector(`.sell-input[data-index="${index}"]`);
+    if (sellEl) sellEl.value = Math.round(cost * (1 + markup / 100));
+}
+
+// Nút "Áp dụng" — áp % chung cho tất cả dòng 1 lần
+document.getElementById('applyGlobalMarkup')?.addEventListener('click', function() {
+    const globalPct = parseFloat(document.getElementById('globalMarkup')?.value) || 0;
+    document.querySelectorAll('.cost-input').forEach(el => {
+        calcSellPrice(el.dataset.index, globalPct);
+    });
 });
 </script>
 @endsection
