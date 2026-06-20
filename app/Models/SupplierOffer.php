@@ -57,4 +57,9 @@ class SupplierOffer extends Model
     {
         return $this->hasOne(PurchaseOrder::class, 'offer_id', 'id');
     }
+    // Yêu cầu thu mua mà NSX đang trả lời (nullable)
+    public function procurementRequest()
+    {
+        return $this->belongsTo(ProcurementRequest::class, 'request_id', 'id');
+    }
 }

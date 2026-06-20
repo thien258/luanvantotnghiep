@@ -8,8 +8,11 @@ use App\Models\Concentration;
 use App\Models\Brand;
 use App\Models\Festival;
 use App\Models\ManuFacturer;
+use App\Models\ProcurementRequest;
+use App\Models\ProcurementRequestItem;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 
 /**
@@ -211,6 +214,57 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()->route('admin.product.index');
+    }
+
+    // =========================================================================
+    // CREATE ORDER REQUEST — Tạo yêu cầu nhập hàng từ modal trang sản phẩm
+    // =========================================================================
+
+    /**
+     * Nhận danh sách SP tick trong modal → tạo ProcurementRequest công khai
+     * → tất cả NSX đều thấy và có thể chào giá
+     */
+    public function createOrderRequest(Request $request)
+    {
+        $productIds = $request->input('product_ids', []);
+
+        if (empty($productIds)) {
+            return redirect()->back()->with('error', 'Vui lòng chọn ít nhất 1 sản phẩm.');
+        }
+
+        $products = Product::whereIn('id', $productIds)->get();
+
+        if ($products->isEmpty()) {
+            return redirect()->back()->with('error', 'Không tìm thấy sản phẩm.');
+        }
+
+        // Sinh request_code: PRQ-YYYYMMDD-001
+        $count = ProcurementRequest::whereDate('created_at', today())->count() + 1;
+        $code  = 'PRQ-' . now()->format('Ymd') . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+
+        // Tạo yêu cầu thu mua (status = open → NSX có thể thấy và chào giá)
+        $req = ProcurementRequest::create([
+            'request_code' => $code,
+            'status'       => 'open',
+            'note'         => $request->input('note'),
+            'deadline'     => $request->input('deadline') ?? now()->addDays(7)->toDateString(),
+            'created_by'   => Auth::id(),
+        ]);
+
+        $qtySuggest = $request->input('qty_suggest', []);
+
+        foreach ($products as $product) {
+            ProcurementRequestItem::create([
+                'request_id'   => $req->id,
+                'product_id'   => $product->id,
+                'product_name' => $product->title,
+                'qty_needed'   => (int)($qtySuggest[$product->id] ?? 10),
+                'note'         => 'Tồn kho hiện tại: ' . $product->quantity,
+            ]);
+        }
+
+        return redirect()->route('admin.procurement.show', $req->id)
+            ->with('success', 'Đã đăng yêu cầu nhập hàng ' . $code . '. NSX có thể xem và chào giá.');
     }
 
     // =========================================================================

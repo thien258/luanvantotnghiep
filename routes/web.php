@@ -17,11 +17,13 @@ use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\ManufacturerController;
 use App\Http\Controllers\admin\SupplierOfferController;   // Báo giá NSX
 use App\Http\Controllers\admin\PurchaseOrderController;   // Đơn đặt hàng NSX
+use App\Http\Controllers\admin\ProcurementController;     // Yêu cầu thu mua công khai
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductShowController;
+use App\Http\Controllers\ProcurementPublicController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -64,6 +66,11 @@ Route::get('/festival_product/{festival}', [HomeController::class, 'festival_pro
 
 // Trang đăng ký (view riêng, không dùng auth scaffolding mặc định)
 Route::get('/register', fn() => view('register'))->name('register');
+
+// ── Trang NSX xem yêu cầu nhập hàng và chào giá (public) ────────────
+Route::get('/procurement',             [ProcurementPublicController::class, 'index'])->name('procurement.index');
+Route::get('/procurement/{id}',        [ProcurementPublicController::class, 'show'])->name('procurement.show');
+Route::post('/procurement/{id}/offer', [ProcurementPublicController::class, 'submitOffer'])->name('procurement.offer');
 
 // Đăng nhập / đăng ký / xác minh email (tự generate bởi Auth::routes)
 Auth::routes(['verify' => true]);
@@ -185,6 +192,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('supplier-offers/{id}/reject',  [SupplierOfferController::class, 'reject'])->name('supplier-offers.reject');
 
     // Đơn đặt hàng: tạo từ báo giá → theo dõi trạng thái → xuất file
+    // ── Yêu cầu thu mua công khai (Admin đăng → NSX xem + chào giá) ──
+    Route::resource('procurement', ProcurementController::class)->only(['index', 'store', 'show']);
+    Route::post('procurement/{id}/close',        [ProcurementController::class, 'close'])->name('procurement.close');
+    Route::post('procurement/{id}/upload-offer', [ProcurementController::class, 'uploadOffer'])->name('procurement.upload-offer');
     Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'store', 'show']);
     Route::post('purchase-orders/{id}/status',   [PurchaseOrderController::class, 'updateStatus'])->name('purchase-orders.status');
     Route::post('purchase-orders/{id}/receive',  [PurchaseOrderController::class, 'receive'])->name('purchase-orders.receive');

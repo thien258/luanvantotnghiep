@@ -157,6 +157,11 @@
                                 <i class="fa-solid fa-cart-flatbed text-muted mr-2"></i>Đơn đặt hàng
                             </a>
                         </li>
+                        <li class="nav-item {{ request()->routeIs('admin.procurement.*') ? 'active font-weight-bold' : '' }}">
+                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.procurement.index') }}">
+                                <i class="fa-solid fa-bullhorn text-muted mr-2"></i>Yêu cầu nhập hàng
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </li>

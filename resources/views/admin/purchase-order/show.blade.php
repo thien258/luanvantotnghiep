@@ -150,12 +150,12 @@
     @endif
 
     @if($purchaseOrder->status === 'delivering')
-        {{-- Đang giao → Xuất CSV để nhập qua trang nhập kho --}}
+        {{-- Đang giao → chỉ xác nhận nhận hàng, CSV xuất riêng ở trên --}}
         <form action="{{ route('admin.purchase-orders.receive', $purchaseOrder->id) }}" method="POST"
-              onsubmit="return confirm('Xác nhận đã nhận hàng? Hệ thống sẽ tải file CSV để nhập kho.')">
+              onsubmit="return confirm('Xác nhận đã nhận hàng từ NSX?')">
             @csrf
             <button type="submit" class="btn btn-success rounded-0 px-4">
-                <i class="fa-solid fa-file-csv mr-1"></i> Xác nhận nhận hàng &amp; Tải file CSV nhập kho
+                <i class="fa-solid fa-check mr-1"></i> Xác nhận đã nhận hàng
             </button>
         </form>
     @endif

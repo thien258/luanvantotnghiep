@@ -3,10 +3,13 @@
 <div class="card-footer small text-muted">
     <h3>Quản lý Sản phẩm</h3>
 
-    <div class="mb-3 d-flex align-items-center">
+    <div class="mb-3 d-flex align-items-center gap-2">
         <a href="{{ route('admin.product.create') }}" class="btn btn-warning">
             <i class="fas fa-plus"></i> Thêm Sản phẩm
         </a>
+        <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#lowStockModal">
+            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Đăng yêu cầu nhập hàng
+        </button>
     </div>
 
     <div class="position-relative mb-3" style="width: 350px;">
@@ -141,6 +144,120 @@
 </table>
 </div>
 @endsection
+
+{{-- ── MODAL YÊU CẦU NHẬP HÀNG ──────────────────────────────── --}}
+<div class="modal fade" id="lowStockModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content rounded-0">
+            <div class="modal-header border-bottom py-3">
+                <h6 class="modal-title font-weight-bold text-uppercase small" style="letter-spacing:1px;">
+                    <i class="fa-solid fa-triangle-exclamation text-danger mr-2"></i>
+                    SP hết / sắp hết hàng — Đăng yêu cầu để NSX chào giá
+                </h6>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+
+            <form action="{{ route('admin.procurement.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+
+                    {{-- Thông tin yêu cầu --}}
+                    <div class="form-row mb-3">
+                        <div class="form-group col-md-6 mb-2">
+                            <label class="small font-weight-bold">Hạn chót NSX chào giá</label>
+                            <input type="date" name="deadline"
+                                   value="{{ now()->addDays(7)->format('Y-m-d') }}"
+                                   class="form-control form-control-sm rounded-0">
+                        </div>
+                        <div class="form-group col-md-6 mb-2">
+                            <label class="small font-weight-bold">Ghi chú</label>
+                            <input type="text" name="note" class="form-control form-control-sm rounded-0"
+                                   placeholder="Ghi chú thêm về yêu cầu...">
+                        </div>
+                    </div>
+
+                    {{-- Tất cả SP — admin chọn cái nào muốn nhập thêm --}}
+                    @php
+                        $lowStockItems = $products->sortBy('quantity')->values();
+                    @endphp
+
+                    @if($lowStockItems->isEmpty())
+                        <div class="text-center text-muted py-3">Chưa có sản phẩm nào.</div>
+                    @else
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small text-muted">{{ $lowStockItems->count() }} sản phẩm</span>
+                            <label class="small text-muted mb-0">
+                                <input type="checkbox" id="selectAllLow" class="mr-1">Chọn tất cả
+                            </label>
+                        </div>
+                        <table class="table table-sm small table-hover mb-0 border">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="pl-3 py-2" style="width:5%">✓</th>
+                                    <th style="width:7%">Ảnh</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th class="text-center" style="width:12%">Tồn kho</th>
+                                    <th class="text-center" style="width:15%">Cần nhập</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($lowStockItems as $p)
+                                <tr>
+                                    <td class="pl-3 py-2">
+                                        <input type="checkbox" name="product_ids[]"
+                                               value="{{ $p->id }}" class="low-stock-check">
+                                    </td>
+                                    <td class="py-2">
+                                        @if($p->image)
+                                            <img src="{{ $p->image }}" style="width:32px;height:32px;object-fit:cover;" class="border rounded">
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
+                                    <td class="py-2 font-weight-bold">
+                                        {{ $p->title }}
+                                        @if($p->quantity == 0)
+                                            <span class="badge badge-danger rounded-0 ml-1 text-white" style="font-size:0.6rem;">HẾT</span>
+                                        @elseif($p->quantity < 5)
+                                            <span class="badge badge-warning rounded-0 ml-1 text-white" style="font-size:0.6rem;">SẮP HẾT</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center py-2 font-weight-bold
+                                        {{ $p->quantity == 0 ? 'text-danger' : ($p->quantity < 5 ? 'text-warning' : 'text-dark') }}">
+                                        {{ $p->quantity }}
+                                    </td>
+                                    <td class="py-2">
+                                        <input type="number" name="qty_suggest[{{ $p->id }}]"
+                                               value="10" min="1"
+                                               class="form-control form-control-sm rounded-0 text-center">
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @endif
+                </div>
+
+                @if(true)
+                <div class="modal-footer border-top py-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-0" data-dismiss="modal">
+                        Đóng
+                    </button>
+                    <button type="submit" class="btn btn-dark btn-sm rounded-0">
+                        <i class="fa-solid fa-bullhorn mr-1"></i> Đăng yêu cầu cho NSX xem
+                    </button>
+                </div>
+                @endif
+            </form>
+        </div>
+    </div>
+</div>
+
 @section('script')
 <script src="{{ asset('js/admin/adminProduct_search.js') }}"></script>
+<script>
+    document.getElementById('selectAllLow')?.addEventListener('change', function () {
+        document.querySelectorAll('.low-stock-check').forEach(cb => cb.checked = this.checked);
+    });
+</script>
 @endsection
