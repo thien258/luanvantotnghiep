@@ -56,7 +56,7 @@ class OrderAdminController extends Controller
             });
         }
 
-        $orders = $query->get();
+        $orders = $query->paginate(20);
 
         // AJAX request (từ filter JS) → trả về HTML rows + count để cập nhật bảng không reload trang
         if ($request->ajax() || $request->wantsJson()) {

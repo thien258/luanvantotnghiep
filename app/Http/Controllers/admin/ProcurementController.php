@@ -30,7 +30,7 @@ class ProcurementController extends Controller
     {
         $requests = ProcurementRequest::with('items.product')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
 
         return view('admin.procurement.index', compact('requests'));
     }

@@ -17,6 +17,34 @@ use Illuminate\Database\Eloquent\Model;
  *   rejected  — admin từ chối
  *
  * Bảng: supplier_offers
+ *
+ * @property int $id
+ * @property int $manufacturer_id
+ * @property int|null $request_id
+ * @property string $offer_code
+ * @property string|null $note
+ * @property string $status
+ * @property string|null $submitted_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SupplierOfferItem> $items
+ * @property-read int|null $items_count
+ * @property-read \App\Models\ManuFacturer $manufacturer
+ * @property-read \App\Models\ProcurementRequest|null $procurementRequest
+ * @property-read \App\Models\PurchaseOrder|null $purchaseOrder
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer whereManufacturerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer whereNote($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer whereOfferCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer whereRequestId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer whereSubmittedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOffer whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class SupplierOffer extends Model
 {

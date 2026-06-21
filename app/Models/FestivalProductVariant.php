@@ -4,6 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property-read \App\Models\Festival|null $festival
+ * @property-read \App\Models\ProductVariant|null $productVariant
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FestivalProductVariant newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FestivalProductVariant newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FestivalProductVariant query()
+ * @mixin \Eloquent
+ */
 class FestivalProductVariant extends Model
 {
     //

@@ -9,6 +9,7 @@ use App\Models\Brand;
 use App\Models\Footer;
 use App\Models\Title;
 use App\Models\Concentration;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * ProductShowController — Trang hiển thị TẤT CẢ sản phẩm (không lọc theo danh mục/thương hiệu).
@@ -86,6 +87,21 @@ class ProductShowController extends Controller
 
         $title   = Title::all();
         $footers = Footer::all();
+
+        // Manual paginate — giữ filter giá discount vì filter chạy trên Collection sau get()
+        // $total phải lưu TRƯỚC forPage() để có tổng đúng sau filter
+        $perPage  = 12;                          // số SP mỗi trang
+        $page     = (int) $request->input('page', 1);
+        $products = $products->values();         // reset index Collection sau filter/sort
+        $total    = $products->count();          // tổng SP sau khi filter (dùng để tính số trang)
+
+        $products = new LengthAwarePaginator(
+            $products->forPage($page, $perPage), // items của trang hiện tại
+            $total,                              // tổng đúng sau filter
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->except('page')]
+        );
 
         return view('show-product', compact(
             'all_concentrations', 'all_brands', 'categories', 'products', 'title', 'footers'

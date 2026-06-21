@@ -250,7 +250,6 @@
             <div id="product-container">
 
                 <div class="row d-flex flex-wrap">
-
                     @forelse($products as $product)
 
                     @php
@@ -397,6 +396,15 @@
 
                 </div>
 
+            </div>
+
+            {{-- Phân trang — chỉ hiện khi có hơn 1 trang --}}
+            <div id="pagination-container">
+                @if($products->hasPages())
+                <div class="d-flex justify-content-center mt-4">
+                    {{ $products->links() }}
+                </div>
+                @endif
             </div>
 
         </div>

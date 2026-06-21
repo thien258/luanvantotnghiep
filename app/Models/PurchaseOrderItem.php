@@ -14,6 +14,29 @@ use Illuminate\Database\Eloquent\Model;
  * product_name luôn có để tránh mất dữ liệu nếu SP bị xóa sau này.
  *
  * Bảng: purchase_order_items
+ *
+ * @property int $id
+ * @property int $purchase_order_id
+ * @property int|null $product_id
+ * @property string $product_name
+ * @property int $quantity
+ * @property numeric $unit_price
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\PurchaseOrder $order
+ * @property-read \App\Models\Product|null $product
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrderItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrderItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrderItem query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrderItem whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrderItem whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrderItem whereProductId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrderItem whereProductName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrderItem wherePurchaseOrderId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrderItem whereQuantity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrderItem whereUnitPrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrderItem whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class PurchaseOrderItem extends Model
 {

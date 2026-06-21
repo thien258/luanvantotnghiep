@@ -24,6 +24,46 @@ use Illuminate\Database\Eloquent\Model;
  *   - Khi quantity về 0 → status tự chuyển sang 0 (off) qua booted()
  *
  * Bảng: products
+ *
+ * @property int $id
+ * @property string $title
+ * @property string $decription
+ * @property string|null $volume
+ * @property int $price
+ * @property int $quantity
+ * @property string $image
+ * @property int $idCategory
+ * @property int|null $idBrand
+ * @property string $status
+ * @property int|null $idConcentration
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Brand|null $brand
+ * @property-read \App\Models\Category $category
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Comment> $comment
+ * @property-read int|null $comment_count
+ * @property-read \App\Models\Concentration|null $concentration
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Festival> $festivals
+ * @property-read int|null $festivals_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ManuFacturer> $manufacturers
+ * @property-read int|null $manufacturers_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereDecription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereIdBrand($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereIdCategory($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereIdConcentration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereImage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereQuantity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereVolume($value)
+ * @mixin \Eloquent
  */
 class Product extends Model
 {

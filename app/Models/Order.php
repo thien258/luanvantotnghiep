@@ -19,6 +19,38 @@ use Illuminate\Database\Eloquent\Model;
  * tracking_code: mã QR để khách xác nhận nhận hàng
  *
  * Bảng: orders
+ *
+ * @property int $id
+ * @property int $idUser
+ * @property string|null $fullname
+ * @property string|null $phone
+ * @property string $address
+ * @property string $payment_method
+ * @property int $total_price
+ * @property int $status
+ * @property string|null $note
+ * @property string|null $tracking_code
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\OrderDetail> $details
+ * @property-read int|null $details_count
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereFullname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereIdUser($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereNote($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order wherePaymentMethod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order wherePhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereTotalPrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereTrackingCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class Order extends Model
 {

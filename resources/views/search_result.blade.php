@@ -207,6 +207,13 @@
                 </div>
             </div>
 
+            {{-- Phân trang — chỉ hiện khi có hơn 1 trang --}}
+            @if($products->hasPages())
+            <div class="d-flex justify-content-center mt-4">
+                {{ $products->links() }}
+            </div>
+            @endif
+
         </div>
 
     </div>

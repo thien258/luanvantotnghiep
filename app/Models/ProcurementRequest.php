@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProcurementRequest extends Model
 {
-    //
     protected $table = 'procurement_requests';
 
     protected $fillable = [

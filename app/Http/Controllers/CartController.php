@@ -7,6 +7,19 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
+/**
+ * CartController — Quản lý giỏ hàng của khách.
+ *
+ * Chức năng:
+ *   - store()   : Thêm SP vào giỏ (hoặc tăng quantity nếu đã có)
+ *   - index()   : Hiển thị giỏ hàng, tính giá sau discount festival
+ *   - update()  : Tăng/giảm số lượng SP (AJAX)
+ *   - destroy() : Xóa SP khỏi giỏ
+ *
+ * Lưu ý:
+ *   - Giá hiển thị = giá sau giảm bởi Festival (qua getDiscountedPrice())
+ *   - Tồn kho KHÔNG trừ khi thêm giỏ — chỉ trừ khi admin xuất kho
+ */
 class CartController extends Controller
 {
     // Thêm sản phẩm vào giỏ hàng

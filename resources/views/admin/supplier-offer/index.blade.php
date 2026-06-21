@@ -117,5 +117,8 @@
         </table>
     </div>
 </div>
+<div class="d-flex justify-content-center mt-3">
+    {{ $offers->links() }}
+</div>
 
 @endsection

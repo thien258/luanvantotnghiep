@@ -44,7 +44,7 @@
                             <div class="text-muted" style="font-size:0.8rem;">{{ $order->phone }}</div>
                         </td>
                         <td>
-                            @foreach($order->detatil as $detail)
+                            @foreach($order->details as $detail)
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 @if($detail->product?->image)
                                     <img src="{{ $detail->product->image }}" style="width:35px;height:35px;object-fit:cover;" class="border">

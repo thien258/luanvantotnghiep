@@ -12,6 +12,28 @@ use Illuminate\Database\Eloquent\Model;
  * name lưu tên SP tại thời điểm mua (dự phòng SP bị xóa sau).
  *
  * Bảng: order_details
+ *
+ * @property int $id
+ * @property int $idProduct
+ * @property int $idOrder
+ * @property int $quantity
+ * @property int $price
+ * @property string $name
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Product $product
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OrderDetail newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OrderDetail newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OrderDetail query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OrderDetail whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OrderDetail whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OrderDetail whereIdOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OrderDetail whereIdProduct($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OrderDetail whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OrderDetail wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OrderDetail whereQuantity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OrderDetail whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class OrderDetail extends Model
 {

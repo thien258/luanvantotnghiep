@@ -42,7 +42,7 @@ class ProductController extends Controller
     public function index()
     {
         // Eager load festivals để hiển thị badge festival trong bảng
-        $products = Product::with('festivals')->get();
+        $products = Product::with('festivals')->paginate(5);
         return view('admin.product.product-list', compact('products'));
     }
 

@@ -154,14 +154,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // AJAX gợi ý sản phẩm (dùng trong form tìm kiếm admin)
     Route::get('/product-suggest', [ProductController::class, 'suggest'])->name('product.suggest');
 
-    // CRUD sản phẩm
-    Route::resource('product', ProductController::class);
-
-    // ── Kho hàng ────────────────────────────────────────────────────
-
-    // Trang tổng quan kho (3 tab: bán chậm, log, phiếu nhập)
-    Route::get('product/warehouse',       [WarehouseController::class, 'index'])->name('product.warehouse.index');
+    // ── Kho hàng — PHẢI đứng TRƯỚC resource product ─────────────────
+    // Nếu để sau resource, /product/warehouse sẽ bị bắt như show('warehouse')
+    Route::get('product/warehouse',        [WarehouseController::class, 'index'])->name('product.warehouse.index');
     Route::post('product/warehouse/store', [WarehouseController::class, 'store'])->name('product.warehouse.store');
+
+    // Tạo yêu cầu nhập hàng từ modal trang sản phẩm
+    Route::post('product/order-request', [ProductController::class, 'createOrderRequest'])->name('product.createOrderRequest');
+
+    // CRUD sản phẩm (đứng SAU các route lẻ để tránh conflict)
+    Route::resource('product', ProductController::class);
 
     // Nhập kho qua file (nhân viên upload → admin duyệt)
     Route::get('warehouse/imports',                     [WarehouseController::class, 'importList'])->name('warehouse.imports');

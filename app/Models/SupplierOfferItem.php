@@ -15,6 +15,29 @@ use Illuminate\Database\Eloquent\Model;
  * product_name luôn có (lưu dự phòng phòng khi product bị xóa).
  *
  * Bảng: supplier_offer_items
+ *
+ * @property int $id
+ * @property int $offer_id
+ * @property int|null $product_id
+ * @property string $product_name
+ * @property numeric $unit_price
+ * @property string|null $note
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\SupplierOffer $offer
+ * @property-read \App\Models\Product|null $product
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOfferItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOfferItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOfferItem query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOfferItem whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOfferItem whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOfferItem whereNote($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOfferItem whereOfferId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOfferItem whereProductId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOfferItem whereProductName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOfferItem whereUnitPrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupplierOfferItem whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class SupplierOfferItem extends Model
 {

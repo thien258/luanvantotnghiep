@@ -34,7 +34,7 @@ class PurchaseOrderController extends Controller
         // Lấy tất cả đơn, kèm tên NSX, sắp theo mới nhất
         $orders = PurchaseOrder::with('manufacturer')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
 
         return view('admin.purchase-order.purchase-order-list', compact('orders'));
     }

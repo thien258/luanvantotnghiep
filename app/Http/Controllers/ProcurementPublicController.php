@@ -7,7 +7,6 @@ use App\Models\ManuFacturer;
 use App\Models\SupplierOffer;
 use App\Models\SupplierOfferItem;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * ProcurementPublicController — Trang cho NSX xem yêu cầu nhập hàng và chào giá.
@@ -24,6 +23,7 @@ class ProcurementPublicController extends Controller
      */
     public function index()
     {
+        /** @var \Illuminate\Database\Eloquent\Collection<int, ProcurementRequest> $requests */
         $requests = ProcurementRequest::with('items.product')
             ->where('status', 'open')
             ->orderBy('created_at', 'desc')
@@ -37,13 +37,14 @@ class ProcurementPublicController extends Controller
      */
     public function show(string $id)
     {
+        /** @var ProcurementRequest $procRequest */
         $procRequest = ProcurementRequest::with([
             'items.product.brand',
             'items.product.category',
             'items.product.concentration',
         ])->where('status', 'open')->findOrFail($id);
 
-        // Danh sách NSX để chọn (tạm thời — sau này lấy từ user đăng nhập)
+        /** @var \Illuminate\Database\Eloquent\Collection<int, ManuFacturer> $manufacturers */
         $manufacturers = ManuFacturer::orderBy('name')->get();
 
         return view('procurement.show', compact('procRequest', 'manufacturers'));
@@ -54,6 +55,7 @@ class ProcurementPublicController extends Controller
      */
     public function submitOffer(Request $request, string $id)
     {
+        /** @var ProcurementRequest $procRequest */
         $procRequest = ProcurementRequest::where('status', 'open')->findOrFail($id);
 
         $request->validate([

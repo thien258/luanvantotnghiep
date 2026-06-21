@@ -10,6 +10,19 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Font;
 
+/**
+ * PurchaseOrderExport — Xuất Đơn Mua Hàng dạng Excel có format đẹp.
+ *
+ * Dùng PhpSpreadsheet để tạo file .xlsx với:
+ *   - Header công ty (AURA & ESSENCE)
+ *   - Thông tin NSX + ngày + số đơn
+ *   - Bảng sản phẩm: quy cách, diễn giải, số lượng, đơn giá, thành tiền
+ *   - Tổng cộng + chuyển số thành chữ
+ *   - Thông tin giao hàng + chữ ký 2 bên
+ *
+ * File này gửi cho NSX làm đơn đặt hàng chính thức.
+ * Khác với CSV (dùng để nhập kho nội bộ).
+ */
 class PurchaseOrderExport
 {
     protected PurchaseOrder $po;

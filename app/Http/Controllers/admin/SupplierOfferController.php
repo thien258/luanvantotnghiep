@@ -33,7 +33,7 @@ class SupplierOfferController extends Controller
         // Lấy tất cả báo giá, kèm tên NSX, sắp theo mới nhất
         $offers = SupplierOffer::with('manufacturer')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
 
         // Danh sách NSX để hiển thị trong dropdown chọn khi upload file
         $manufacturers = ManuFacturer::orderBy('name')->get();

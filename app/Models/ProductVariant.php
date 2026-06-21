@@ -6,6 +6,20 @@ use App\Models\Festival;
 use App\Models\FestivalProductVariant;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Cart> $cart
+ * @property-read int|null $cart_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Festival> $festival
+ * @property-read int|null $festival_count
+ * @property-read mixed $final_price
+ * @property-read \App\Models\Product|null $product
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Festival> $specificFestivals
+ * @property-read int|null $specific_festivals_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductVariant newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductVariant newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductVariant query()
+ * @mixin \Eloquent
+ */
 class ProductVariant extends Model
 {
     protected $table = 'product_variants';

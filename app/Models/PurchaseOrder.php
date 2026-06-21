@@ -23,6 +23,37 @@ use Illuminate\Database\Eloquent\Model;
  * Sau khi received → admin tải file CSV → upload vào trang Nhập Kho → cộng tồn kho.
  *
  * Bảng: purchase_orders
+ *
+ * @property int $id
+ * @property int|null $offer_id
+ * @property int $manufacturer_id
+ * @property string $order_code
+ * @property numeric $total_amount
+ * @property string $status
+ * @property string|null $expected_date
+ * @property string|null $note
+ * @property int $created_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PurchaseOrderItem> $items
+ * @property-read int|null $items_count
+ * @property-read \App\Models\ManuFacturer $manufacturer
+ * @property-read \App\Models\SupplierOffer|null $offer
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder whereExpectedDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder whereManufacturerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder whereNote($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder whereOfferId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder whereOrderCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder whereTotalAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class PurchaseOrder extends Model
 {

@@ -12,6 +12,7 @@ use App\Models\Concentration;
 use App\Models\Festival;
 use App\Models\Product;
 use Illuminate\Support\Facades\View;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * HomeController — Xử lý trang chủ và các trang danh sách sản phẩm frontend.
@@ -117,6 +118,8 @@ class HomeController extends Controller
             $products = $products->sortByDesc('created_at')->values(); // mặc định: mới nhất
         }
 
+        $products = $this->manualPaginate($products->values(), 5, $request);
+
         return view('layout.category_product', compact(
             'all_concentrations', 'all_brands', 'products', 'category', 'title', 'footers'
         ));
@@ -166,6 +169,8 @@ class HomeController extends Controller
         } else {
             $products = $products->sortByDesc('created_at')->values();
         }
+
+        $products = $this->manualPaginate($products->values(), 12, $request);
 
         return view('layout.brand_product', compact(
             'all_concentrations', 'categories', 'products', 'brand', 'title', 'footers'
@@ -252,6 +257,8 @@ class HomeController extends Controller
             $products = $products->sortByDesc('created_at')->values();
         }
 
+        $products = $this->manualPaginate($products->values(), 12, $request);
+
         return view('search_result', compact(
             'products', 'keyword', 'all_brands', 'all_concentrations', 'categories', 'title', 'footers'
         ));
@@ -335,8 +342,36 @@ class HomeController extends Controller
             $products = $products->sortByDesc('created_at')->values();
         }
 
+        $products = $this->manualPaginate($products->values(), 12, $request);
+
         return view('layout.festival_product', compact(
             'festival', 'all_concentrations', 'categories', 'products', 'title', 'footers'
         ));
+    }
+
+    // =========================================================================
+    // HELPER — Manual paginate từ Collection (giữ được filter giá discount)
+    // =========================================================================
+
+    /**
+     * Tạo LengthAwarePaginator từ một Collection đã được filter/sort.
+     * Dùng khi không thể paginate() trực tiếp trên query vì cần filter sau get().
+     */
+    private function manualPaginate($collection, int $perPage, Request $request): LengthAwarePaginator
+    {
+        $page     = (int) $request->input('page', 1);
+        $total    = $collection->count(); // tổng TRƯỚC khi cắt trang
+        $items    = $collection->forPage($page, $perPage); // items của trang hiện tại
+
+        return new LengthAwarePaginator(
+            $items,
+            $total,  // đúng tổng sau filter
+            $perPage,
+            $page,
+            [
+                'path'  => $request->url(),
+                'query' => $request->except('page'),
+            ]
+        );
     }
 }

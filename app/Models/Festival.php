@@ -7,6 +7,32 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property int $discount
+ * @property int $status
+ * @property \Illuminate\Support\Carbon $start_date
+ * @property \Illuminate\Support\Carbon $end_date
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
+ * @property-read int|null $products_count
+ * @method static Builder<static>|Festival active()
+ * @method static \Database\Factories\FestivalFactory factory($count = null, $state = [])
+ * @method static Builder<static>|Festival newModelQuery()
+ * @method static Builder<static>|Festival newQuery()
+ * @method static Builder<static>|Festival query()
+ * @method static Builder<static>|Festival whereCreatedAt($value)
+ * @method static Builder<static>|Festival whereDiscount($value)
+ * @method static Builder<static>|Festival whereEndDate($value)
+ * @method static Builder<static>|Festival whereId($value)
+ * @method static Builder<static>|Festival whereName($value)
+ * @method static Builder<static>|Festival whereStartDate($value)
+ * @method static Builder<static>|Festival whereStatus($value)
+ * @method static Builder<static>|Festival whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Festival extends Model
 {
     //
