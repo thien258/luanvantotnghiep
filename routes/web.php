@@ -23,7 +23,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductShowController;
-use App\Http\Controllers\ProcurementPublicController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -66,11 +65,6 @@ Route::get('/festival_product/{festival}', [HomeController::class, 'festival_pro
 
 // Trang đăng ký (view riêng, không dùng auth scaffolding mặc định)
 Route::get('/register', fn() => view('register'))->name('register');
-
-// ── Trang NSX xem yêu cầu nhập hàng và chào giá (public) ────────────
-Route::get('/procurement',             [ProcurementPublicController::class, 'index'])->name('procurement.index');
-Route::get('/procurement/{id}',        [ProcurementPublicController::class, 'show'])->name('procurement.show');
-Route::post('/procurement/{id}/offer', [ProcurementPublicController::class, 'submitOffer'])->name('procurement.offer');
 
 // Đăng nhập / đăng ký / xác minh email (tự generate bởi Auth::routes)
 Auth::routes(['verify' => true]);

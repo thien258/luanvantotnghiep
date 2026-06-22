@@ -82,6 +82,7 @@
                                     </li>
                                     @endif
 
+									@guest
 									<li class="nav-item submenu dropdown">
 										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Pages</a>
 										<ul class="dropdown-menu">
@@ -89,6 +90,7 @@
 											<li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Register</a></li>
 										</ul>
 									</li>
+									@endguest
 
 									<li class="nav-item"><a class="nav-link" href="{{ route('contact.index') }}">Contact</a></li>
 								</ul>
