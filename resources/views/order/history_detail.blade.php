@@ -19,13 +19,19 @@
                     <div class="text-end">
                         <span class="text-uppercase small border border-dark px-3 py-1.5 fw-semibold">
                             @if($order->status == 0)
-                            Chờ xử lý
+                                Chờ thanh toán
                             @elseif($order->status == 1)
-                            Đang giao
-                            @elseif($order->status == 2)
-                            Hoàn thành
+                                Chờ xử lý
+                            @elseif($order->status == 3)
+                                Đang giao
+                            @elseif($order->status == 4)
+                                Hoàn thành
+                            @elseif($order->status == 5)
+                                Yêu cầu hoàn hàng
+                            @elseif($order->status == 6)
+                                Hàng hỏng
                             @else
-                            Đã hủy
+                                Không xác định
                             @endif
                         </span>
                     </div>

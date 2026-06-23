@@ -191,6 +191,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // ── Yêu cầu thu mua công khai (Admin đăng → NSX xem + chào giá) ──
     Route::resource('procurement', ProcurementController::class)->only(['index', 'store', 'show']);
     Route::post('procurement/{id}/close',        [ProcurementController::class, 'close'])->name('procurement.close');
+    Route::get('procurement/{id}/export-template', [ProcurementController::class, 'exportTemplate'])->name('procurement.export-template');
     Route::post('procurement/{id}/upload-offer', [ProcurementController::class, 'uploadOffer'])->name('procurement.upload-offer');
     Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'store', 'show']);
     Route::post('purchase-orders/{id}/status',   [PurchaseOrderController::class, 'updateStatus'])->name('purchase-orders.status');

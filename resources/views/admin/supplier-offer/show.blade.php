@@ -131,15 +131,6 @@
 
 </form>
 
-{{-- Nút từ chối đặt NGOÀI form đặt hàng --}}
-<form action="{{ route('admin.supplier-offers.reject', $offer->id) }}" method="POST" class="mb-4"
-      onsubmit="return confirm('Xác nhận từ chối báo giá này?')">
-    @csrf
-    <button type="submit" class="btn btn-outline-danger rounded-0 btn-sm">
-        <i class="fa-solid fa-xmark mr-1"></i> Từ chối báo giá
-    </button>
-</form>
-
 @else
 
 {{-- Hiển thị bảng chỉ đọc khi không còn status submitted --}}
@@ -201,15 +192,27 @@
         });
     });
 
-    // Validate trước khi submit
+    // Validate và XÓA các input chưa chọn trước khi submit
     const form = document.getElementById('orderForm');
     if (form) {
         form.addEventListener('submit', function (e) {
-            const checked = document.querySelectorAll('.item-check:checked').length;
-            if (checked === 0) {
+            const checkedBoxes = document.querySelectorAll('.item-check:checked');
+            
+            if (checkedBoxes.length === 0) {
                 e.preventDefault();
                 alert('Vui lòng chọn ít nhất 1 sản phẩm để đặt hàng.');
+                return;
             }
+
+            // XÓA tất cả các input của SP KHÔNG được tick - đổi name để Laravel bỏ qua
+            document.querySelectorAll('.item-check:not(:checked)').forEach(function(cb) {
+                const idx = cb.dataset.index;
+                // Đổi tên tất cả input có name="items[X][...]" của dòng này
+                const inputs = document.querySelectorAll(`input[name^="items[${idx}]"]`);
+                inputs.forEach(inp => {
+                    inp.name = inp.name.replace('items[', 'ignored['); // đổi thành ignored[] để Laravel bỏ qua
+                });
+            });
         });
     }
 </script>

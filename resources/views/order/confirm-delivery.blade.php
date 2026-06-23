@@ -41,7 +41,7 @@
         </div>
 
         <div class="mb-4">
-            @foreach($order->detatil as $detail)
+            @foreach($order->details as $detail)
             <div class="d-flex align-items-center gap-3 py-2 border-bottom border-light text-start">
                 @if($detail->product?->image)
                 <img src="{{ $detail->product->image }}" class="border bg-white" alt="" style="width: 52px; height: 52px; object-fit: cover; flex-shrink: 0;">
@@ -76,7 +76,7 @@
         </div>
 
         <div class="mb-4">
-            @foreach($order->detatil as $detail)
+            @foreach($order->details as $detail)
             <div class="d-flex align-items-center gap-3 py-2 border-bottom border-light text-start">
                 @if($detail->product?->image)
                 <img src="{{ $detail->product->image }}" class="border bg-white" alt="" style="width: 52px; height: 52px; object-fit: cover; flex-shrink: 0;">

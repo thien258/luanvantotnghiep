@@ -64,10 +64,14 @@
 {{-- Form upload file báo giá từ NSX --}}
 @if($procRequest->status === 'open')
 <div class="card shadow-none border rounded-0 mb-4">
-    <div class="card-header bg-white py-2 border-bottom">
+    <div class="card-header bg-white py-2 border-bottom d-flex justify-content-between align-items-center">
         <span class="small font-weight-bold text-uppercase text-muted">
             <i class="fa-solid fa-file-arrow-up mr-1"></i> Upload file báo giá từ NSX
         </span>
+        <a href="{{ route('admin.procurement.export-template', $procRequest->id) }}"
+           class="btn btn-sm btn-outline-primary rounded-0 px-2 py-1" style="font-size:0.75rem;">
+            <i class="fa-solid fa-download mr-1"></i> Tải file mẫu Excel
+        </a>
     </div>
     <div class="card-body">
         <form action="{{ route('admin.procurement.upload-offer', $procRequest->id) }}" method="POST"

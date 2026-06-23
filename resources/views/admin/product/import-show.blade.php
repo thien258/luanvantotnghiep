@@ -1,6 +1,25 @@
 @extends('layout/admin')
 @section('body')
 
+<style>
+    .import-row-approved {
+        background-color: #d1e7dd !important;
+        border-left: 4px solid #198754 !important;
+    }
+    .import-row-skipped {
+        background-color: #f8f9fa;
+        opacity: 0.65;
+    }
+    .import-row-skipped td {
+        text-decoration: line-through;
+        text-decoration-color: rgba(0, 0, 0, 0.25);
+    }
+    .import-row-skipped td:first-child,
+    .import-row-skipped td:nth-child(2) {
+        text-decoration: none;
+    }
+</style>
+
 <div class="container-fluid pt-4 px-4">
     <div class="bg-light rounded p-4">
 
@@ -70,7 +89,7 @@
                             @foreach($productsPreview as $index => $p)
                             <tr>
                                 <td class="text-center">
-                                    <input type="checkbox" name="selected_products[]" value="{{ $index }}" class="product-checkbox" checked>
+                                    <input type="checkbox" name="selected_products[]" value="{{ $index }}" class="product-checkbox">
                                 </td>
                                 <td>
                                     <input type="text" name="product_name[{{ $index }}]"
@@ -83,6 +102,8 @@
                                     <input type="hidden" name="brand[{{ $index }}]" value="{{ $p['brand'] }}">
                                     <input type="hidden" name="concentration[{{ $index }}]" value="{{ $p['concentration'] }}">
                                     <input type="hidden" name="line_note[{{ $index }}]" value="{{ $p['note'] }}">
+                                    <input type="hidden" name="unit_price[{{ $index }}]" value="{{ $p['unit_price'] ?? 0 }}">
+                                    <input type="hidden" name="sl_order[{{ $index }}]" value="{{ $p['sl_order'] ?? 0 }}">
                                 </td>
                                 <td class="text-center">
                                     @if(!empty($p['image']))
@@ -92,22 +113,29 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <input type="number" name="quantity[{{ $index }}]"
-                                           value="{{ $p['quantity'] }}" min="0"
-                                           class="form-control form-control-sm rounded-0 text-center fw-bold">
+                                    {{-- SL Order từ đơn đặt hàng --}}
+                                    <input type="text"
+                                           value="{{ $p['sl_order'] ?? '' }}" readonly
+                                           class="form-control form-control-sm rounded-0 text-center text-muted bg-light">
                                 </td>
                                 <td>
-                                    {{-- Giá nhập từ file — chỉ đọc, dùng để tính giá bán --}}
+                                    {{-- SL thực tế nhập kho - chỉ đọc, không cho sửa --}}
+                                    <input type="number" name="quantity[{{ $index }}]"
+                                           value="{{ $p['quantity'] }}" min="0" readonly
+                                           class="form-control form-control-sm rounded-0 text-center fw-bold bg-light text-muted">
+                                </td>
+                                <td>
+                                    {{-- Giá nhập từ NSX - chỉ đọc --}}
                                     <input type="number"
-                                           value="{{ $p['price'] }}" min="0" readonly
+                                           value="{{ $p['unit_price'] ?? $p['price'] }}" min="0" readonly
                                            class="form-control form-control-sm rounded-0 text-center text-muted cost-input"
                                            data-index="{{ $index }}">
                                 </td>
                                 <td>
-                                    {{-- Giá bán = giá nhập × (1 + %/100), tính tự động từ % chung --}}
+                                    {{-- Giá bán = giá nhập × (1 + %/100) - chỉ đọc, tính từ % markup --}}
                                     <input type="number" name="price[{{ $index }}]"
-                                           value="{{ round($p['price'] * 1.3) }}" min="0"
-                                           class="form-control form-control-sm rounded-0 text-center sell-input"
+                                           value="{{ round(($p['unit_price'] ?? 0) * 1.3) }}" min="0" readonly
+                                           class="form-control form-control-sm rounded-0 text-center bg-light sell-input"
                                            data-index="{{ $index }}">
                                 </td>
                                 <td class="text-center text-muted" style="font-size:0.78rem;">{{ $p['volume'] }}</td>
@@ -120,24 +148,100 @@
                     </table>
                 </div>
                 <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
-                    <span class="text-muted small">{{ count($productsPreview) }} sản phẩm trong file</span>
+                    <span class="text-muted small">
+                        <span id="selectedCount">0</span>/{{ count($productsPreview) }} sản phẩm được chọn
+                    </span>
                     <button type="submit" class="btn btn-success rounded-0 fw-bold px-4"
-                            onclick="return confirm('Xác nhận duyệt và nhập kho?')">
+                            onclick="return confirmApprove()">
                         <i class="fa fa-check me-2"></i>Duyệt & Nhập kho
                     </button>
                 </div>
             </div>
         </form>
 
+        @elseif($import->status === 'approved')
+        @php
+            $importedCount = count($approvedItems);
+            $totalInFile   = count($productsPreview);
+        @endphp
+
+        @if($importedCount === 0)
+            <div class="alert alert-info rounded-0 small mb-3">
+                <i class="fa fa-info-circle me-1"></i>
+                File này duyệt trước khi hệ thống lưu chi tiết — hiển thị toàn bộ {{ $totalInFile }} sản phẩm trong file.
+            </div>
         @else
-        {{-- Đã xử lý rồi, chỉ hiển thị --}}
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div class="text-muted small">
+                    <i class="fa fa-check-circle text-success me-1"></i>
+                    Đã nhập kho <strong class="text-success">{{ $importedCount }}</strong>/{{ $totalInFile }} sản phẩm trong file
+                </div>
+                <label class="small text-muted mb-0">
+                    <input type="checkbox" id="showImportedOnly" class="me-1">
+                    Chỉ hiển thị SP đã nhập
+                </label>
+            </div>
+        @endif
+
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered align-middle" style="font-size:0.85rem;">
+                <thead class="table-dark">
+                    <tr>
+                        <th width="12%">Trạng thái</th>
+                        <th>Tên sản phẩm</th>
+                        <th class="text-center">SL</th>
+                        <th class="text-center">Giá bán</th>
+                        <th>Volume</th>
+                        <th>Category</th>
+                        <th>Brand</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($productsPreview as $index => $p)
+                    @php
+                        $key      = mb_strtolower(trim($p['title']));
+                        $imported = $importedCount > 0 && $approvedByTitle->has($key);
+                        $data     = $imported ? $approvedByTitle->get($key) : $p;
+                    @endphp
+                    <tr class="import-result-row {{ $importedCount === 0 ? '' : ($imported ? 'import-row-approved' : 'import-row-skipped') }}"
+                        data-imported="{{ $imported ? '1' : '0' }}">
+                        <td class="text-center">
+                            @if($importedCount === 0)
+                                <span class="text-muted">—</span>
+                            @elseif($imported)
+                                <span class="badge bg-success rounded-0 px-2 py-1">
+                                    <i class="fa fa-check me-1"></i>Đã nhập
+                                </span>
+                            @else
+                                <span class="badge bg-secondary rounded-0 px-2 py-1">
+                                    <i class="fa fa-minus me-1"></i>Bỏ qua
+                                </span>
+                            @endif
+                        </td>
+                        <td class="fw-bold {{ $imported ? 'text-success' : 'text-muted' }}">{{ $p['title'] }}</td>
+                        <td class="text-center {{ $imported ? 'fw-bold' : 'text-muted' }}">{{ $data['quantity'] ?? 0 }}</td>
+                        <td class="text-center {{ $imported ? 'text-danger fw-bold' : 'text-muted' }}">
+                            {{ number_format($data['price'] ?? $data['unit_price'] ?? 0) }}đ
+                        </td>
+                        <td class="{{ $imported ? '' : 'text-muted' }}">{{ $p['volume'] }}</td>
+                        <td class="{{ $imported ? '' : 'text-muted' }}">{{ $p['category'] }}</td>
+                        <td class="{{ $imported ? '' : 'text-muted' }}">{{ $p['brand'] }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        @else
+        {{-- File bị từ chối --}}
+        <div class="alert alert-danger rounded-0 small mb-3">File này đã bị từ chối, không nhập kho.</div>
         <div class="table-responsive">
             <table class="table table-sm table-bordered align-middle" style="font-size:0.85rem;">
                 <thead class="table-dark">
                     <tr>
                         <th>Tên sản phẩm</th>
                         <th class="text-center">SL</th>
-                        <th class="text-center">Giá bán</th>
+                        <th class="text-center">Giá nhập</th>
                         <th>Volume</th>
                         <th>Category</th>
                         <th>Brand</th>
@@ -148,7 +252,7 @@
                     <tr>
                         <td class="fw-bold">{{ $p['title'] }}</td>
                         <td class="text-center">{{ $p['quantity'] }}</td>
-                        <td class="text-center">{{ number_format($p['price']) }}đ</td>
+                        <td class="text-center">{{ number_format($p['unit_price'] ?? 0) }}đ</td>
                         <td>{{ $p['volume'] }}</td>
                         <td>{{ $p['category'] }}</td>
                         <td>{{ $p['brand'] }}</td>
@@ -168,7 +272,21 @@
 <script>
 document.getElementById('selectAll')?.addEventListener('change', function() {
     document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = this.checked);
+    updateSelectedCount();
 });
+
+function updateSelectedCount() {
+    const total = document.querySelectorAll('.product-checkbox').length;
+    const selected = document.querySelectorAll('.product-checkbox:checked').length;
+    const el = document.getElementById('selectedCount');
+    if (el) el.textContent = selected;
+}
+
+document.querySelectorAll('.product-checkbox').forEach(cb => {
+    cb.addEventListener('change', updateSelectedCount);
+});
+
+updateSelectedCount();
 
 // Tính giá bán = giá nhập × (1 + % / 100)
 function calcSellPrice(index, markup) {
@@ -182,6 +300,25 @@ document.getElementById('applyGlobalMarkup')?.addEventListener('click', function
     const globalPct = parseFloat(document.getElementById('globalMarkup')?.value) || 0;
     document.querySelectorAll('.cost-input').forEach(el => {
         calcSellPrice(el.dataset.index, globalPct);
+    });
+});
+
+function confirmApprove() {
+    const selected = document.querySelectorAll('.product-checkbox:checked').length;
+    if (selected === 0) {
+        alert('Vui lòng chọn ít nhất 1 sản phẩm để duyệt.');
+        return false;
+    }
+    return confirm(`Xác nhận duyệt và nhập kho ${selected} sản phẩm đã chọn?`);
+}
+
+document.getElementById('showImportedOnly')?.addEventListener('change', function() {
+    document.querySelectorAll('.import-result-row').forEach(row => {
+        if (this.checked) {
+            row.style.display = row.dataset.imported === '1' ? '' : 'none';
+        } else {
+            row.style.display = '';
+        }
     });
 });
 </script>

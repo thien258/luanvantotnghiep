@@ -39,11 +39,12 @@ class WarehouseImport extends Model
     protected $table = 'warehouse_imports';
     protected $fillable = [
         'file_path', 'original_name', 'supplier', 'note',
-        'uploaded_by', 'status', 'reviewed_by', 'reviewed_at',
+        'uploaded_by', 'status', 'approved_items', 'reviewed_by', 'reviewed_at',
     ];
 
     protected $casts = [
         'reviewed_at' => 'datetime',
+        'approved_items' => 'array',
     ];
 
     public function uploader()

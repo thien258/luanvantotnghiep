@@ -30,6 +30,9 @@ class ProductImport implements ToModel, WithHeadingRow
     /**
      * Xử lý từng dòng trong file Excel/CSV.
      * Trả về Product mới hoặc null (nếu bỏ qua).
+     * 
+     * Format file chuẩn (dòng đầu là header):
+     *   title | image | decription | unit_price | sl_order | quantity | volume | category | brand | concentration
      */
     public function model(array $row)
     {
@@ -61,13 +64,20 @@ class ProductImport implements ToModel, WithHeadingRow
         // ── SP đã tồn tại → cập nhật, không tạo mới ──────────────────
         $product = Product::where('title', $title)->first();
 
+        // Số lượng thực tế nhập (ưu tiên cột quantity, fallback về sl_order nếu không có)
+        $quantityToAdd = !empty($row['quantity']) ? (int)$row['quantity'] : (int)($row['sl_order'] ?? 0);
+
+        // Giá bán (price) — tính từ unit_price nếu có
+        $unitPrice = !empty($row['unit_price']) ? (float)$row['unit_price'] : 0;
+        $salePrice = !empty($row['price']) ? (float)$row['price'] : ($unitPrice > 0 ? $unitPrice * 1.3 : 0);
+
         if ($product) {
             // Cộng thêm số lượng nhập
-            $product->quantity += (int)($row['quantity'] ?? 0);
+            $product->quantity += $quantityToAdd;
 
-            // Cập nhật giá nếu file có giá hợp lệ
-            if (!empty($row['price']) && $row['price'] > 0) {
-                $product->price = $row['price'];
+            // Cập nhật giá bán nếu có
+            if ($salePrice && $salePrice > 0) {
+                $product->price = $salePrice;
             }
 
             // Cập nhật mô tả nếu file có
@@ -84,8 +94,8 @@ class ProductImport implements ToModel, WithHeadingRow
             'title'           => $title,
             'image'           => $row['image']       ?? '',
             'decription'      => $row['decription']  ?? '',
-            'price'           => $row['price']       ?? 0,
-            'quantity'        => $row['quantity']    ?? 0,
+            'price'           => $salePrice > 0 ? $salePrice : 0,
+            'quantity'        => $quantityToAdd,
             'volume'          => $row['volume']      ?? '100ml',
             'status'          => $row['status']      ?? 1,   // mặc định: đang bán
             'idConcentration' => $concentrationId,

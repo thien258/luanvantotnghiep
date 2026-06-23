@@ -194,52 +194,18 @@ class WarehouseController extends Controller
      */
     public function importShow(WarehouseImport $import)
     {
-        $filePath        = Storage::disk('local')->path($import->file_path);
-        $productsPreview = [];
-        $ext             = strtolower(pathinfo($import->original_name, PATHINFO_EXTENSION));
+        $productsPreview = $this->parseImportFile($import);
+        $approvedItems     = $import->status === 'approved' ? ($import->approved_items ?? []) : [];
+        $approvedByTitle   = collect($approvedItems)->keyBy(
+            fn ($item) => mb_strtolower(trim($item['title'] ?? ''))
+        );
 
-        if (file_exists($filePath)) {
-            if ($ext === 'csv') {
-                $fileContent = file_get_contents($filePath);
-
-                // Detect và convert encoding về UTF-8 nếu cần
-                $enc = mb_detect_encoding($fileContent, ['UTF-8', 'GBK', 'ISO-8859-1'], true);
-                if ($enc && $enc !== 'UTF-8') {
-                    $fileContent = mb_convert_encoding($fileContent, 'UTF-8', $enc);
-                }
-
-                $stream = fopen('php://memory', 'r+');
-                fwrite($stream, $fileContent);
-                rewind($stream);
-
-                // Thử đọc dòng đầu với dấu phẩy → nếu chỉ có 1 cột → đổi sang dấu chấm phẩy
-                $headerLine = fgetcsv($stream, 1000, ',');
-                $delimiter  = (count($headerLine) <= 1) ? ';' : ',';
-                if ($delimiter === ';') {
-                    rewind($stream);
-                    fgetcsv($stream, 1000, ';'); // bỏ qua dòng header
-                }
-
-                while (($data = fgetcsv($stream, 1000, $delimiter)) !== false) {
-                    if (!empty($data[0])) $productsPreview[] = $this->mapRow($data);
-                }
-                fclose($stream);
-            } else {
-                // Excel: dùng RawArrayImport để lấy mảng 2D thô
-                $importer = new \App\Imports\RawArrayImport();
-                Excel::import($importer, $filePath);
-                $sheet = $importer->data;
-
-                if (!empty($sheet)) {
-                    array_shift($sheet); // bỏ dòng header
-                    foreach ($sheet as $data) {
-                        if (!empty($data[0])) $productsPreview[] = $this->mapRow(array_values($data));
-                    }
-                }
-            }
-        }
-
-        return view('admin.product.import-show', compact('import', 'productsPreview'));
+        return view('admin.product.import-show', compact(
+            'import',
+            'productsPreview',
+            'approvedItems',
+            'approvedByTitle',
+        ));
     }
 
     /**
@@ -261,15 +227,17 @@ class WarehouseController extends Controller
         }
 
         // Lấy tất cả dữ liệu từ form (indexed theo số thứ tự dòng)
-        $titles  = $request->input('product_name', []);
-        $qtys    = $request->input('quantity', []);
-        $prices  = $request->input('price', []);      // giá bán sau khi áp % markup
-        $images  = $request->input('image', []);
-        $descs   = $request->input('decription', []);
-        $volumes = $request->input('volume', []);
-        $cats    = $request->input('category', []);
-        $brands  = $request->input('brand', []);
-        $concs   = $request->input('concentration', []);
+        $titles     = $request->input('product_name', []);
+        $qtys       = $request->input('quantity', []);
+        $prices     = $request->input('price', []);      // giá bán sau khi áp % markup
+        $images     = $request->input('image', []);
+        $descs      = $request->input('decription', []);
+        $volumes    = $request->input('volume', []);
+        $cats       = $request->input('category', []);
+        $brands     = $request->input('brand', []);
+        $concs      = $request->input('concentration', []);
+        $unitPrices = $request->input('unit_price', []); // giá nhập từ NSX
+        $slOrders   = $request->input('sl_order', []);   // số lượng đã order
 
         // Tạo phiếu nhập kho
         $code    = 'PN' . now()->format('ymdHis');
@@ -281,6 +249,8 @@ class WarehouseController extends Controller
         ]);
 
         $count = 0;
+        $approvedItems = [];
+
         foreach ($selected as $i) {
             $title = $titles[$i] ?? null;
             $qty   = (int)($qtys[$i] ?? 0);
@@ -330,14 +300,31 @@ class WarehouseController extends Controller
                 'stock_after' => $product->quantity,
                 'reason'      => $reason,
             ]);
+
+            $approvedItems[] = [
+                'row_index'     => (int) $i,
+                'title'         => $title,
+                'image'         => $image,
+                'decription'    => $desc,
+                'unit_price'    => (float)($unitPrices[$i] ?? 0),
+                'sl_order'      => (int)($slOrders[$i] ?? 0),
+                'quantity'      => $qty,
+                'price'         => $price,
+                'volume'        => $volumes[$i] ?? '100ml',
+                'category'      => $cats[$i] ?? '',
+                'brand'         => $brands[$i] ?? '',
+                'concentration' => $concs[$i] ?? '',
+            ];
+
             $count++;
         }
 
-        // Đánh dấu file đã duyệt
+        // Đánh dấu file đã duyệt + lưu danh sách SP thực sự nhập kho
         $import->update([
-            'status'      => 'approved',
-            'reviewed_by' => Auth::id(),
-            'reviewed_at' => now(),
+            'status'         => 'approved',
+            'approved_items' => $approvedItems,
+            'reviewed_by'    => Auth::id(),
+            'reviewed_at'    => now(),
         ]);
 
         return redirect()->route('admin.warehouse.imports')
@@ -404,18 +391,75 @@ class WarehouseController extends Controller
     }
 
     /**
+     * Đọc file CSV/Excel và trả về mảng preview sản phẩm.
+     */
+    private function parseImportFile(WarehouseImport $import): array
+    {
+        $filePath        = Storage::disk('local')->path($import->file_path);
+        $productsPreview = [];
+        $ext             = strtolower(pathinfo($import->original_name, PATHINFO_EXTENSION));
+
+        if (!file_exists($filePath)) {
+            return $productsPreview;
+        }
+
+        if ($ext === 'csv') {
+            $fileContent = file_get_contents($filePath);
+
+            $enc = mb_detect_encoding($fileContent, ['UTF-8', 'GBK', 'ISO-8859-1'], true);
+            if ($enc && $enc !== 'UTF-8') {
+                $fileContent = mb_convert_encoding($fileContent, 'UTF-8', $enc);
+            }
+
+            $stream = fopen('php://memory', 'r+');
+            fwrite($stream, $fileContent);
+            rewind($stream);
+
+            $headerLine = fgetcsv($stream, 1000, ',');
+            $delimiter  = (count($headerLine) <= 1) ? ';' : ',';
+            if ($delimiter === ';') {
+                rewind($stream);
+                fgetcsv($stream, 1000, ';');
+            }
+
+            while (($data = fgetcsv($stream, 1000, $delimiter)) !== false) {
+                if (!empty($data[0])) {
+                    $productsPreview[] = $this->mapRow($data);
+                }
+            }
+            fclose($stream);
+        } else {
+            $importer = new \App\Imports\RawArrayImport();
+            Excel::import($importer, $filePath);
+            $sheet = $importer->data;
+
+            if (!empty($sheet)) {
+                array_shift($sheet);
+                foreach ($sheet as $data) {
+                    if (!empty($data[0])) {
+                        $productsPreview[] = $this->mapRow(array_values($data));
+                    }
+                }
+            }
+        }
+
+        return $productsPreview;
+    }
+
+    /**
      * Ánh xạ 1 dòng CSV/Excel thành array chuẩn để hiển thị preview.
      *
      * Format file chuẩn (theo thứ tự cột):
      *   [0] title         — Tên sản phẩm
      *   [1] image         — URL ảnh
      *   [2] decription    — Mô tả (typo giữ nguyên)
-     *   [3] price         — Giá bán
-     *   [4] quantity      — Số lượng nhập
-     *   [5] volume        — Dung tích (VD: 100ml)
-     *   [6] category      — Tên danh mục
-     *   [7] brand         — Tên thương hiệu
-     *   [8] concentration — Nồng độ (VD: EDP)
+     *   [3] unit_price    — Giá nhập từ NSX
+     *   [4] sl_order      — Số lượng đã order
+     *   [5] quantity      — Số lượng thực tế nhập kho
+     *   [6] volume        — Dung tích (VD: 100ml)
+     *   [7] category      — Tên danh mục
+     *   [8] brand         — Tên thương hiệu
+     *   [9] concentration — Nồng độ (VD: EDP)
      */
     private function mapRow(array $d): array
     {
@@ -423,12 +467,13 @@ class WarehouseController extends Controller
             'title'         => trim($d[0] ?? ''),
             'image'         => trim($d[1] ?? ''),
             'decription'    => trim($d[2] ?? ''),
-            'price'         => (float) str_replace(',', '', trim((string)($d[3] ?? '0'))),
-            'quantity'      => (int) trim((string)($d[4] ?? '0')),
-            'volume'        => trim($d[5] ?? '100ml'),
-            'category'      => trim($d[6] ?? ''),
-            'brand'         => trim($d[7] ?? ''),
-            'concentration' => trim($d[8] ?? ''),
+            'unit_price'    => (float) str_replace(',', '', trim((string)($d[3] ?? '0'))),
+            'sl_order'      => (int) trim((string)($d[4] ?? '0')),
+            'quantity'      => (int) trim((string)($d[5] ?? '0')),
+            'volume'        => trim($d[6] ?? '100ml'),
+            'category'      => trim($d[7] ?? ''),
+            'brand'         => trim($d[8] ?? ''),
+            'concentration' => trim($d[9] ?? ''),
             'note'          => '',
         ];
     }

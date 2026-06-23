@@ -58,7 +58,55 @@ class HomeController extends Controller
         $title    = Title::all();
         $footers  = Footer::all();
 
-        return view('index', compact("products", "footers", "title", "concentrations"));
+        // Lấy festivals active và lọc sản phẩm theo logic discount cao nhất
+        $activeFestivals = $this->getFestivalsWithFilteredProducts();
+
+        // Lấy brands để hiển thị logo
+        $brands = Brand::where('status', 1)->take(12)->get();
+
+        return view('index', compact("products", "footers", "title", "concentrations", "activeFestivals", "brands"));
+    }
+
+    /**
+     * Lấy các festival đang active và lọc sản phẩm theo quy tắc:
+     * - Nếu 1 sản phẩm thuộc nhiều festival, chỉ hiển thị ở festival có discount cao nhất
+     * - Festival có discount thấp hơn sẽ ẩn sản phẩm đó
+     * - Mỗi festival chỉ lấy tối đa 6 sản phẩm để hiển thị ở trang chủ
+     */
+    private function getFestivalsWithFilteredProducts()
+    {
+        $today = \Carbon\Carbon::today()->toDateString();
+        
+        // Lấy tất cả festival active, sắp xếp theo discount cao -> thấp
+        $festivals = Festival::active()
+            ->with(['products' => function($query) {
+                $query->where('products.status', 1)->with('festivals');
+            }])
+            ->orderByDesc('discount')
+            ->get();
+
+        // Lọc sản phẩm cho từng festival
+        $festivals->each(function($festival) use ($today) {
+            $filteredProducts = $festival->products->filter(function($product) use ($festival, $today) {
+                // Tìm discount cao nhất từ tất cả festival active của sản phẩm này
+                $maxActiveDiscount = $product->festivals
+                    ->where('status', 1)
+                    ->filter(fn($f) =>
+                        $f->start_date->toDateString() <= $today &&
+                        $f->end_date->toDateString() >= $today
+                    )
+                    ->max('discount') ?? 0;
+                
+                // Chỉ hiển thị nếu festival đang xem có discount >= cao nhất
+                return $festival->discount >= $maxActiveDiscount;
+            })->take(6); // Chỉ lấy 6 sản phẩm cho trang chủ
+
+            // Ghi đè collection products với products đã lọc
+            $festival->setRelation('products', $filteredProducts);
+        });
+
+        // Chỉ trả về các festival có ít nhất 1 sản phẩm sau khi lọc
+        return $festivals->filter(fn($festival) => $festival->products->count() > 0);
     }
 
     // =========================================================================

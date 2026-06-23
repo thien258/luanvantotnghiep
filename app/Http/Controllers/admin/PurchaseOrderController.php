@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ManuFacturer;
+use App\Models\ProcurementRequest;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\SupplierOffer;
@@ -113,6 +114,14 @@ class PurchaseOrderController extends Controller
 
             // Bước 4: Đánh dấu báo giá đã được chấp nhận
             $offer->update(['status' => 'accepted']);
+
+            // Bước 5: Tự động đóng yêu cầu nhập hàng (nếu có)
+            if ($offer->request_id) {
+                $procRequest = ProcurementRequest::find($offer->request_id);
+                if ($procRequest && $procRequest->status !== 'closed') {
+                    $procRequest->update(['status' => 'closed']);
+                }
+            }
         });
 
         return redirect()->route('admin.purchase-orders.index')
@@ -168,7 +177,7 @@ class PurchaseOrderController extends Controller
         // Chỉ đổi trạng thái → tồn kho được cập nhật qua luồng Nhập Kho riêng
         $po->update(['status' => 'received']);
 
-        return redirect()->back()->with('success', 'Đã xác nhận nhận hàng. Tải file CSV và upload vào trang Nhập Kho để cập nhật tồn kho.');
+        return redirect()->back()->with('success', 'Đơn hàng đã được nhận');
     }
 
     // =========================================================================
@@ -216,7 +225,8 @@ class PurchaseOrderController extends Controller
             fputs($handle, "\xEF\xBB\xBF");
 
             // Dòng header — khớp đúng format WarehouseController::mapRow()
-            fputcsv($handle, ['title', 'image', 'decription', 'price', 'quantity', 'volume', 'category', 'brand', 'concentration']);
+            // Bao gồm cả sl_order (đã đặt) và quantity (thực nhận) + unit_price (giá nhập)
+            fputcsv($handle, ['title', 'image', 'decription', 'unit_price', 'sl_order', 'quantity', 'volume', 'category', 'brand', 'concentration']);
 
             foreach ($po->items as $item) {
                 $product = $item->product;
@@ -225,7 +235,8 @@ class PurchaseOrderController extends Controller
                     $product?->image ?? '',                       // URL ảnh
                     $product?->decription ?? '',                  // Mô tả
                     $item->unit_price,                            // Giá nhập (từ báo giá NSX)
-                    $item->quantity,                              // Số lượng đã đặt
+                    $item->quantity,                              // SL đã order
+                    '',                                           // SL thực tế - để trống cho NV kho điền
                     $product?->volume ?? '',                      // Dung tích
                     $product?->category?->name ?? '',             // Danh mục
                     $product?->brand?->name ?? '',                // Thương hiệu

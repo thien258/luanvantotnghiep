@@ -262,12 +262,12 @@ class OrderController extends Controller
         $order = Order::where('id', $id)
             ->where('idUser', Auth::id())
             ->where('status', 1)
-            ->with('detatil')
+            ->with('details')
             ->firstOrFail();
 
         DB::beginTransaction();
         try {
-            foreach ($order->detatil as $detail) {
+            foreach ($order->details as $detail) {
                 // Hoàn sản phẩm về giỏ hàng để khách đặt lại
                 // KHÔNG cộng lại tồn kho vì chưa trừ (trừ khi xuất kho)
                 Cart::create([
@@ -297,7 +297,7 @@ class OrderController extends Controller
     public function confirmDelivery($code)
     {
         $order = Order::where('tracking_code', $code)
-            ->with('detatil.product')
+            ->with('details.product')
             ->firstOrFail();
 
         return view('order.confirm-delivery', compact('order'));
@@ -310,12 +310,12 @@ class OrderController extends Controller
     {
         $order = Order::where('tracking_code', $code)
             ->where('status', 3) // chỉ xác nhận khi đang giao
-            ->with('detatil.product')
             ->firstOrFail();
 
         $order->update(['status' => 4]);
 
-        return view('order.confirm-delivery', compact('order'));
+        // Redirect về trang confirm-delivery để hiển thị trạng thái đã hoàn tất
+        return redirect()->route('order.confirm-delivery', $code);
     }
 
     // =========================================================================
@@ -409,13 +409,13 @@ class OrderController extends Controller
     {
         $order = Order::where('id', $id)
             ->where('status', 0) // chỉ hủy đơn chưa thanh toán
-            ->with('detatil')
+            ->with('details')
             ->first();
 
         if ($order) {
             DB::beginTransaction();
             try {
-                foreach ($order->detatil as $detail) {
+                foreach ($order->details as $detail) {
                     Cart::create([
                         'idUser'     => $order->idUser,
                         'product_id' => $detail->idProduct,

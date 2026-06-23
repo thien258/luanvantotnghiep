@@ -53,6 +53,7 @@ class SupplierOffer extends Model
     // Các cột được phép gán hàng loạt (mass assignment)
     protected $fillable = [
         "manufacturer_id", // FK → manufacturers (NSX nào gửi báo giá)
+        "request_id",      // FK → procurement_requests (liên kết với yêu cầu nhập hàng)
         "offer_code",      // Mã báo giá tự sinh: OFR-YYYYMMDD-001
         "note",            // Ghi chú kèm theo
         "status",          // Trạng thái: draft / submitted / accepted / rejected

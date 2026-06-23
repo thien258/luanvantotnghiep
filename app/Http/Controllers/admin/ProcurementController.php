@@ -11,6 +11,7 @@ use App\Models\SupplierOffer;
 use App\Models\SupplierOfferItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 /**
  * ProcurementController — Quản lý yêu cầu thu mua công khai.
@@ -111,6 +112,65 @@ class ProcurementController extends Controller
             ->with('success', 'Đã đóng yêu cầu ' . $procRequest->request_code . '.');
     }
 
+    // Xuất file Excel mẫu để NSX chào giá
+    public function exportTemplate(string $id)
+    {
+        $procRequest = ProcurementRequest::with([
+            'items.product.brand',
+            'items.product.category',
+            'items.product.concentration',
+        ])->findOrFail($id);
+
+        $filename = 'mau-bao-gia-' . $procRequest->request_code . '-' . now()->format('Ymd') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($procRequest) {
+            $handle = fopen('php://output', 'w');
+
+            // BOM UTF-8 cho Excel hiển thị đúng tiếng Việt
+            fputs($handle, "\xEF\xBB\xBF");
+
+            // Header 10 cột - format chuẩn để upload vào trang import
+            fputcsv($handle, [
+                'title',
+                'image',
+                'decription',
+                'unit_price',
+                'sl_order',
+                'quantity',
+                'volume',
+                'category',
+                'brand',
+                'concentration'
+            ]);
+
+            // Mỗi item trong request → 1 dòng
+            foreach ($procRequest->items as $item) {
+                $product = $item->product;
+                fputcsv($handle, [
+                    $item->product_name,                              // Tên SP
+                    $product?->image ?? '',                           // URL ảnh
+                    $product?->decription ?? '',                      // Mô tả
+                    '',                                               // Giá nhập - NSX điền
+                    $item->qty_needed,                                // Số lượng shop cần
+                    '',                                               // SL thực tế - để trống
+                    $product?->volume ?? '100ml',                     // Dung tích
+                    $product?->category?->name ?? '',                 // Category
+                    $product?->brand?->name ?? '',                    // Brand
+                    $product?->concentration?->concentration ?? '',   // Nồng độ
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     // Upload file Excel báo giá từ NSX → đọc → tạo SupplierOffer + items
     public function uploadOffer(Request $request, string $id)
     {
@@ -128,8 +188,14 @@ class ProcurementController extends Controller
         // Đọc file giống SupplierOfferController::upload()
         $rows = $this->readOfferFile($request->file('file'));
 
+        // DEBUG: Log số dòng đọc được
+        Log::info('ProcurementController uploadOffer - Rows count: ' . count($rows));
+        if (!empty($rows)) {
+            Log::info('First row: ' . json_encode($rows[0]));
+        }
+
         if (empty($rows)) {
-            return back()->with('error', 'File không có dữ liệu hoặc sai định dạng.');
+            return back()->with('error', 'File không có dữ liệu hoặc sai định dạng. Vui lòng kiểm tra lại file CSV.');
         }
 
         // Sinh offer_code
@@ -145,25 +211,34 @@ class ProcurementController extends Controller
             'submitted_at'    => now(),
         ]);
 
+        $itemCount = 0;
         foreach ($rows as $row) {
+            // Lấy tên SP - thử nhiều key khác nhau
             $productName = trim($row['title'] ?? $row['product_name'] ?? '');
-            $unitPrice   = (float) str_replace([',', ' '], '', $row['price'] ?? $row['unit_price'] ?? 0);
+            
+            // Bỏ qua dòng nếu thiếu tên SP hoặc là dòng trống
+            if (empty($productName) || strlen($productName) < 2) continue;
+            
+            // Lấy giá nhập - thử nhiều key
+            $unitPriceRaw = $row['unit_price'] ?? $row['price'] ?? $row['gia_nhap'] ?? '0';
+            $unitPrice = (float) str_replace([',', ' ', '.'], '', trim((string)$unitPriceRaw));
 
-            if (empty($productName) || $unitPrice <= 0) continue;
-
-            $product = Product::whereRaw('LOWER(title) = ?', [strtolower($productName)])->first();
+            // Tìm SP trong database (case-insensitive)
+            $product = Product::whereRaw('LOWER(TRIM(title)) = ?', [strtolower(trim($productName))])->first();
 
             SupplierOfferItem::create([
                 'offer_id'     => $offer->id,
                 'product_id'   => $product?->id,
                 'product_name' => $productName,
                 'unit_price'   => $unitPrice,
-                'note'         => trim($row['note'] ?? $row['decription'] ?? ''),
+                'note'         => trim($row['note'] ?? $row['decription'] ?? $row['description'] ?? ''),
             ]);
+            
+            $itemCount++;
         }
 
         return redirect()->route('admin.procurement.show', $id)
-            ->with('success', 'Đã đọc file báo giá ' . $offerCode . ' từ ' . $offer->manufacturer->name . '.');
+            ->with('success', "Đã đọc file báo giá {$offerCode} từ " . $offer->manufacturer->name . " — {$itemCount} sản phẩm.");
     }
 
     // Đọc file Excel/CSV → trả về mảng rows với key = tên cột
@@ -175,19 +250,51 @@ class ProcurementController extends Controller
         $headers = [];
 
         if ($ext === 'csv') {
-            $handle   = fopen($path, 'r');
+            $content = file_get_contents($path);
+            
+            // Remove UTF-8 BOM from the entire content first
+            $content = str_replace("\xEF\xBB\xBF", '', $content);
+            
+            // Detect encoding và convert về UTF-8
+            $encoding = mb_detect_encoding($content, ['UTF-8', 'ISO-8859-1', 'Windows-1252'], true);
+            if ($encoding && $encoding !== 'UTF-8') {
+                $content = mb_convert_encoding($content, 'UTF-8', $encoding);
+            }
+            
+            // Tách theo dòng
+            $lines = explode("\n", $content);
             $isHeader = true;
-            while (($line = fgetcsv($handle)) !== false) {
+            
+            foreach ($lines as $line) {
+                $line = trim($line);
+                
+                // Bỏ qua dòng trống hoàn toàn
+                if (empty($line)) continue;
+                
+                // Thử tách bằng tab trước, nếu không được thì dùng dấu phẩy
+                $data = str_getcsv($line, "\t");
+                if (count($data) <= 1) {
+                    $data = str_getcsv($line, ",");
+                }
+                
+                // Lọc bỏ các cell trống
+                $cleanData = array_map('trim', $data);
+                
+                // Nếu tất cả cells đều trống → skip
+                if (empty(array_filter($cleanData))) continue;
+                
                 if ($isHeader) {
-                    $headers  = array_map(fn($h) => strtolower(trim($h)), $line);
+                    // Chuyển headers thành lowercase
+                    $headers = array_map(function($h) {
+                        return strtolower(trim($h));
+                    }, $cleanData);
                     $isHeader = false;
                     continue;
                 }
-                if (!empty(array_filter($line))) {
-                    $rows[] = array_combine($headers, array_pad($line, count($headers), ''));
-                }
+                
+                // Pad data để khớp số lượng headers
+                $rows[] = array_combine($headers, array_pad($cleanData, count($headers), ''));
             }
-            fclose($handle);
         } else {
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
             $sheet       = $spreadsheet->getActiveSheet();
@@ -197,14 +304,17 @@ class ProcurementController extends Controller
                 foreach ($row->getCellIterator() as $cell) {
                     $cells[] = $cell->getValue();
                 }
+                
+                // Bỏ qua dòng trống
+                if (empty(array_filter($cells))) continue;
+                
                 if ($isHeader) {
                     $headers  = array_map(fn($h) => strtolower(trim((string)$h)), $cells);
                     $isHeader = false;
                     continue;
                 }
-                if (!empty(array_filter($cells))) {
-                    $rows[] = array_combine($headers, array_pad($cells, count($headers), ''));
-                }
+                
+                $rows[] = array_combine($headers, array_pad($cells, count($headers), ''));
             }
         }
 
