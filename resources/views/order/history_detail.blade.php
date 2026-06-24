@@ -37,6 +37,63 @@
                     </div>
                 </div>
 
+                {{-- TIMELINE: Lịch sử trạng thái đơn hàng --}}
+                <div class="mb-5 border-bottom pb-4">
+                    <p class="text-uppercase fw-bold text-muted small mb-3" style="letter-spacing:1px;">
+                        &#9203; Trạng thái đơn hàng
+                    </p>
+
+                    {{-- Hàng 1: dot + line --}}
+                    <div class="d-flex align-items-center">
+                        @foreach($timelineSteps as $step)
+                            <div class="rounded-circle d-flex align-items-center justify-content-center border {{ $step['dotClass'] }} flex-shrink-0"
+                                 style="width:34px; height:34px;">
+                                <i class="fas {{ $step['icon'] }}" style="font-size:0.8rem;"></i>
+                            </div>
+                            @if(!$loop->last)
+                                <div class="flex-grow-1 {{ $step['lineClass'] }}" style="height:2px;"></div>
+                            @endif
+                        @endforeach
+
+                        @if($isReturn)
+                            <div class="flex-grow-1 bg-dark" style="height:2px; min-width:30px;"></div>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center border bg-danger text-white border-danger flex-shrink-0"
+                                 style="width:34px; height:34px;">
+                                <i class="fas fa-undo" style="font-size:0.8rem;"></i>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Hàng 2: label căn dưới mỗi dot --}}
+                    <div class="d-flex align-items-start mt-2">
+                        @foreach($timelineSteps as $step)
+                            {{-- Label của dot này --}}
+                            <div class="text-center flex-shrink-0" style="width:34px;">
+                                <div class="{{ $step['textClass'] }}" style="font-size:0.7rem; white-space:nowrap; transform:translateX(-50%); margin-left:17px;">
+                                    {{ $step['label'] }}<br>
+                                    <span class="text-muted" style="font-size:0.62rem;">
+                                        {{ $step['isDone'] ? $order->updated_at->format('d/m/Y') : '—' }}
+                                    </span>
+                                </div>
+                            </div>
+                            @if(!$loop->last)
+                                <div class="flex-grow-1"></div>
+                            @endif
+                        @endforeach
+
+                        @if($isReturn)
+                            <div class="flex-grow-1"></div>
+                            <div class="text-center flex-shrink-0" style="width:34px;">
+                                <div class="text-danger fw-semibold" style="font-size:0.7rem; white-space:nowrap; transform:translateX(-50%); margin-left:17px;">
+                                    {{ $currentStatus == 5 ? 'Yêu cầu hoàn hàng' : 'Hàng hỏng' }}<br>
+                                    <span class="text-muted" style="font-size:0.62rem;">{{ $order->updated_at->format('d/m/Y') }}</span>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                {{-- END TIMELINE --}}
+
                 <div class="row g-4 mb-5 small">
                     <div class="col-md-6">
                         <div class="text-uppercase fw-bold text-muted mb-2" style="font-size:0.7rem; letter-spacing:1px;">Địa chỉ nhận hàng</div>

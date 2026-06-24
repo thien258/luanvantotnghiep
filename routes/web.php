@@ -55,6 +55,8 @@ Route::post('/api/payos-webhook', [OrderController::class, 'payosWebhook'])->nam
 // =========================================================================
 
 Route::get('/',                   [HomeController::class, 'index'])->name('welcome');
+Route::get('/gucci-demo',         [HomeController::class, 'showGucciProduct'])->name('gucci.demo');
+Route::get('/manufacturer-demo',  [HomeController::class, 'showManufacturerProducts'])->name('manufacturer.demo');
 Route::get('/search',             [HomeController::class, 'search'])->name('home.search');
 Route::get('/search-suggest',     [HomeController::class, 'suggest'])->name('search.suggest');    // AJAX gợi ý
 Route::get('/show-products',      [ProductShowController::class, 'showProducts'])->name('show_products');

@@ -74,16 +74,50 @@
                         </div>
                     </div>
 
-                    {{-- 4. FORM THÊM VÀO GIỎ HÀNG (Sửa lại chỉ gửi product_id) --}}
+                    {{-- 4. FORM THÊM VÀO GIỎ HÀNG --}}
                     <form action="{{ route('carts.store') }}" method="POST" class="m-0">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        
+                        {{-- Chọn số lượng --}}
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <label class="text-uppercase small fw-bold mb-0">Số lượng:</label>
+                            <div class="input-group" style="width: 150px;">
+                                <button type="button" class="btn btn-outline-secondary rounded-0" onclick="decreaseQty()">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                                <input type="number" name="quantity" id="quantityInput" value="1" min="1" 
+                                       max="{{ $product->quantity }}" data-max="{{ $product->quantity }}" 
+                                       class="form-control text-center rounded-0" readonly>
+                                <button type="button" class="btn btn-outline-secondary rounded-0" onclick="increaseQty()">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                            <span class="text-muted small">(Còn {{ $product->quantity }} sản phẩm)</span>
+                        </div>
 
                         <button type="submit" class="btn btn-dark btn-lg rounded-0 px-5 text-uppercase fw-bold shadow-none w-100"
                             {{ $product->quantity <= 0 ? 'disabled' : '' }}>
                             <i class="fa-solid fa-shopping-cart me-2"></i> THÊM VÀO GIỎ
                         </button>
                     </form>
+                    
+                    <script>
+                    function decreaseQty() {
+                        const input = document.getElementById('quantityInput');
+                        if (input.value > 1) {
+                            input.value = parseInt(input.value) - 1;
+                        }
+                    }
+                    
+                    function increaseQty() {
+                        const input = document.getElementById('quantityInput');
+                        const max = parseInt(input.getAttribute('data-max'));
+                        if (parseInt(input.value) < max) {
+                            input.value = parseInt(input.value) + 1;
+                        }
+                    }
+                    </script>
                 </div>
             </div>
         </div>

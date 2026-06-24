@@ -119,7 +119,7 @@
         <div class="card shadow-none border rounded-0 border-left-danger" style="border-left-width:4px !important;">
             <div class="card-header bg-white py-3 border-bottom-0">
                 <h6 class="m-0 font-weight-bold text-danger text-uppercase small" style="letter-spacing:1px;">
-                    <i class="fa-solid fa-hourglass-half mr-2"></i>Sản phẩm bán chậm (tỷ lệ bán ≤ 5%)
+                    <i class="fa-solid fa-hourglass-half mr-2"></i>Sản phẩm bán chậm (Nhập ≥7 ngày, bán <30%)
                 </h6>
             </div>
             <div class="card-body p-0">
@@ -128,15 +128,17 @@
                         <tr>
                             <th class="pl-4 py-2">Tên sản phẩm</th>
                             <th class="text-center py-2">Đã bán</th>
-                            <th class="text-center py-2">Tồn kho</th>
+                            <th class="text-center py-2">Tỉ lệ</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($slowProducts as $sp)
                         <tr>
                             <td class="pl-4 py-2 font-weight-bold">{{ $sp->title }}</td>
-                            <td class="text-center text-muted font-weight-bold">{{ $sp->total_sold }}</td>
-                            <td class="text-center text-danger font-weight-bold">{{ $sp->quantity }}</td>
+                            <td class="text-center text-muted font-weight-bold">{{ $sp->total_sold }}/{{ $sp->total_import }}</td>
+                            <td class="text-center">
+                                <span class="badge badge-danger">{{ $sp->sale_rate }}%</span>
+                            </td>
                         </tr>
                         @empty
                         <tr>

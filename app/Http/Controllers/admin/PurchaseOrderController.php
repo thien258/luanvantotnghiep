@@ -177,7 +177,7 @@ class PurchaseOrderController extends Controller
         // Chỉ đổi trạng thái → tồn kho được cập nhật qua luồng Nhập Kho riêng
         $po->update(['status' => 'received']);
 
-        return redirect()->back()->with('success', 'Đơn hàng đã được nhận');
+        return redirect()->back()->with('success', 'Đã xác nhận nhận hàng thành công!');
     }
 
     // =========================================================================

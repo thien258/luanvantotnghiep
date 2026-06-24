@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
 
 /**
  * OrderController — Xử lý đơn hàng phía khách hàng.
@@ -185,34 +187,9 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Illuminate\Support\Facades\Log::error('placeOrder exception: ' . $e->getMessage());
+            Log::error('placeOrder exception: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
-    }
-
-    // =========================================================================
-    // PAYMENT FORM — Trang hiển thị mã QR VietQR (fallback)
-    // =========================================================================
-
-    public function paymentForm($id)
-    {
-        // Chỉ cho user đặt đơn đó xem — bảo mật bằng where idUser
-        $order = Order::where('id', $id)->where('idUser', Auth::id())->firstOrFail();
-
-        $BANK_ID      = 'TPBANK';
-        $ACCOUNT_NO   = '07178497601';
-        $ACCOUNT_NAME = 'Tran Quang Thien';
-        $amount       = $order->total_price;
-        $addInfo      = "DH{$order->id} Thanh toan nuoc hoa";
-
-        // Tạo URL QR từ VietQR API
-        $qrCodeUrl = "https://img.vietqr.io/image/{$BANK_ID}-{$ACCOUNT_NO}-qr_only.png"
-            . "?amount={$amount}"
-            . "&addInfo=" . urlencode($addInfo)
-            . "&accountName=" . urlencode($ACCOUNT_NAME)
-            . "&t=" . time(); // thêm timestamp để tránh cache trình duyệt
-
-        return view('order.order_payment', compact('order', 'qrCodeUrl', 'amount', 'addInfo', 'BANK_ID', 'ACCOUNT_NO'));
     }
 
     // =========================================================================
@@ -230,13 +207,57 @@ class OrderController extends Controller
         return view('order.history', compact('orders'));
     }
 
+    /**
+     * Trang chi tiết một đơn hàng của khách.
+     *
+     * Bảo mật: query kèm idUser để user A không xem được đơn của user B.
+     * Nếu không tìm thấy → tự động 404 (firstOrFail).
+     *
+     * Timeline logic:
+     *   - status 1 → Đang xử lý
+     *   - status 3 → Đang giao hàng
+     *   - status 4 → Đã giao hàng
+     *   - status 5/6 → Hoàn hàng / Hàng hỏng (effectiveStatus = 4, thêm bước đặc biệt)
+     *
+     * Mỗi bước trong $timelineSteps đã được tính sẵn dotClass/textClass/lineClass
+     * để blade chỉ việc render, không chứa logic PHP.
+     */
     public function historyDetail($id)
     {
-        // Bảo mật: chỉ cho xem đơn của chính mình
+        // Chỉ lấy đơn thuộc về user đang đăng nhập
         $order        = Order::where('id', $id)->where('idUser', Auth::id())->firstOrFail();
         $orderDetails = OrderDetail::where('idOrder', $id)->with('product')->get();
 
-        return view('order.history_detail', compact('order', 'orderDetails'));
+        $currentStatus   = $order->status;
+        $isReturn        = in_array($currentStatus, [5, 6]); // hoàn hàng hoặc hàng hỏng
+        $effectiveStatus = $isReturn ? 4 : $currentStatus;   // nếu hoàn hàng vẫn tô đủ 3 bước
+
+        // Build timeline — xử lý màu sắc tại đây, blade chỉ đọc
+        $timelineSteps = collect([
+            ['status' => 1, 'icon' => 'fa-box',         'label' => 'Đang xử lý'],
+            ['status' => 3, 'icon' => 'fa-truck',        'label' => 'Đang giao hàng'],
+            ['status' => 4, 'icon' => 'fa-check-circle', 'label' => 'Đã giao hàng'],
+        ])->map(function ($step) use ($effectiveStatus) {
+            $isDone   = $effectiveStatus >= $step['status']; // bước đã qua
+            $isActive = $effectiveStatus == $step['status']; // bước hiện tại
+
+            return array_merge($step, [
+                'isDone'    => $isDone,
+                'isActive'  => $isActive,
+                // dot: xanh = đang ở đây | đen = đã qua | xám = chưa tới
+                'dotClass'  => $isActive ? 'bg-success text-white border-success'
+                             : ($isDone  ? 'bg-dark text-white border-dark'
+                                         : 'bg-white text-secondary border-secondary'),
+                // label text
+                'textClass' => $isActive ? 'text-success fw-semibold'
+                             : ($isDone  ? 'text-dark fw-semibold'
+                                         : 'text-secondary'),
+                // đường nối sang bước tiếp theo
+                'lineClass' => $isDone   ? 'bg-dark' : 'bg-secondary-subtle',
+            ]);
+        });
+
+        return view('order.history_detail', compact('order', 'orderDetails', 'timelineSteps', 'isReturn', 'currentStatus'));
     }
 
     // =========================================================================
@@ -427,7 +448,7 @@ class OrderController extends Controller
                 DB::commit();
             } catch (\Exception $e) {
                 DB::rollBack();
-                \Illuminate\Support\Facades\Log::error('payosCancel error: ' . $e->getMessage());
+                Log::error('payosCancel error: ' . $e->getMessage());
             }
         }
 
@@ -444,6 +465,9 @@ class OrderController extends Controller
     {
         $body = $request->all();
 
+        // Log webhook để debug
+        Log::info('PayOS Webhook received', ['body' => $body]);
+
         // code='00' = thanh toán thành công
         if (isset($body['code']) && $body['code'] == '00' && isset($body['data'])) {
             $description = $body['data']['description'];
@@ -452,11 +476,24 @@ class OrderController extends Controller
             preg_match('/DH(\d+)/', $description, $matches);
 
             if (isset($matches[1])) {
-                $order = Order::find($matches[1]);
-                if ($order && $order->status == 0) {
-                    $order->update(['status' => 1]); // xác nhận đã thanh toán
+                $orderId = $matches[1];
+                $order = Order::find($orderId);
+                
+                if ($order) {
+                    if ($order->status == 0) {
+                        $order->update(['status' => 1]); // xác nhận đã thanh toán
+                        Log::info("Order #{$orderId} updated: status 0 → 1");
+                    } else {
+                        Log::warning("Order #{$orderId} already processed (status={$order->status})");
+                    }
+                } else {
+                    Log::error("Order #{$orderId} not found");
                 }
+            } else {
+                Log::error("Cannot extract order ID from description: {$description}");
             }
+        } else {
+            Log::warning('PayOS Webhook: Invalid payload or code != 00');
         }
 
         return response()->json(['success' => true]);

@@ -118,7 +118,7 @@
                 <p class="text-uppercase text-danger small mb-2 fw-bold" style="letter-spacing: 2px;">Ưu đãi đặc biệt</p>
                 <h3 class="fw-bold">{{ $festival->name }}</h3>
                 <p class="text-muted">
-                    <span class="badge bg-danger me-2">-{{ $festival->discount }}%</span>
+                    <span class="badge text-danger me-2">-{{ $festival->discount }}%</span>
                     {{ $festival->start_date->format('d/m/Y') }} - {{ $festival->end_date->format('d/m/Y') }}
                 </p>
             </div>
@@ -133,7 +133,7 @@
                             <div class="bg-white border rounded mb-3 p-3 position-relative" style="aspect-ratio: 3/4;">
                                 <!-- Badge giảm giá -->
                                 <div class="position-absolute top-0 end-0 m-2">
-                                    <span class="badge bg-danger">-{{ $festival->discount }}%</span>
+                                    <span class="badge text-danger">-{{ $festival->discount }}%</span>
                                 </div>
                                 
                                 @if($product->image)

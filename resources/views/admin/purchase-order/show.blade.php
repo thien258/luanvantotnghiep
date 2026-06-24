@@ -166,7 +166,7 @@
 @if($purchaseOrder->status === 'received')
 <div class="alert alert-success rounded-0 small">
     <i class="fa-solid fa-check-circle mr-1"></i>
-    Đơn hàng đã được nhận và tồn kho đã được cập nhật.
+    Đơn hàng đã được nhận
 </div>
 @endif
 

@@ -14,6 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // Trust all proxies (ngrok, cloudflare, etc.)
         // Cho phép Laravel đọc đúng host/scheme từ X-Forwarded-* headers
         $middleware->trustProxies(at: '*');
+
+        // Exempt PayOS webhook from CSRF protection
+        // PayOS POST webhook không có CSRF token → phải exempt
+        $middleware->validateCsrfTokens(except: [
+            'api/payos-webhook',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

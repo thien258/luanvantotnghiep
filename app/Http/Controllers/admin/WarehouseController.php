@@ -271,10 +271,31 @@ class WarehouseController extends Controller
                 if ($desc)      $product->update(['decription' => $desc]);
                 $reason = "Nhập kho từ phiếu {$code}";
             } else {
-                // SP chưa có → tìm category/brand/concentration theo tên, fallback về ID đầu tiên
-                $catId   = Category::where('name', $cats[$i] ?? '')->value('id')          ?? Category::value('id')      ?? 1;
-                $brandId = Brand::where('name', $brands[$i] ?? '')->value('id')           ?? Brand::value('id')         ?? 1;
-                $concId  = Concentration::where('concentration', $concs[$i] ?? '')->value('id') ?? Concentration::value('id') ?? 1;
+                // SP chưa có → tìm hoặc tạo mới category/brand/concentration theo tên
+                $catName   = trim($cats[$i] ?? '');
+                $brandName = trim($brands[$i] ?? '');
+                $concName  = trim($concs[$i] ?? '');
+
+                // Category: tìm hoặc lấy mặc định
+                $catId = $catName 
+                    ? (Category::whereRaw('LOWER(name) = ?', [strtolower($catName)])->value('id') ?? Category::value('id') ?? 1)
+                    : (Category::value('id') ?? 1);
+
+                // Brand: tìm hoặc TẠO MỚI nếu chưa có
+                if ($brandName) {
+                    $brand = Brand::whereRaw('LOWER(name) = ?', [strtolower($brandName)])->first();
+                    if (!$brand) {
+                        $brand = Brand::create(['name' => $brandName]);
+                    }
+                    $brandId = $brand->id;
+                } else {
+                    $brandId = Brand::value('id') ?? 1;
+                }
+
+                // Concentration: tìm hoặc lấy mặc định
+                $concId = $concName
+                    ? (Concentration::whereRaw('LOWER(concentration) = ?', [strtolower($concName)])->value('id') ?? Concentration::value('id') ?? 1)
+                    : (Concentration::value('id') ?? 1);
 
                 $product = Product::create([
                     'title'           => $title,
@@ -364,26 +385,48 @@ class WarehouseController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Tab 1: Sản phẩm bán chậm (tỷ lệ bán / nhập < 20%)
+        // Tab 1: Sản phẩm bán chậm - logic mới:
+        // Lấy các lần nhập kho cách đây >= 7 ngày (có thể đổi thành 30 sau)
+        // Tính tỉ lệ đã bán / nhập của batch đó
+        // Nếu < 30% → cảnh báo bán chậm
         $slowProducts = [];
-        foreach (Product::where('quantity', '>', 0)->get() as $product) {
-            $totalImport = WarehouseStockLog::where('product_id', $product->id)
-                ->where('type', 'import')
-                ->sum('quantity');
+        $daysThreshold = 7; // TODO: Đổi thành 30 khi có đủ dữ liệu
+        $daysAgo = now()->subDays($daysThreshold);
 
+        // Lấy các log nhập kho từ N ngày trước trở về trước
+        $oldImportLogs = WarehouseStockLog::where('type', 'import')
+            ->where('created_at', '<=', $daysAgo)
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->groupBy('product_id');
+
+        foreach ($oldImportLogs as $productId => $logs) {
+            $product = Product::find($productId);
+            if (!$product) continue;
+
+            // Tính tổng số lượng nhập từ các lần nhập >= N ngày trước
+            $totalImported = $logs->sum('quantity');
+            
+            // Lấy log nhập đầu tiên để biết ngày nhập
+            $firstImportDate = $logs->first()->created_at;
+            $daysInStock = now()->diffInDays($firstImportDate);
+
+            // Tính tổng đã bán (từ tất cả đơn hàng)
             $totalSold = Schema::hasTable('order_details')
                 ? DB::table('order_details')->where('idProduct', $product->id)->sum('quantity')
                 : 0;
 
-            // Nếu chưa có log nhập → dùng quantity hiện tại làm base
-            $importBase = $totalImport > 0 ? $totalImport : $product->quantity;
-            $saleRate   = $importBase > 0 ? ($totalSold / $importBase) * 100 : 0;
+            // Tính tỉ lệ bán
+            $saleRate = $totalImported > 0 ? ($totalSold / $totalImported) * 100 : 0;
 
-            if ($saleRate < 20) {
-                $product->total_import = $importBase;
-                $product->total_sold   = $totalSold;
-                $product->sale_rate    = round($saleRate, 1);
-                $slowProducts[]        = $product;
+            // Cảnh báo nếu tỉ lệ < 30%
+            if ($saleRate < 30) {
+                $product->total_import = $totalImported;
+                $product->total_sold = $totalSold;
+                $product->sale_rate = round($saleRate, 1);
+                $product->days_in_stock = $daysInStock;
+                $product->first_import_date = $firstImportDate;
+                $slowProducts[] = $product;
             }
         }
 

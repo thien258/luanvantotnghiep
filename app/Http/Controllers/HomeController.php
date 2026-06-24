@@ -11,6 +11,7 @@ use App\Models\Title;
 use App\Models\Concentration;
 use App\Models\Festival;
 use App\Models\Product;
+use App\Models\Manufacturer;
 use Illuminate\Support\Facades\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -421,5 +422,64 @@ class HomeController extends Controller
                 'query' => $request->except('page'),
             ]
         );
+    }
+
+    // =========================================================================
+    // DEMO GUCCI — Hiển thị 1 sản phẩm Gucci (cho giảng viên)
+    // =========================================================================
+
+    /**
+     * Trang demo hiển thị 1 sản phẩm Gucci cụ thể.
+     * Dùng để trình bày cho giảng viên cách lấy và hiển thị sản phẩm.
+     */
+    public function showGucciProduct()
+    {
+        // Lấy 1 sản phẩm Gucci đầu tiên trong database
+        $product = Product::whereHas('brand', function($query) {
+            $query->where('title', 'GUCCI');
+        })->with(['brand', 'category', 'concentration', 'festivals'])->first();
+
+        // Fallback: Nếu không có sản phẩm Gucci, lấy sản phẩm đầu tiên bất kỳ
+        if (!$product) {
+            $product = Product::with(['brand', 'category', 'concentration', 'festivals'])->first();
+        }
+
+        $title   = Title::all();
+        $footers = Footer::all();
+        $brands = Brand::where('status', 1)->get();
+        $festivals = Festival::active()->get();
+
+        return view('gucci-demo', compact('product', 'title', 'footers', 'brands', 'festivals'));
+    }
+
+    // =========================================================================
+    // DEMO NSX — Hiển thị sản phẩm từ NSX "a" (CÁCH 1 - Đơn giản)
+    // =========================================================================
+
+    /**
+     * Trang demo hiển thị sản phẩm từ NSX "a".
+     * CÁCH 1: Lấy trực tiếp từ bảng manufacturers_product (many-to-many).
+     * Đơn giản và nhanh hơn so với query qua Purchase Order.
+     */
+    public function showManufacturerProducts()
+    {
+        // Lấy NSX "a" với eager loading relationships
+        $manufacturer = ManuFacturer::where('name', 'a')
+            ->with(['products.brand', 'products.category', 'products.concentration'])
+            ->first();
+
+        $products = collect();
+        
+        if ($manufacturer) {
+            // Lấy sản phẩm từ relationship có sẵn (manufacturers_product)
+            // Lọc chỉ lấy sản phẩm đang bán (status = 1)
+            $products = $manufacturer->products
+                ->where('status', 1)
+                ->values();
+        }
+      
+    
+
+        return view('manufacturer-demo', compact('manufacturer', 'products'));
     }
 }

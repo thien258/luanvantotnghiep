@@ -69,7 +69,7 @@ class CartController extends Controller
             ]);
         }
 
-        return redirect()->route('carts.index')->with('status', 'Đã thêm vào giỏ hàng!');
+        return back()->with('status', 'Đã thêm vào giỏ hàng!');
     }
 
     // Hiển thị giỏ hàng

@@ -57,4 +57,13 @@ class ManuFacturer extends Model
     {
         return $this->belongsToMany(Product::class, 'manufacturers_product', 'manufacturer_id', 'product_id');
     }
+
+    /**
+     * Các đơn đặt hàng từ NSX này.
+     * One-to-many: 1 NSX có nhiều Purchase Orders.
+     */
+    public function purchaseOrders()
+    {
+        return $this->hasMany(PurchaseOrder::class, 'manufacturer_id');
+    }
 }

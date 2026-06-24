@@ -94,15 +94,29 @@ class AdminController extends Controller
 
         // ── 4. SẢN PHẨM BÁN CHẬM ─────────────────────────────────────
 
-        // Định nghĩa "bán chậm": tổng đã bán / tổng đã nhập kho ≤ 5%
+        // Định nghĩa "bán chậm": Sản phẩm nhập kho >= 7 ngày mà tỷ lệ bán < 30%
+        // TODO: Đổi thành 30 ngày khi có đủ dữ liệu
         $slowProducts = [];
-        $products = Product::where('quantity', '>', 0)->get();
+        $daysThreshold = 7; // TODO: Đổi thành 30 sau
+        $daysAgo = now()->subDays($daysThreshold);
 
-        foreach ($products as $product) {
-            // Tổng số đã nhập kho từ warehouse_stock_logs (type = 'import')
-            $totalImport = WarehouseStockLog::where('product_id', $product->id)
-                ->where('type', 'import')
-                ->sum('quantity');
+        // Lấy các log nhập kho từ N ngày trước trở về trước, nhóm theo product_id
+        $oldImportLogs = WarehouseStockLog::where('type', 'import')
+            ->where('created_at', '<=', $daysAgo)
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->groupBy('product_id');
+
+        foreach ($oldImportLogs as $productId => $logs) {
+            $product = Product::find($productId);
+            if (!$product) continue;
+
+            // Tính tổng số lượng nhập từ các lần nhập >= N ngày
+            $totalImported = $logs->sum('quantity');
+            
+            // Lấy log nhập đầu tiên để biết ngày nhập
+            $firstImportDate = $logs->first()->created_at;
+            $daysInStock = now()->diffInDays($firstImportDate);
 
             // Tổng số đã bán từ đơn hoàn tất (status = 4)
             $totalSold = DB::table('order_details')
@@ -111,18 +125,23 @@ class AdminController extends Controller
                 ->where('orders.status', 4)
                 ->sum('order_details.quantity');
 
-            // Tỷ lệ bán = đã bán / đã nhập × 100
-            // Nếu chưa nhập kho → saleRate = 0 (không có log) → vẫn hiện vào bán chậm
-            $saleRate = $totalImport > 0 ? ($totalSold / $totalImport) * 100 : 0;
+            // Tính tỉ lệ bán
+            $saleRate = $totalImported > 0 ? ($totalSold / $totalImported) * 100 : 0;
 
-            if ($saleRate <= 5) {
-                $product->total_sold = $totalSold; // gán thêm để dùng trong view
+            // Cảnh báo nếu tỉ lệ < 30%
+            if ($saleRate < 30) {
+                $product->total_import = $totalImported;
+                $product->total_sold = $totalSold;
+                $product->sale_rate = round($saleRate, 1);
+                $product->days_in_stock = $daysInStock;
+                $product->first_import_date = $firstImportDate;
                 $slowProducts[] = $product;
             }
         }
 
         // Giới hạn 5 sản phẩm để tránh bảng quá dài
         $slowProducts = \array_slice($slowProducts, 0, 5);
+
 
         // ── 5. SẢN PHẨM SẮP HẾT KHO ──────────────────────────────────
 

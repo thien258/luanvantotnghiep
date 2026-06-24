@@ -40,7 +40,7 @@
             <div class="tab-pane fade show active" id="content-bancham">
                 <div class="alert alert-warning rounded-0 border-0 small mb-3">
                     <i class="fa fa-lightbulb me-1"></i> <strong>Gợi ý hệ thống:</strong>
-                    Danh sách sản phẩm chưa phát sinh đơn hàng hoặc có tỉ lệ trừ Stock chậm (0%).
+                    Danh sách sản phẩm nhập kho từ <strong>7 ngày trở lên</strong> mà tỷ lệ bán chưa đạt <strong>30%</strong>.
                     Hệ thống đề xuất lập tức bật <strong>Flash Sale</strong> hoặc <strong>Giảm giá</strong> để giải phóng kho.
                 </div>
                 <div class="table-responsive">
@@ -48,10 +48,9 @@
                         <thead class="table-light text-uppercase" style="font-size:0.75rem;">
                             <tr>
                                 <th>Sản phẩm ứ đọng</th>
-                                <th class="text-center">Lượng nhập/Gốc</th>
-                                <th class="text-center">Tồn thực tại</th>
+                                <th class="text-center">Lượng nhập</th>
                                 <th class="text-center">Đã tiêu thụ</th>
-                                <th class="text-center">Tỉ lệ</th>
+                                <th class="text-center">Tỉ lệ bán</th>
                                 <th class="text-center">Đề xuất</th>
                             </tr>
                         </thead>
@@ -60,7 +59,6 @@
                             <tr>
                                 <td><span class="fw-bold text-dark">{{ $sp->title }}</span></td>
                                 <td class="text-center fw-bold text-secondary">{{ $sp->total_import }}</td>
-                                <td class="text-center fw-bold text-dark">{{ $sp->quantity }}</td>
                                 <td class="text-center fw-bold text-danger">{{ $sp->total_sold }}</td>
                                 <td class="text-center">
                                     <span class="badge bg-danger rounded-0" style="font-size:0.65rem;">{{ $sp->sale_rate }}%</span>
@@ -73,7 +71,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-3">Kho sạch, không phát sinh hàng ứ đọng.</td>
+                                <td colspan="5" class="text-center text-muted py-3">Không có sản phẩm bán chậm (tất cả SP nhập từ 7 ngày trước đã bán > 30%).</td>
                             </tr>
                             @endforelse
                         </tbody>
