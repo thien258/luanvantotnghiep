@@ -52,8 +52,11 @@ class WarehouseStockLog extends Model
         'quantity',    // Số lượng thay đổi
         'stock_after', // Tồn kho sau thay đổi (snapshot)
         'reason',      // Lý do / ghi chú
+        'expiry_date', // Ngày hết hạn của lô hàng (nullable — log export không cần)
     ];
-
+    protected $casts = [
+        'expiry_date' => 'date', // tự cast thành Carbon date khi đọc ra
+    ];
     /**
      * Sản phẩm liên quan đến log này.
      */

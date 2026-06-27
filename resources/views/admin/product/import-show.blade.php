@@ -6,14 +6,17 @@
         background-color: #d1e7dd !important;
         border-left: 4px solid #198754 !important;
     }
+
     .import-row-skipped {
         background-color: #f8f9fa;
         opacity: 0.65;
     }
+
     .import-row-skipped td {
         text-decoration: line-through;
         text-decoration-color: rgba(0, 0, 0, 0.25);
     }
+
     .import-row-skipped td:first-child,
     .import-row-skipped td:nth-child(2) {
         text-decoration: none;
@@ -38,7 +41,7 @@
         </div>
 
         @if(session('error'))
-            <div class="alert alert-danger rounded-0">{{ session('error') }}</div>
+        <div class="alert alert-danger rounded-0">{{ session('error') }}</div>
         @endif
 
         @if($import->status === 'pending')
@@ -57,7 +60,7 @@
                         <div class="input-group input-group-sm" style="width:180px;">
                             <span class="input-group-text rounded-0 text-muted" style="font-size:0.75rem;">% tăng tất cả</span>
                             <input type="number" id="globalMarkup" value="30" min="0" max="1000" step="1"
-                                   class="form-control form-control-sm rounded-0 text-center">
+                                class="form-control form-control-sm rounded-0 text-center">
                             <span class="input-group-text rounded-0 px-1" style="font-size:0.75rem;">%</span>
                         </div>
                         <button type="button" class="btn btn-dark btn-sm rounded-0" id="applyGlobalMarkup">
@@ -72,17 +75,18 @@
                     <table class="table table-sm table-bordered align-middle mb-0" style="font-size:0.85rem;">
                         <thead class="table-dark">
                             <tr>
-                                <th class="text-center" width="4%">✓</th>
-                                <th>Tên sản phẩm</th>
-                                <th width="8%">Ảnh</th>
-                                <th width="8%">SL Order</th>
-                                <th width="10%">SL thực tế</th>
-                                <th width="12%">Giá nhập (₫)</th>
-                                <th width="12%">Giá bán (₫)</th>
-                                <th width="8%">Volume</th>
-                                <th width="10%">Category</th>
-                                <th width="10%">Brand</th>
-                                <th width="10%">Nồng độ</th>
+                                <th class="text-center" width="3%">✓</th>
+                                <th width="18%" class="text-center">Tên sản phẩm</th>
+                                <th width="6%"class="text-center">Ảnh</th>
+                                <th width="5%"class="text-center">SL Order</th>
+                                <th width="5%"class="text-center">SL thực tế</th>
+                                <th width="8%"class="text-center">Giá nhập (₫)</th>
+                                <th width="8%"class="text-center">Giá bán (₫)</th>
+                                <th width="5%"class="text-center">Volume</th>
+                                <th width="8%"class="text-center">Category</th>
+                                <th width="8%"class="text-center">Brand</th>
+                                <th width="10%"class="text-center">Nồng độ</th>
+                                <th width="9%"class="text-center">HSD</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -93,8 +97,8 @@
                                 </td>
                                 <td>
                                     <input type="text" name="product_name[{{ $index }}]"
-                                           value="{{ $p['title'] }}"
-                                           class="form-control form-control-sm rounded-0 fw-bold">
+                                        value="{{ $p['title'] }}"
+                                        class="form-control form-control-sm rounded-0 fw-bold">
                                     <input type="hidden" name="image[{{ $index }}]" value="{{ $p['image'] }}">
                                     <input type="hidden" name="decription[{{ $index }}]" value="{{ $p['decription'] }}">
                                     <input type="hidden" name="volume[{{ $index }}]" value="{{ $p['volume'] }}">
@@ -107,41 +111,47 @@
                                 </td>
                                 <td class="text-center">
                                     @if(!empty($p['image']))
-                                        <img src="{{ $p['image'] }}" style="width:36px;height:36px;object-fit:cover;" class="border">
+                                    <img src="{{ $p['image'] }}" style="width:36px;height:36px;object-fit:cover;" class="border">
                                     @else
-                                        <span class="text-muted" style="font-size:0.7rem;">No img</span>
+                                    <span class="text-muted" style="font-size:0.7rem;">No img</span>
                                     @endif
                                 </td>
                                 <td>
                                     {{-- SL Order từ đơn đặt hàng --}}
                                     <input type="text"
-                                           value="{{ $p['sl_order'] ?? '' }}" readonly
-                                           class="form-control form-control-sm rounded-0 text-center text-muted bg-light">
+                                        value="{{ $p['sl_order'] ?? '' }}" readonly
+                                        class="form-control form-control-sm rounded-0 text-center text-muted bg-light px-1">
                                 </td>
                                 <td>
                                     {{-- SL thực tế nhập kho - chỉ đọc, không cho sửa --}}
                                     <input type="number" name="quantity[{{ $index }}]"
-                                           value="{{ $p['quantity'] }}" min="0" readonly
-                                           class="form-control form-control-sm rounded-0 text-center fw-bold bg-light text-muted">
+                                        value="{{ $p['quantity'] }}" min="0" readonly
+                                        class="form-control form-control-sm rounded-0 text-center fw-bold bg-light text-muted px-1">
                                 </td>
                                 <td>
                                     {{-- Giá nhập từ NSX - chỉ đọc --}}
                                     <input type="number"
-                                           value="{{ $p['unit_price'] ?? $p['price'] }}" min="0" readonly
-                                           class="form-control form-control-sm rounded-0 text-center text-muted cost-input"
-                                           data-index="{{ $index }}">
+                                        value="{{ $p['unit_price'] ?? $p['price'] }}" min="0" readonly
+                                        class="form-control form-control-sm rounded-0 text-center text-muted cost-input px-1"
+                                        data-index="{{ $index }}">
                                 </td>
                                 <td>
                                     {{-- Giá bán = giá nhập × (1 + %/100) - chỉ đọc, tính từ % markup --}}
                                     <input type="number" name="price[{{ $index }}]"
-                                           value="{{ round(($p['unit_price'] ?? 0) * 1.3) }}" min="0" readonly
-                                           class="form-control form-control-sm rounded-0 text-center bg-light sell-input"
-                                           data-index="{{ $index }}">
+                                        value="{{ round(($p['unit_price'] ?? 0) * 1.3) }}" min="0" readonly
+                                        class="form-control form-control-sm rounded-0 text-center bg-light sell-input px-1"
+                                        data-index="{{ $index }}">
                                 </td>
                                 <td class="text-center text-muted" style="font-size:0.78rem;">{{ $p['volume'] }}</td>
-                                <td class="text-muted" style="font-size:0.78rem;">{{ $p['category'] }}</td>
-                                <td class="text-muted" style="font-size:0.78rem;">{{ $p['brand'] }}</td>
+                                <td class="text-muted text-center" style="font-size:0.78rem;">{{ $p['category'] }}</td>
+                                <td class="text-muted text-center" style="font-size:0.78rem;">{{ $p['brand'] }}</td>
                                 <td class="text-muted" style="font-size:0.78rem;">{{ $p['concentration'] }}</td>
+                                <td>
+                                    <input type="date" name="expiry_date[{{ $index }}]"
+                                        value="{{ $p['expiry_date'] ?? '' }}"
+                                        class="form-control form-control-sm rounded-0 text-center bg-light text-muted"
+                                        style="min-width:130px;" readonly>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -152,7 +162,7 @@
                         <span id="selectedCount">0</span>/{{ count($productsPreview) }} sản phẩm được chọn
                     </span>
                     <button type="submit" class="btn btn-success rounded-0 fw-bold px-4"
-                            onclick="return confirmApprove()">
+                        onclick="return confirmApprove()">
                         <i class="fa fa-check me-2"></i>Duyệt & Nhập kho
                     </button>
                 </div>
@@ -161,26 +171,26 @@
 
         @elseif($import->status === 'approved')
         @php
-            $importedCount = count($approvedItems);
-            $totalInFile   = count($productsPreview);
+        $importedCount = count($approvedItems);
+        $totalInFile = count($productsPreview);
         @endphp
 
         @if($importedCount === 0)
-            <div class="alert alert-info rounded-0 small mb-3">
-                <i class="fa fa-info-circle me-1"></i>
-                File này duyệt trước khi hệ thống lưu chi tiết — hiển thị toàn bộ {{ $totalInFile }} sản phẩm trong file.
-            </div>
+        <div class="alert alert-info rounded-0 small mb-3">
+            <i class="fa fa-info-circle me-1"></i>
+            File này duyệt trước khi hệ thống lưu chi tiết — hiển thị toàn bộ {{ $totalInFile }} sản phẩm trong file.
+        </div>
         @else
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                <div class="text-muted small">
-                    <i class="fa fa-check-circle text-success me-1"></i>
-                    Đã nhập kho <strong class="text-success">{{ $importedCount }}</strong>/{{ $totalInFile }} sản phẩm trong file
-                </div>
-                <label class="small text-muted mb-0">
-                    <input type="checkbox" id="showImportedOnly" class="me-1">
-                    Chỉ hiển thị SP đã nhập
-                </label>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div class="text-muted small">
+                <i class="fa fa-check-circle text-success me-1"></i>
+                Đã nhập kho <strong class="text-success">{{ $importedCount }}</strong>/{{ $totalInFile }} sản phẩm trong file
             </div>
+            <label class="small text-muted mb-0">
+                <input type="checkbox" id="showImportedOnly" class="me-1">
+                Chỉ hiển thị SP đã nhập
+            </label>
+        </div>
         @endif
 
         <div class="table-responsive">
@@ -199,23 +209,23 @@
                 <tbody>
                     @foreach($productsPreview as $index => $p)
                     @php
-                        $key      = mb_strtolower(trim($p['title']));
-                        $imported = $importedCount > 0 && $approvedByTitle->has($key);
-                        $data     = $imported ? $approvedByTitle->get($key) : $p;
+                    $key = mb_strtolower(trim($p['title']));
+                    $imported = $importedCount > 0 && $approvedByTitle->has($key);
+                    $data = $imported ? $approvedByTitle->get($key) : $p;
                     @endphp
                     <tr class="import-result-row {{ $importedCount === 0 ? '' : ($imported ? 'import-row-approved' : 'import-row-skipped') }}"
                         data-imported="{{ $imported ? '1' : '0' }}">
                         <td class="text-center">
                             @if($importedCount === 0)
-                                <span class="text-muted">—</span>
+                            <span class="text-muted">—</span>
                             @elseif($imported)
-                                <span class="badge bg-success rounded-0 px-2 py-1">
-                                    <i class="fa fa-check me-1"></i>Đã nhập
-                                </span>
+                            <span class="badge bg-success rounded-0 px-2 py-1">
+                                <i class="fa fa-check me-1"></i>Đã nhập
+                            </span>
                             @else
-                                <span class="badge bg-secondary rounded-0 px-2 py-1">
-                                    <i class="fa fa-minus me-1"></i>Bỏ qua
-                                </span>
+                            <span class="badge bg-secondary rounded-0 px-2 py-1">
+                                <i class="fa fa-minus me-1"></i>Bỏ qua
+                            </span>
                             @endif
                         </td>
                         <td class="fw-bold {{ $imported ? 'text-success' : 'text-muted' }}">{{ $p['title'] }}</td>
@@ -270,56 +280,56 @@
 
 @section('script')
 <script>
-document.getElementById('selectAll')?.addEventListener('change', function() {
-    document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = this.checked);
-    updateSelectedCount();
-});
-
-function updateSelectedCount() {
-    const total = document.querySelectorAll('.product-checkbox').length;
-    const selected = document.querySelectorAll('.product-checkbox:checked').length;
-    const el = document.getElementById('selectedCount');
-    if (el) el.textContent = selected;
-}
-
-document.querySelectorAll('.product-checkbox').forEach(cb => {
-    cb.addEventListener('change', updateSelectedCount);
-});
-
-updateSelectedCount();
-
-// Tính giá bán = giá nhập × (1 + % / 100)
-function calcSellPrice(index, markup) {
-    const cost   = parseFloat(document.querySelector(`.cost-input[data-index="${index}"]`)?.value) || 0;
-    const sellEl = document.querySelector(`.sell-input[data-index="${index}"]`);
-    if (sellEl) sellEl.value = Math.round(cost * (1 + markup / 100));
-}
-
-// Nút "Áp dụng" — áp % chung cho tất cả dòng 1 lần
-document.getElementById('applyGlobalMarkup')?.addEventListener('click', function() {
-    const globalPct = parseFloat(document.getElementById('globalMarkup')?.value) || 0;
-    document.querySelectorAll('.cost-input').forEach(el => {
-        calcSellPrice(el.dataset.index, globalPct);
+    document.getElementById('selectAll')?.addEventListener('change', function() {
+        document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = this.checked);
+        updateSelectedCount();
     });
-});
 
-function confirmApprove() {
-    const selected = document.querySelectorAll('.product-checkbox:checked').length;
-    if (selected === 0) {
-        alert('Vui lòng chọn ít nhất 1 sản phẩm để duyệt.');
-        return false;
+    function updateSelectedCount() {
+        const total = document.querySelectorAll('.product-checkbox').length;
+        const selected = document.querySelectorAll('.product-checkbox:checked').length;
+        const el = document.getElementById('selectedCount');
+        if (el) el.textContent = selected;
     }
-    return confirm(`Xác nhận duyệt và nhập kho ${selected} sản phẩm đã chọn?`);
-}
 
-document.getElementById('showImportedOnly')?.addEventListener('change', function() {
-    document.querySelectorAll('.import-result-row').forEach(row => {
-        if (this.checked) {
-            row.style.display = row.dataset.imported === '1' ? '' : 'none';
-        } else {
-            row.style.display = '';
-        }
+    document.querySelectorAll('.product-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateSelectedCount);
     });
-});
+
+    updateSelectedCount();
+
+    // Tính giá bán = giá nhập × (1 + % / 100)
+    function calcSellPrice(index, markup) {
+        const cost = parseFloat(document.querySelector(`.cost-input[data-index="${index}"]`)?.value) || 0;
+        const sellEl = document.querySelector(`.sell-input[data-index="${index}"]`);
+        if (sellEl) sellEl.value = Math.round(cost * (1 + markup / 100));
+    }
+
+    // Nút "Áp dụng" — áp % chung cho tất cả dòng 1 lần
+    document.getElementById('applyGlobalMarkup')?.addEventListener('click', function() {
+        const globalPct = parseFloat(document.getElementById('globalMarkup')?.value) || 0;
+        document.querySelectorAll('.cost-input').forEach(el => {
+            calcSellPrice(el.dataset.index, globalPct);
+        });
+    });
+
+    function confirmApprove() {
+        const selected = document.querySelectorAll('.product-checkbox:checked').length;
+        if (selected === 0) {
+            alert('Vui lòng chọn ít nhất 1 sản phẩm để duyệt.');
+            return false;
+        }
+        return confirm(`Xác nhận duyệt và nhập kho ${selected} sản phẩm đã chọn?`);
+    }
+
+    document.getElementById('showImportedOnly')?.addEventListener('change', function() {
+        document.querySelectorAll('.import-result-row').forEach(row => {
+            if (this.checked) {
+                row.style.display = row.dataset.imported === '1' ? '' : 'none';
+            } else {
+                row.style.display = '';
+            }
+        });
+    });
 </script>
 @endsection

@@ -142,6 +142,57 @@ class AdminController extends Controller
         // Giới hạn 5 sản phẩm để tránh bảng quá dài
         $slowProducts = \array_slice($slowProducts, 0, 5);
 
+        // ── 6. SẮP HẾT HẠN (HSD) ─────────────────────────────────────
+
+        // Lấy top 5 lô có HSD gần nhất còn tồn kho (FIFO by expiry_date)
+        // Chỉ lấy lô HSD trong vòng 365 ngày tới
+        $expiringBatches = [];
+        $today365 = now()->addDays(365)->toDateString();
+        $todayStr  = now()->toDateString();
+
+        $hsdLogs = WarehouseStockLog::where('type', 'import')
+            ->whereNotNull('expiry_date')
+            ->selectRaw('product_id, expiry_date, SUM(quantity) as total_import')
+            ->groupBy('product_id', 'expiry_date')
+            ->orderBy('product_id')
+            ->orderBy('expiry_date', 'asc')
+            ->get()
+            ->groupBy('product_id');
+
+        foreach ($hsdLogs as $productId => $batches) {
+            $product = Product::find($productId);
+            if (!$product) continue;
+
+            $totalSoldHsd = DB::table('order_details')->where('idProduct', $productId)->sum('quantity');
+            $remaining = $totalSoldHsd;
+
+            foreach ($batches as $batch) {
+                $batchQty = (int) $batch->total_import;
+                if ($remaining >= $batchQty) { $remaining -= $batchQty; continue; }
+
+                $expiryStr = $batch->expiry_date instanceof \Carbon\Carbon
+                    ? $batch->expiry_date->toDateString()
+                    : (string) $batch->expiry_date;
+
+                $daysLeft = (int) now()->diffInDays($expiryStr, false);
+
+                // Chỉ lấy lô chưa hết hạn và trong 365 ngày tới
+                if ($expiryStr >= $todayStr && $expiryStr <= $today365) {
+                    $expiringBatches[] = (object)[
+                        'product'     => $product,
+                        'expiry_date' => $expiryStr,
+                        'qty_left'    => $batchQty - $remaining,
+                        'days_left'   => $daysLeft,
+                    ];
+                }
+                break;
+            }
+        }
+
+        // Sắp theo HSD gần nhất, lấy top 5
+        usort($expiringBatches, fn($a, $b) => $a->days_left <=> $b->days_left);
+        $expiringBatches = \array_slice($expiringBatches, 0, 5);
+
 
         // ── 5. SẢN PHẨM SẮP HẾT KHO ──────────────────────────────────
 
@@ -160,7 +211,8 @@ class AdminController extends Controller
             'monthlyRevenue',
             'topSelling',
             'slowProducts',
-            'lowStockProducts'
+            'lowStockProducts',
+            'expiringBatches'
         ));
     }
 }

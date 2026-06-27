@@ -43,7 +43,21 @@
     </thead>
     <tbody>
         @forelse($products as $object)
-        <tr>
+        @php
+            $expiry   = $expiryMap[$object->id] ?? null;
+            $daysLeft = $expiry ? $expiry['days_left'] : null;
+
+            // Border trái chỉ theo HSD — độc lập với màu row
+            if ($daysLeft !== null && $daysLeft <= 30) {
+                $borderStyle = 'border-left: 5px solid #dc3545 !important;'; // đỏ
+            } elseif ($daysLeft !== null && $daysLeft <= 90) {
+                $borderStyle = 'border-left: 5px solid #fd7e14 !important;'; // cam
+            } else {
+                $borderStyle = '';
+            }
+        @endphp
+        <tr class="@if($object->quantity < 5) table-danger @elseif($object->quantity < 10) table-warning @endif"
+            style="{{ $borderStyle }}">
             <td class="fw-bold">{{$object->title}}</td>
             <td>{{$object->decription}}</td>
             <td>{{$object->category?->name ?? 'Trống'}}</td>
@@ -70,10 +84,16 @@
 
             {{-- Hiển thị số lượng kho — đỏ nếu < 5, vàng nếu < 10, bình thường nếu >= 10 --}}
             <td class="text-center fw-bold
-                @if($object->quantity < 5) text-danger
-                @elseif($object->quantity < 10) text-warning
+                @if($object->quantity < 5) bg-danger text-white
+                @elseif($object->quantity < 10) bg-warning
                 @else text-dark @endif">
                 {{ $object->quantity }}
+                @if($expiry)
+                <br><small class="fw-normal"
+                    style="font-size:0.65rem; color: {{ $daysLeft <= 30 ? '#dc3545' : ($daysLeft <= 90 ? '#fd7e14' : '#6c757d') }}">
+                    ⏰ {{ \Carbon\Carbon::parse($expiry['date'])->format('d/m/Y') }}
+                </small>
+                @endif
             </td>
 
             <td>
@@ -180,6 +200,7 @@
                     </div>
 
                     {{-- Tất cả SP — admin chọn cái nào muốn nhập thêm --}}
+            
                     @php
                         $lowStockItems = $products->sortBy('quantity')->values();
                     @endphp
@@ -205,7 +226,7 @@
                             </thead>
                             <tbody>
                                 @foreach($lowStockItems as $p)
-                                <tr>
+                                <tr class="@if($p->quantity < 5) table-danger @elseif($p->quantity < 10) table-warning @endif">
                                     <td class="pl-3 py-2">
                                         <input type="checkbox" name="product_ids[]"
                                                value="{{ $p->id }}" class="low-stock-check">

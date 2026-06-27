@@ -15,20 +15,26 @@
             <ul class="nav nav-tabs rounded-0 border-0" id="warehouseTab" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link active rounded-0 border-0 fw-bold small text-uppercase px-3 py-3 text-danger"
-                       id="bancham-tab" data-toggle="tab" href="#content-bancham" role="tab">
+                        id="bancham-tab" data-toggle="tab" href="#content-bancham" role="tab">
                         <i class="fa-solid fa-triangle-exclamation me-1"></i> Cảnh báo Sale (Bán chậm)
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link rounded-0 border-0 fw-bold small text-uppercase px-3 py-3 text-secondary"
-                       id="biendong-tab" data-toggle="tab" href="#content-biendong" role="tab">
+                        id="biendong-tab" data-toggle="tab" href="#content-biendong" role="tab">
                         <i class="fa-solid fa-history me-1"></i> Biến động kho
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link rounded-0 border-0 fw-bold small text-uppercase px-3 py-3 text-secondary"
-                       id="lichsu-tab" data-toggle="tab" href="#content-lichsu" role="tab">
+                        id="lichsu-tab" data-toggle="tab" href="#content-lichsu" role="tab">
                         <i class="fa-solid fa-list-alt me-1"></i> Lịch sử nhập kho
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link rounded-0 border-0 fw-bold small text-uppercase px-3 py-3 text-warning"
+                        id="hsd-tab" data-toggle="tab" href="#content-hsd" role="tab">
+                        <i class="fa-solid fa-clock me-1"></i> Sắp hết hạn
                     </a>
                 </li>
             </ul>
@@ -38,10 +44,16 @@
 
             {{-- TAB 1: CẢNH BÁO BÁN CHẬM --}}
             <div class="tab-pane fade show active" id="content-bancham">
-                <div class="alert alert-warning rounded-0 border-0 small mb-3">
-                    <i class="fa fa-lightbulb me-1"></i> <strong>Gợi ý hệ thống:</strong>
-                    Danh sách sản phẩm nhập kho từ <strong>7 ngày trở lên</strong> mà tỷ lệ bán chưa đạt <strong>30%</strong>.
-                    Hệ thống đề xuất lập tức bật <strong>Flash Sale</strong> hoặc <strong>Giảm giá</strong> để giải phóng kho.
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="alert alert-warning rounded-0 border-0 small mb-0 flex-grow-1 me-3">
+                        <i class="fa fa-lightbulb me-1"></i> <strong>Gợi ý hệ thống:</strong>
+                        Danh sách sản phẩm nhập kho từ <strong>7 ngày trở lên</strong> mà tỷ lệ bán chưa đạt <strong>30%</strong>.
+                        Hệ thống đề xuất lập tức bật <strong>Flash Sale</strong> hoặc <strong>Giảm giá</strong> để giải phóng kho.
+                    </div>
+                    <button type="button" class="btn btn-success btn-sm rounded-0 text-nowrap"
+                        data-toggle="modal" data-target="#modalAttachFestivalSlow">
+                        <i class="fa fa-tag me-1"></i> Phân vào Festival
+                    </button>
                 </div>
                 <div class="table-responsive">
                     <table class="table align-middle small text-start">
@@ -51,6 +63,7 @@
                                 <th class="text-center">Lượng nhập</th>
                                 <th class="text-center">Đã tiêu thụ</th>
                                 <th class="text-center">Tỉ lệ bán</th>
+                                <th class="text-center">Festival</th>
                                 <th class="text-center">Đề xuất</th>
                             </tr>
                         </thead>
@@ -68,10 +81,20 @@
                                         <i class="fa fa-bolt me-1"></i> CẦN GIẢM GIÁ SALE
                                     </span>
                                 </td>
+                                {{-- Hiện festival SP đang tham gia (nếu có) --}}
+                                <td class="text-center">
+                                    @forelse($sp->festivals as $fes)
+                                        <span class="badge bg-info text-dark rounded-0 mb-1" style="font-size:0.65rem;">
+                                            🎉 {{ $fes->name }}
+                                        </span>
+                                    @empty
+                                        <span class="text-muted" style="font-size:0.75rem;">—</span>
+                                    @endforelse
+                                </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-3">Không có sản phẩm bán chậm (tất cả SP nhập từ 7 ngày trước đã bán > 30%).</td>
+                                <td colspan="6" class="text-center text-muted py-3">Không có sản phẩm bán chậm (tất cả SP nhập từ 7 ngày trước đã bán > 30%).</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -151,6 +174,215 @@
                 </div>
             </div>
 
+            {{-- TAB 4: SẮP HẾT HẠN --}}
+            <div class="tab-pane fade" id="content-hsd">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="alert alert-warning rounded-0 border-0 small mb-0 flex-grow-1 me-3">
+                        <i class="fa fa-clock me-1"></i> <strong>Cảnh báo HSD:</strong>
+                        Danh sách lô hàng còn tồn kho và sẽ hết hạn trong vòng <strong>2 năm</strong>.
+                        🔴 <strong>Trong năm nay</strong> (≤ 365 ngày) — cần xử lý ngay.
+                        🟡 <strong>Năm sau</strong> (366–730 ngày) — theo dõi, lên kế hoạch sale sớm.
+                    </div>
+                    <button type="button" class="btn btn-success btn-sm rounded-0 text-nowrap"
+                        data-toggle="modal" data-target="#modalAttachFestival">
+                        <i class="fa fa-tag me-1"></i> Phân vào Festival
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle small text-start">
+                        <thead class="table-light text-uppercase" style="font-size:0.75rem;">
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th class="text-center">Còn lại</th>
+                                <th class="text-center">Ngày HSD</th>
+                                <th class="text-center">Số ngày còn lại</th>
+                                <th class="text-center">Mức độ</th>
+                                <th class="text-center">Festival</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($expiring as $item)
+                            <tr class="{{ $item->days_left <= 365 ? 'table-danger' : 'table-warning' }}">
+                                <td><span class="fw-bold text-dark">{{ $item->product->title }}</span></td>
+                                <td class="text-center fw-bold">{{ $item->qty_left }} chai</td>
+                                <td class="text-center">{{ \Carbon\Carbon::parse($item->expiry_date)->format('d/m/Y') }}</td>
+                                <td class="text-center fw-bold
+                                    {{ $item->days_left <= 365 ? 'text-danger' : 'text-warning' }}">
+                                    {{ $item->days_left }} ngày
+                                </td>
+                                <td class="text-center">
+                                    @if($item->days_left <= 365)
+                                        <span class="badge  rounded-0" style="font-size:0.65rem;">🔴 TRONG NĂM NAY</span>
+                                        @else
+                                        <span class="badge bg-warning text-dark rounded-0" style="font-size:0.65rem;">🟡 THEO DÕI (NĂM SAU)</span>
+                                        @endif
+                                </td>
+                                {{-- Cột Festival: hiện badge nếu SP đã được thêm vào festival nào --}}
+                                <td class="text-center">
+                                    @forelse($item->product->festivals as $fes)
+                                    <span class="badge bg-info text-dark rounded-0 mb-1" style="font-size:0.65rem;">
+                                        {{ $fes->name }}
+                                    </span>
+                                    @empty
+                                    <span class="text-muted" style="font-size:0.75rem;">—</span>
+                                    @endforelse
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-3">Không có lô hàng nào sắp hết hạn.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{{-- MODAL: Phân SP bán chậm vào Festival --}}
+<div class="modal fade" id="modalAttachFestivalSlow" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content rounded-0">
+            <div class="modal-header bg-success text-white py-2">
+                <h6 class="modal-title mb-0"><i class="fa fa-tag me-2"></i>Phân sản phẩm bán chậm vào Festival</h6>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <form action="{{ route('admin.product.warehouse.attach-festival') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row">
+                        {{-- Cột trái: SP bán chậm --}}
+                        <div class="col-md-7">
+                            <p class="fw-bold small text-uppercase text-muted mb-2">Chọn sản phẩm bán chậm</p>
+                            <div style="max-height:350px; overflow-y:auto;">
+                                <table class="table table-sm table-bordered small mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th width="5%">✓</th>
+                                            <th>Sản phẩm</th>
+                                            <th class="text-center">Tỉ lệ bán</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($slowProducts as $sp)
+                                        <tr>
+                                            <td class="text-center">
+                                                <input type="checkbox" name="product_ids[]" value="{{ $sp->id }}">
+                                            </td>
+                                            <td class="fw-bold">{{ $sp->title }}</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-danger rounded-0">{{ $sp->sale_rate }}%</span>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {{-- Cột phải: Festival --}}
+                        <div class="col-md-5">
+                            <p class="fw-bold small text-uppercase text-muted mb-2">Chọn Festival</p>
+                            @forelse($festivals as $fes)
+                            <div class="form-check border rounded-0 p-2 mb-2">
+                                <input class="form-check-input" type="radio"
+                                    name="festival_id" value="{{ $fes->id }}" id="slow_fes_{{ $fes->id }}">
+                                <label class="form-check-label w-100" for="slow_fes_{{ $fes->id }}">
+                                    <span class="fw-bold">{{ $fes->name }}</span>
+                                    <span class="badge bg-danger ms-1">-{{ $fes->discount }}%</span>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ $fes->start_date->format('d/m/Y') }} → {{ $fes->end_date->format('d/m/Y') }}
+                                    </small>
+                                </label>
+                            </div>
+                            @empty
+                            <div class="alert alert-warning rounded-0 small">Không có festival đang active.</div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-0" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-success btn-sm rounded-0">
+                        <i class="fa fa-check me-1"></i> Xác nhận thêm vào Festival
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{-- MODAL: Phân SP sắp hết hạn vào Festival --}}
+<div class="modal fade" id="modalAttachFestival" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content rounded-0">
+            <div class="modal-header bg-success text-white py-2">
+                <h6 class="modal-title mb-0"><i class="fa fa-tag me-2"></i>Phân sản phẩm vào Festival</h6>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <form action="{{ route('admin.product.warehouse.attach-festival') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row">
+                        {{-- Cột trái: Danh sách SP sắp hết hạn --}}
+                        <div class="col-md-7">
+                            <p class="fw-bold small text-uppercase text-muted mb-2">Chọn sản phẩm cần đưa vào sale</p>
+                            <div style="max-height:350px; overflow-y:auto;">
+                                <table class="table table-sm table-bordered small mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th width="5%">✓</th>
+                                            <th>Sản phẩm</th>
+                                            <th class="text-center">Còn lại</th>
+                                            <th class="text-center">HSD</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($expiring as $item)
+                                        <tr class="{{ $item->days_left <= 365 ? 'table-danger' : 'table-warning' }}">
+                                            <td class="text-center">
+                                                <input type="checkbox" name="product_ids[]"
+                                                    value="{{ $item->product->id }}">
+                                            </td>
+                                            <td class="fw-bold">{{ $item->product->title }}</td>
+                                            <td class="text-center">{{ $item->qty_left }}</td>
+                                            <td class="text-center">{{ \Carbon\Carbon::parse($item->expiry_date)->format('d/m/Y') }}</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {{-- Cột phải: Danh sách Festival --}}
+                        <div class="col-md-5">
+                            <p class="fw-bold small text-uppercase text-muted mb-2">Chọn Festival</p>
+                            @forelse($festivals as $fes)
+                            <div class="form-check border rounded-0 p-2 mb-2">
+                                <input class="form-check-input" type="radio"
+                                    name="festival_id" value="{{ $fes->id }}" id="fes_{{ $fes->id }}">
+                                <label class="form-check-label w-100" for="fes_{{ $fes->id }}">
+                                    <span class="fw-bold">{{ $fes->name }}</span>
+                                    <span class="badge bg-danger ms-1">-{{ $fes->discount }}%</span>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ $fes->start_date->format('d/m/Y') }} → {{ $fes->end_date->format('d/m/Y') }}
+                                    </small>
+                                </label>
+                            </div>
+                            @empty
+                            <div class="alert alert-warning rounded-0 small">Không có festival đang active.</div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-0" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-success btn-sm rounded-0">
+                        <i class="fa fa-check me-1"></i> Xác nhận thêm vào Festival
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

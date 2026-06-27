@@ -14,6 +14,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
+use \Illuminate\Support\Facades\DB;
+
 
 /**
  * ProductController — Quản lý CRUD sản phẩm trong admin.
@@ -43,7 +45,42 @@ class ProductController extends Controller
     {
         // Eager load festivals để hiển thị badge festival trong bảng
         $products = Product::with('festivals')->paginate(5);
-        return view('admin.product.product-list', compact('products'));
+
+        // Lấy HSD gần nhất còn hàng cho từng SP (FIFO by expiry_date)
+        // $expiryMap[product_id] = ['date' => 'Y-m-d', 'days_left' => int]
+        $expiryMap = [];
+
+        $logs = \App\Models\WarehouseStockLog::where('type', 'import')
+            ->whereNotNull('expiry_date')
+            ->selectRaw('product_id, expiry_date, SUM(quantity) as total_import')
+            ->groupBy('product_id', 'expiry_date')
+            ->orderBy('product_id')
+            ->orderBy('expiry_date', 'asc')
+            ->get()
+            ->groupBy('product_id');
+
+        foreach ($logs as $productId => $batches) {
+            $totalSold = DB::table('order_details')
+                ->where('idProduct', $productId)->sum('quantity');
+            $remaining = $totalSold;
+
+            foreach ($batches as $batch) {
+                $batchQty = (int) $batch->total_import;
+                if ($remaining >= $batchQty) { $remaining -= $batchQty; continue; }
+
+                $expiryStr = $batch->expiry_date instanceof \Carbon\Carbon
+                    ? $batch->expiry_date->toDateString()
+                    : (string) $batch->expiry_date;
+
+                $expiryMap[$productId] = [
+                    'date'      => $expiryStr,
+                    'days_left' => (int) now()->diffInDays($expiryStr, false),
+                ];
+                break; // chỉ lấy lô HSD gần nhất còn hàng
+            }
+        }
+
+        return view('admin.product.product-list', compact('products', 'expiryMap'));
     }
 
     // =========================================================================
@@ -163,7 +200,7 @@ class ProductController extends Controller
             'quantity'        => 'required|integer|min:0',
             'status'          => 'required|in:0,1',
             'volume'          => 'nullable|string|max:50',
-            'image'           => 'nullable|string|max:500',
+            'image'           => 'nullable|string|',
             'decription'      => 'nullable|string|max:5000',
             'idConcentration' => 'required|integer|exists:concentrations,id',
             'idCategory'      => 'required|integer|exists:categories,id',

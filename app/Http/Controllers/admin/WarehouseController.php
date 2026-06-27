@@ -56,7 +56,9 @@ class WarehouseController extends Controller
     public function index()
     {
         [$receipt, $stockLogs, $slowProducts] = $this->getWarehouseData();
-        return view('admin.product.warehouse', compact('receipt', 'stockLogs', 'slowProducts'));
+        $expiring  = $this->getExpiringBatches(730); // cảnh báo trong vòng 2 năm
+        $festivals = \App\Models\Festival::where('status', 1)->get(); // festival đang active
+        return view('admin.product.warehouse', compact('receipt', 'stockLogs', 'slowProducts', 'expiring', 'festivals'));
     }
 
     /**
@@ -197,7 +199,7 @@ class WarehouseController extends Controller
         $productsPreview = $this->parseImportFile($import);
         $approvedItems     = $import->status === 'approved' ? ($import->approved_items ?? []) : [];
         $approvedByTitle   = collect($approvedItems)->keyBy(
-            fn ($item) => mb_strtolower(trim($item['title'] ?? ''))
+            fn($item) => mb_strtolower(trim($item['title'] ?? ''))
         );
 
         return view('admin.product.import-show', compact(
@@ -238,6 +240,8 @@ class WarehouseController extends Controller
         $concs      = $request->input('concentration', []);
         $unitPrices = $request->input('unit_price', []); // giá nhập từ NSX
         $slOrders   = $request->input('sl_order', []);   // số lượng đã order
+        $expirys    = $request->input('expiry_date', []);
+
 
         // Tạo phiếu nhập kho
         $code    = 'PN' . now()->format('ymdHis');
@@ -277,7 +281,7 @@ class WarehouseController extends Controller
                 $concName  = trim($concs[$i] ?? '');
 
                 // Category: tìm hoặc lấy mặc định
-                $catId = $catName 
+                $catId = $catName
                     ? (Category::whereRaw('LOWER(name) = ?', [strtolower($catName)])->value('id') ?? Category::value('id') ?? 1)
                     : (Category::value('id') ?? 1);
 
@@ -320,6 +324,7 @@ class WarehouseController extends Controller
                 'quantity'    => $qty,
                 'stock_after' => $product->quantity,
                 'reason'      => $reason,
+                'expiry_date' => $expirys[$i] ?: null,
             ]);
 
             $approvedItems[] = [
@@ -335,6 +340,7 @@ class WarehouseController extends Controller
                 'category'      => $cats[$i] ?? '',
                 'brand'         => $brands[$i] ?? '',
                 'concentration' => $concs[$i] ?? '',
+                'expiry_date' => $expirys[$i] ?? ''
             ];
 
             $count++;
@@ -365,6 +371,38 @@ class WarehouseController extends Controller
 
         return redirect()->route('admin.warehouse.imports')
             ->with('success', 'Đã từ chối file nhập kho.');
+    }
+
+    // =========================================================================
+    // ATTACH TO FESTIVAL — Từ tab HSD
+    // =========================================================================
+
+    /**
+     * Admin attach nhiều SP vào 1 festival từ tab HSD.
+     *
+     * Nhận từ form modal:
+     *   - festival_id: ID festival được chọn
+     *   - product_ids[]: mảng ID sản phẩm được tick chọn
+     *
+     * syncWithoutDetaching: chỉ thêm quan hệ mới, KHÔNG xóa festival cũ của SP
+     * (khác sync() sẽ xóa hết quan hệ cũ trước khi thêm mới)
+     */
+    public function attachToFestival(Request $request)
+    {
+        $festivalId = $request->input('festival_id');  // ID festival được chọn
+        $productIds = $request->input('product_ids', []); // mảng ID SP được tick
+
+        // Validate: phải có cả festival và ít nhất 1 SP
+        if (!$festivalId || empty($productIds)) {
+            return back()->with('error', 'Vui lòng chọn festival và ít nhất 1 sản phẩm.');
+        }
+
+        $festival = \App\Models\Festival::findOrFail($festivalId);
+
+        // Thêm SP vào festival — không xóa quan hệ festival cũ của SP
+        $festival->products()->syncWithoutDetaching($productIds);
+
+        return back()->with('success', 'Đã thêm ' . count($productIds) . ' sản phẩm vào festival "' . $festival->name . '".');
     }
 
     // =========================================================================
@@ -401,12 +439,12 @@ class WarehouseController extends Controller
             ->groupBy('product_id');
 
         foreach ($oldImportLogs as $productId => $logs) {
-            $product = Product::find($productId);
+            $product = Product::with('festivals')->find($productId); // load festivals để hiện badge
             if (!$product) continue;
 
             // Tính tổng số lượng nhập từ các lần nhập >= N ngày trước
             $totalImported = $logs->sum('quantity');
-            
+
             // Lấy log nhập đầu tiên để biết ngày nhập
             $firstImportDate = $logs->first()->created_at;
             $daysInStock = now()->diffInDays($firstImportDate);
@@ -517,7 +555,99 @@ class WarehouseController extends Controller
             'category'      => trim($d[7] ?? ''),
             'brand'         => trim($d[8] ?? ''),
             'concentration' => trim($d[9] ?? ''),
+            'expiry_date' => (function($val) {
+                if (empty($val)) return '';
+                // Nếu là số serial của Excel (VD: 46200) → convert sang Y-m-d
+                if (is_numeric($val)) {
+                    return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float)$val)->format('Y-m-d');
+                }
+                // Nếu là chuỗi thì thử parse bình thường
+                try {
+                    return \Carbon\Carbon::parse(trim((string)$val))->format('Y-m-d');
+                } catch (\Exception $e) {
+                    return '';
+                }
+            })($d[10] ?? ''),
             'note'          => '',
         ];
+    }
+    /**
+     * Tính tồn kho theo lô HSD (FIFO by expiry_date).
+     * Gom các log import có cùng product_id + expiry_date thành 1 nhóm.
+     * Trừ dần số đã bán từ nhóm HSD gần nhất trước.
+     * Trả về danh sách lô còn hàng và HSD nằm trong vòng $days ngày.
+     */
+    private function getExpiringBatches(int $days = 365): array
+    {
+        $result = []; // mảng kết quả — chứa các lô còn hàng và sắp hết hạn
+
+        // Ngưỡng cảnh báo: hôm nay + $days ngày (VD: 365 ngày tới)
+        $threshold = now()->addDays($days)->toDateString();
+        // Ngày hôm nay — dùng để lọc bỏ lô đã hết hạn rồi
+        $today = now()->toDateString();
+
+        // Truy vấn DB: lấy tất cả log nhập kho có expiry_date
+        // GROUP BY product_id + expiry_date → gộp các lô cùng SP + cùng HSD thành 1 dòng
+        // SUM(quantity) → tổng số lượng nhập của nhóm đó
+        // orderBy expiry_date asc → lô HSD gần nhất lên trước (FIFO)
+        $batches = WarehouseStockLog::where('type', 'import')
+            ->whereNotNull('expiry_date')
+            ->selectRaw('product_id, expiry_date, SUM(quantity) as total_import')
+            ->groupBy('product_id', 'expiry_date')
+            ->orderBy('expiry_date', 'asc')
+            ->get()
+            ->groupBy('product_id'); // groupBy lần 2 trên PHP: gom theo product_id để loop từng SP
+
+        foreach ($batches as $productId => $productBatches) {
+            $product = Product::with('festivals')->find($productId);
+            if (!$product) continue; // SP đã bị xóa → bỏ qua
+
+            // Tổng số đã bán của SP này (từ tất cả đơn hàng đã có)
+            $totalSold = DB::table('order_details')->where('idProduct', $productId)->sum('quantity');
+
+            // $remaining = số đã bán cần trừ dần vào các lô (FIFO)
+            // Ban đầu = toàn bộ số đã bán
+            $remaining = $totalSold;
+
+            // Loop từng lô theo thứ tự HSD gần → xa
+            foreach ($productBatches as $batch) {
+                $batchQty = (int) $batch->total_import; // tổng nhập của lô này
+
+                if ($remaining >= $batchQty) {
+                    // Số đã bán >= lô này → lô đã bán hết, trừ đi rồi đi tiếp
+                    $remaining -= $batchQty;
+                    continue;
+                }
+
+                // Lô này chưa bán hết → tính số còn lại
+                $leftInBatch = $batchQty - $remaining;
+                $remaining = 0; // reset về 0 vì đã trừ hết số bán vào các lô trước
+
+                // Chuẩn hóa expiry_date thành string 'Y-m-d'
+                // (DB trả về có thể là Carbon object hoặc string tùy driver)
+                $expiryStr = $batch->expiry_date instanceof Carbon
+                    ? $batch->expiry_date->toDateString()
+                    : (string) $batch->expiry_date;
+
+                // Chỉ lấy lô: HSD chưa qua ($expiryStr >= $today)
+                //              VÀ còn trong ngưỡng cảnh báo ($expiryStr <= $threshold)
+                if ($expiryStr >= $today && $expiryStr <= $threshold) {
+                    // Số ngày còn lại tới HSD (false = không lấy absolute, giữ dấu âm nếu quá hạn)
+                    $dayLeft = now()->diffInDays($expiryStr, false);
+
+                    $result[] = (object) [
+                        'product'     => $product,   // object Product để dùng $item->product->title
+                        'expiry_date' => $expiryStr, // ngày hết hạn dạng string
+                        'qty_left'    => $leftInBatch, // số lượng còn lại của lô này
+                        'days_left'   => (int) $dayLeft, // số ngày còn lại
+                    ];
+                }
+            }
+        }
+
+        // Sắp xếp: lô HSD gần nhất (days_left nhỏ nhất) lên đầu
+        usort($result, fn($a, $b) => $a->days_left <=> $b->days_left);
+
+        return $result;
     }
 }

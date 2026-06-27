@@ -154,6 +154,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Nếu để sau resource, /product/warehouse sẽ bị bắt như show('warehouse')
     Route::get('product/warehouse',        [WarehouseController::class, 'index'])->name('product.warehouse.index');
     Route::post('product/warehouse/store', [WarehouseController::class, 'store'])->name('product.warehouse.store');
+    Route::post('product/warehouse/attach-festival', [WarehouseController::class, 'attachToFestival'])->name('product.warehouse.attach-festival');
 
     // Tạo yêu cầu nhập hàng từ modal trang sản phẩm
     Route::post('product/order-request', [ProductController::class, 'createOrderRequest'])->name('product.createOrderRequest');

@@ -128,6 +128,8 @@ $nsx->products->count(); // số sản phẩm
 ```
 
 ---
+$product=App\Models\Product::where('title','like','%Gucci%')->with('manufacturers')->first();
+print_r($product->manufacturers->pluck('name','id'));  
 
 ## Order (Đơn hàng)
 

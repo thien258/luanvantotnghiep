@@ -199,6 +199,48 @@
         </div>
     </div>
 
+    {{-- Sắp hết hạn (HSD) --}}
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-none border rounded-0" style="border-left:4px solid #dc3545 !important;">
+            <div class="card-header bg-white py-3 border-bottom-0 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-danger text-uppercase small" style="letter-spacing:1px;">
+                    <i class="fa-solid fa-clock mr-2"></i>Lô hàng sắp hết hạn (365 ngày)
+                </h6>
+                <a href="{{ route('admin.product.warehouse.index') }}" class="small text-muted">Xem tất cả →</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0 small text-dark table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="pl-4 py-2">Tên sản phẩm</th>
+                            <th class="text-center py-2">Còn lại</th>
+                            <th class="text-center py-2">HSD</th>
+                            <th class="text-center py-2">Ngày còn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($expiringBatches as $item)
+                        <tr class="{{ $item->days_left <= 90 ? 'table-danger' : 'table-warning' }}">
+                            <td class="pl-4 py-2 font-weight-bold">{{ $item->product->title }}</td>
+                            <td class="text-center font-weight-bold">{{ $item->qty_left }}</td>
+                            <td class="text-center text-muted">
+                                {{ \Carbon\Carbon::parse($item->expiry_date)->format('d/m/Y') }}
+                            </td>
+                            <td class="text-center font-weight-bold {{ $item->days_left <= 90 ? 'text-danger' : 'text-warning' }}">
+                                {{ $item->days_left }}
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-3">Không có lô hàng sắp hết hạn</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 {{-- ── CHART.JS ─────────────────────────────────────────────────────── --}}
