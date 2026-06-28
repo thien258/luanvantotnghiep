@@ -202,7 +202,7 @@
                     {{-- Tất cả SP — admin chọn cái nào muốn nhập thêm --}}
             
                     @php
-                        $lowStockItems = $products->sortBy('quantity')->values();
+                        $lowStockItems = $allProducts;
                     @endphp
 
                     @if($lowStockItems->isEmpty())
@@ -214,8 +214,9 @@
                                 <input type="checkbox" id="selectAllLow" class="mr-1">Chọn tất cả
                             </label>
                         </div>
+                        <div style="max-height: 350px; overflow-y: auto;">
                         <table class="table table-sm small table-hover mb-0 border">
-                            <thead class="table-light">
+                            <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                 <tr>
                                     <th class="pl-3 py-2" style="width:5%">✓</th>
                                     <th style="width:7%">Ảnh</th>
@@ -259,6 +260,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        </div>
                     @endif
                 </div>
 

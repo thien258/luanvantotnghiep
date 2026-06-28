@@ -46,6 +46,9 @@ class ProductController extends Controller
         // Eager load festivals để hiển thị badge festival trong bảng
         $products = Product::with('festivals')->paginate(5);
 
+        // Tất cả SP cho modal tạo yêu cầu nhập hàng (không phân trang)
+        $allProducts = Product::orderBy('quantity', 'asc')->get();
+
         // Lấy HSD gần nhất còn hàng cho từng SP (FIFO by expiry_date)
         // $expiryMap[product_id] = ['date' => 'Y-m-d', 'days_left' => int]
         $expiryMap = [];
@@ -80,7 +83,7 @@ class ProductController extends Controller
             }
         }
 
-        return view('admin.product.product-list', compact('products', 'expiryMap'));
+        return view('admin.product.product-list', compact('products', 'expiryMap', 'allProducts'));
     }
 
     // =========================================================================
