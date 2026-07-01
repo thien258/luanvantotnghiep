@@ -31,25 +31,38 @@ class ManufacturerController extends Controller
      */
     public function store(Request $request)
     {
-        //
         $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:500',
+            'name'     => 'required|string|max:255',
+            'phone'    => 'nullable|string|max:20',
+            'address'  => 'nullable|string|max:500',
+            'email'    => 'nullable|email|unique:users,email',
+            'password' => 'nullable|min:8',
+        ], [
+            'email.unique' => 'Email này đã được dùng cho tài khoản khác.',
         ]);
 
-        // Đã sửa thành f thường
         $manufacturer = ManuFacturer::create([
-            'name' => $request->name,
-            'phone' => $request->phone,
+            'name'    => $request->name,
+            'phone'   => $request->phone,
             'address' => $request->address,
         ]);
 
-        if ($manufacturer) {
-            return redirect()->route('admin.manufacturer.index')->with('success', 'Manufacturer created successfully.');
-        } else {
-            return back()->with('error', 'Failed to create manufacturer. Please try again.');
+        // Tạo tài khoản nếu email được điền
+        if ($request->filled('email') && $request->filled('password')) {
+            $user = \App\Models\User::create([
+                'name'              => $request->name,
+                'email'             => $request->email,
+                'phone'             => $request->phone ?? '',
+                'address'           => $request->address ?? '',
+                'password'          => bcrypt($request->password),
+                'role'              => 'manufacturer',
+                'email_verified_at' => now(),
+            ]);
+            $manufacturer->update(['user_id' => $user->id]);
         }
+
+        return redirect()->route('admin.manufacturer.index')
+            ->with('success', 'Đã tạo NSX' . ($request->filled('email') ? ' và tài khoản đăng nhập' : '') . ' thành công.');
     }
 
     /**
@@ -66,8 +79,7 @@ class ManufacturerController extends Controller
      */
     public function edit(string $id)
     {
-        //
-        $mainufacturer = ManuFacturer::find($id);
+        $mainufacturer = ManuFacturer::with('user')->find($id);
         if (!$mainufacturer) {
             return redirect()->route('admin.manufacturer.index')->with('error', 'Manufacturer not found.');
         }
@@ -99,6 +111,41 @@ class ManufacturerController extends Controller
         ]);
 
         return redirect()->route('admin.manufacturer.index')->with('success', 'Manufacturer updated successfully.');
+    }
+
+    /**
+     * Tạo tài khoản đăng nhập cho NSX và liên kết với manufacturer.
+     */
+    public function createAccount(Request $request, string $id)
+    {
+        $manufacturer = ManuFacturer::findOrFail($id);
+
+        // Nếu đã có tài khoản rồi thì không tạo thêm
+        if ($manufacturer->user_id) {
+            return back()->with('error', 'NSX này đã có tài khoản đăng nhập rồi.');
+        }
+
+        $request->validate([
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|min:8',
+        ], [
+            'email.unique' => 'Email này đã được dùng cho tài khoản khác.',
+        ]);
+
+        $user = \App\Models\User::create([
+            'name'               => $manufacturer->name,
+            'email'              => $request->email,
+            'phone'              => $manufacturer->phone ?? '',
+            'address'            => $manufacturer->address ?? '',
+            'password'           => bcrypt($request->password),
+            'role'               => 'manufacturer',
+            'email_verified_at'  => now(),
+        ]);
+
+        // Liên kết user với manufacturer
+        $manufacturer->update(['user_id' => $user->id]);
+
+        return back()->with('success', 'Đã tạo tài khoản ' . $request->email . ' cho NSX ' . $manufacturer->name . '.');
     }
 
     /**

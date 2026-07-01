@@ -5,16 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * SupplierOffer — Phiếu báo giá từ Nhà Sản Xuất (NSX).
+ * SupplierOffer — Phiếu báo giá do Nhà Sản Xuất (NSX) gửi.
  *
- * Luồng: NSX gửi file Excel → admin upload → tạo SupplierOffer + SupplierOfferItem
- *        → admin xem, tick SP muốn mua, điền số lượng → tạo PurchaseOrder
+ * Luồng sử dụng:
+ *   NSX gửi file Excel chứa danh sách SP + giá → admin upload
+ *   → Hệ thống tạo SupplierOffer + các SupplierOfferItem
+ *   → Admin xem, tick SP muốn mua, điền số lượng
+ *   → Tạo PurchaseOrder từ báo giá này
  *
- * Trạng thái (status):
- *   draft     — nháp, chưa gửi
- *   submitted — đã gửi, chờ admin xem
- *   accepted  — admin đã tạo đơn đặt hàng từ báo giá này
- *   rejected  — admin từ chối
+ * Vòng đời trạng thái (status):
+ *   draft     — nháp, NSX chưa gửi chính thức
+ *   submitted — đã gửi, chờ admin xem xét
+ *   accepted  — admin đã tạo PurchaseOrder từ báo giá này
+ *   rejected  — admin từ chối toàn bộ báo giá
+ *
+ * request_id nullable — NSX có thể gửi báo giá tự do, không cần có yêu cầu trước.
  *
  * Bảng: supplier_offers
  *
@@ -50,19 +55,19 @@ class SupplierOffer extends Model
 {
     protected $table = "supplier_offers";
 
-    // Các cột được phép gán hàng loạt (mass assignment)
+    // Các cột được phép gán hàng loạt
     protected $fillable = [
         "manufacturer_id", // FK → manufacturers (NSX nào gửi báo giá)
-        "request_id",      // FK → procurement_requests (liên kết với yêu cầu nhập hàng)
+        "request_id",      // FK → procurement_requests (nullable — đáp lại yêu cầu nào)
         "offer_code",      // Mã báo giá tự sinh: OFR-YYYYMMDD-001
-        "note",            // Ghi chú kèm theo
+        "note",            // Ghi chú kèm theo báo giá
         "status",          // Trạng thái: draft / submitted / accepted / rejected
-        "submitted_at"     // Thời điểm NSX gửi báo giá
+        "submitted_at",    // Thời điểm NSX chính thức gửi báo giá
     ];
 
     /**
-     * NSX tạo ra báo giá này.
-     * SupplierOffer thuộc về 1 ManuFacturer.
+     * NSX đã tạo ra báo giá này.
+     * Dùng để hiển thị tên, SĐT NSX khi admin xem danh sách báo giá.
      */
     public function manufacturer()
     {
@@ -70,8 +75,9 @@ class SupplierOffer extends Model
     }
 
     /**
-     * Danh sách sản phẩm NSX chào trong báo giá này.
+     * Danh sách sản phẩm NSX chào giá trong phiếu này.
      * 1 báo giá có nhiều dòng sản phẩm (SupplierOfferItem).
+     * Admin dựa vào đây để chọn SP và tạo PurchaseOrder.
      */
     public function items()
     {
@@ -79,14 +85,19 @@ class SupplierOffer extends Model
     }
 
     /**
-     * Đơn đặt hàng được tạo ra từ báo giá này (nếu có).
-     * 1 báo giá chỉ tạo được 1 PurchaseOrder (hasOne).
+     * Đơn đặt hàng được sinh ra từ báo giá này (nếu admin đã duyệt).
+     * hasOne vì 1 báo giá chỉ được tạo 1 PurchaseOrder duy nhất.
+     * Dùng để check xem báo giá đã được duyệt chưa (purchaseOrder !== null).
      */
     public function purchaseOrder()
     {
         return $this->hasOne(PurchaseOrder::class, 'offer_id', 'id');
     }
-    // Yêu cầu thu mua mà NSX đang trả lời (nullable)
+
+    /**
+     * Yêu cầu nhập hàng mà NSX đang phản hồi (nullable).
+     * Dùng để hiển thị context: báo giá này đáp lại yêu cầu nào của admin.
+     */
     public function procurementRequest()
     {
         return $this->belongsTo(ProcurementRequest::class, 'request_id', 'id');

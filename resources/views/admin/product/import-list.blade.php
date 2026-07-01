@@ -17,7 +17,8 @@
             <div class="alert alert-danger rounded-0 py-2">{{ session('error') }}</div>
         @endif
 
-        {{-- Form upload file (dành cho nhân viên kho) --}}
+        {{-- Form upload file: chỉ warehouse --}}
+        @if(auth()->user()->role === 'warehouse')
         <div class="card rounded-0 border mb-4">
             <div class="card-header bg-white fw-bold small text-uppercase py-2">
                 <i class="fa fa-upload me-1"></i> Upload file nhập kho mới
@@ -26,10 +27,15 @@
                 <form action="{{ route('admin.warehouse.imports.upload') }}" method="POST" enctype="multipart/form-data" class="row g-3">
                     @csrf
                     <div class="col-md-4">
-                        <input type="text" name="supplier" class="form-control rounded-0" placeholder="Nhà cung cấp" required>
+                        <select name="supplier" id="supplierSelect" class="form-control rounded-0" required>
+                            <option value="">— Chọn nhà cung cấp —</option>
+                            @foreach($manufacturers as $m)
+                                <option value="{{ $m->name }}">{{ $m->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="col-md-4">
-                        <input type="file" name="excel_file" class="form-control rounded-0" accept=".csv,.xlsx,.xls" required>
+                        <input type="file" name="excel_file" id="csvFileInput" class="form-control rounded-0" accept=".csv,.xlsx,.xls" required>
                     </div>
                     <div class="col-md-2">
                         <input type="text" name="note" class="form-control rounded-0" placeholder="Ghi chú (tùy chọn)">
@@ -42,6 +48,7 @@
                 </form>
             </div>
         </div>
+        @endif
 
         {{-- Danh sách file --}}
         <div class="table-responsive">
@@ -80,6 +87,7 @@
                                 <i class="fa fa-eye me-1"></i>Xem & Duyệt
                             </a>
                             @if($import->status === 'pending')
+                            @if(auth()->user()->isAdmin())
                             <form action="{{ route('admin.warehouse.imports.reject', $import->id) }}" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-sm btn-outline-danger rounded-0"
@@ -87,6 +95,7 @@
                                     Từ chối
                                 </button>
                             </form>
+                            @endif
                             @endif
                         </td>
                     </tr>
@@ -99,7 +108,50 @@
             </table>
         </div>
 
+        <div class="d-flex justify-content-center mt-3">
+            {{ $imports->links() }}
+        </div>
+
     </div>
 </div>
 
+@endsection
+
+@section('script')
+<script>
+// Khi warehouse chọn file CSV xuất từ đơn đặt hàng,
+// tự động đọc dòng đầu "# supplier, TênNSX" và chọn NSX trong dropdown
+document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('csvFileInput');
+    const supplierSelect = document.getElementById('supplierSelect');
+
+    if (!fileInput || !supplierSelect) return;
+
+    fileInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file || !file.name.endsWith('.csv')) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const firstLine = e.target.result.split('\n')[0];
+            // Dòng metadata có dạng: # supplier,"Tên NSX"
+            if (firstLine.startsWith('# supplier')) {
+                // Lấy giá trị sau dấu phẩy, bỏ dấu nháy và khoảng trắng
+                const parts = firstLine.split(',');
+                if (parts.length >= 2) {
+                    const supplierName = parts[1].trim().replace(/^"|"$/g, '');
+                    // Tìm option khớp tên và chọn
+                    for (let opt of supplierSelect.options) {
+                        if (opt.value.trim() === supplierName) {
+                            opt.selected = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+        reader.readAsText(file, 'UTF-8');
+    });
+});
+</script>
 @endsection

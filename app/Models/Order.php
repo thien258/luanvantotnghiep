@@ -56,20 +56,22 @@ class Order extends Model
 {
     protected $table = "orders";
 
+    // Các cột được phép gán hàng loạt (mass assignment)
     protected $fillable = [
         'idUser',         // FK → users (khách hàng đặt đơn)
-        'fullname',       // Tên người nhận
+        'fullname',       // Tên người nhận hàng
         'phone',          // SĐT người nhận
         'address',        // Địa chỉ giao hàng
-        'payment_method', // Phương thức: COD / BANK TRANSFER
-        'total_price',    // Tổng tiền đơn hàng (₫)
-        'status',         // Trạng thái (xem mô tả trên)
-        'note',           // Ghi chú của khách
-        'tracking_code',  // Mã QR xác nhận giao hàng (unique)
+        'payment_method', // Phương thức thanh toán: 'COD' hoặc 'BANK TRANSFER'
+        'total_price',    // Tổng tiền đơn hàng (đơn vị: VNĐ)
+        'status',         // Trạng thái đơn hàng (xem mô tả trong PHPDoc bên trên)
+        'note',           // Ghi chú của khách khi đặt hàng
+        'tracking_code',  // Mã QR/token dùng để xác nhận giao hàng thành công (unique)
     ];
 
     /**
-     * Khách hàng đặt đơn này.
+     * Quan hệ: Đơn hàng thuộc về 1 khách hàng (User).
+     * Dùng cột idUser làm khóa ngoại thay vì chuẩn user_id của Laravel.
      */
     public function user()
     {
@@ -77,8 +79,9 @@ class Order extends Model
     }
 
     /**
-     * Danh sách sản phẩm trong đơn hàng.
-     * 1 đơn có nhiều dòng OrderDetail.
+     * Quan hệ: 1 đơn hàng có nhiều dòng chi tiết (OrderDetail).
+     * Mỗi OrderDetail là 1 sản phẩm trong đơn.
+     * Dùng cột idOrder làm khóa ngoại ở bảng order_details.
      */
     public function details()
     {

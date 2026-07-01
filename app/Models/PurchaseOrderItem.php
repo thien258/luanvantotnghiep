@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * PurchaseOrderItem — Dòng sản phẩm trong đơn đặt hàng.
  *
- * Đây là nơi lưu số lượng admin quyết định mua (quantity).
- * unit_price lấy từ SupplierOfferItem (giá NSX chào).
+ * Admin chọn SP từ báo giá NSX và điền số lượng muốn mua.
+ * unit_price lấy từ SupplierOfferItem (giá NSX đã chào), KHÔNG tự nhập lại.
  *
- * product_id nullable — SP có thể chưa tồn tại trong hệ thống.
- * product_name luôn có để tránh mất dữ liệu nếu SP bị xóa sau này.
+ * Tại sao lưu cả product_id lẫn product_name?
+ *   - product_id dùng để liên kết với hệ thống (xuất CSV nhập kho, sync tồn kho)
+ *   - product_name lưu dự phòng: nếu SP bị xóa sau này, đơn cũ vẫn còn tên SP
+ *   - product_id nullable vì SP có thể chưa tồn tại trong hệ thống
  *
  * Bảng: purchase_order_items
  *
@@ -42,17 +44,18 @@ class PurchaseOrderItem extends Model
 {
     protected $table = "purchase_order_items";
 
+    // Các cột được phép gán hàng loạt
     protected $fillable = [
-        'purchase_order_id', // FK → purchase_orders
-        'product_id',        // FK → products (nullable)
-        'product_name',      // Tên SP (dự phòng)
-        'quantity',          // Số lượng admin muốn đặt mua
-        'unit_price',        // Giá NSX chào (lấy từ SupplierOfferItem)
+        'purchase_order_id', // FK → purchase_orders (thuộc đơn hàng nào)
+        'product_id',        // FK → products (nullable — SP có thể chưa tồn tại)
+        'product_name',      // Tên SP lưu dự phòng phòng khi product bị xóa
+        'quantity',          // Số lượng admin quyết định đặt mua
+        'unit_price',        // Đơn giá NSX chào (lấy từ SupplierOfferItem, đơn vị: ₫)
     ];
 
     /**
      * Sản phẩm tương ứng trong hệ thống.
-     * Dùng để lấy thông tin khi xuất CSV nhập kho.
+     * Dùng để lấy thông tin khi xuất CSV nhập kho hoặc hiển thị ảnh SP.
      */
     public function product()
     {
@@ -61,6 +64,7 @@ class PurchaseOrderItem extends Model
 
     /**
      * Đơn đặt hàng chứa dòng này.
+     * Dùng để navigate ngược về đơn mẹ.
      */
     public function order()
     {

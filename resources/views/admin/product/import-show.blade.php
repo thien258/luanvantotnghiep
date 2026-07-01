@@ -45,6 +45,8 @@
         @endif
 
         @if($import->status === 'pending')
+        {{-- Form duyệt: chỉ admin thấy --}}
+        @if(auth()->user()->isAdmin())
         <form action="{{ route('admin.warehouse.imports.approve', $import->id) }}" method="POST">
             @csrf
             <input type="hidden" name="supplier" value="{{ $import->supplier }}">
@@ -147,10 +149,36 @@
                                 <td class="text-muted text-center" style="font-size:0.78rem;">{{ $p['brand'] }}</td>
                                 <td class="text-muted" style="font-size:0.78rem;">{{ $p['concentration'] }}</td>
                                 <td>
+                                    @php
+                                        $expiryVal = $p['expiry_date'] ?? '';
+                                        $expiryClass = 'bg-light text-muted';
+                                        $expiryWarning = '';
+                                        if ($expiryVal) {
+                                            try {
+                                                $daysLeft = now()->diffInDays(\Carbon\Carbon::parse($expiryVal), false);
+                                                if ($daysLeft <= 0) {
+                                                    $expiryClass = 'bg-danger text-white fw-bold';
+                                                    $expiryWarning = '⚠️ Đã hết hạn!';
+                                                } elseif ($daysLeft <= 30) {
+                                                    $expiryClass = 'bg-danger text-white fw-bold';
+                                                    $expiryWarning = "⚠️ Còn {$daysLeft} ngày!";
+                                                } elseif ($daysLeft <= 90) {
+                                                    $expiryClass = 'bg-warning text-dark fw-bold';
+                                                    $expiryWarning = "⚠️ Còn {$daysLeft} ngày";
+                                                } elseif ($daysLeft <= 180) {
+                                                    $expiryClass = 'bg-warning text-dark';
+                                                    $expiryWarning = "Còn {$daysLeft} ngày";
+                                                }
+                                            } catch (\Exception $e) {}
+                                        }
+                                    @endphp
                                     <input type="date" name="expiry_date[{{ $index }}]"
-                                        value="{{ $p['expiry_date'] ?? '' }}"
-                                        class="form-control form-control-sm rounded-0 text-center bg-light text-muted"
+                                        value="{{ $expiryVal }}"
+                                        class="form-control form-control-sm rounded-0 text-center {{ $expiryClass }}"
                                         style="min-width:130px;" readonly>
+                                    @if($expiryWarning)
+                                        <div class="text-danger small mt-1 fw-bold" style="font-size:0.7rem;">{{ $expiryWarning }}</div>
+                                    @endif
                                 </td>
                             </tr>
                             @endforeach
@@ -168,6 +196,52 @@
                 </div>
             </div>
         </form>
+        @else
+        {{-- Warehouse chỉ xem danh sách, không duyệt được --}}
+        <div class="alert alert-info rounded-0 small mb-3">
+            <i class="fa fa-eye me-1"></i>File đang chờ duyệt. Bạn chỉ có thể xem danh sách sản phẩm.
+        </div>
+        <div class="card rounded-0 border bg-white">
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered align-middle mb-0" style="font-size:0.85rem;">
+                    <thead class="table-dark">
+                        <tr>
+                            <th width="25%" class="text-center">Tên sản phẩm</th>
+                            <th width="8%" class="text-center">Ảnh</th>
+                            <th width="6%" class="text-center">SL</th>
+                            <th width="8%" class="text-center">Giá nhập (₫)</th>
+                            <th width="8%" class="text-center">Volume</th>
+                            <th width="10%" class="text-center">Category</th>
+                            <th width="10%" class="text-center">Brand</th>
+                            <th width="12%" class="text-center">Nồng độ</th>
+                            <th width="13%" class="text-center">HSD</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($productsPreview as $p)
+                        <tr>
+                            <td class="fw-bold">{{ $p['title'] }}</td>
+                            <td class="text-center">
+                                @if(!empty($p['image']))
+                                <img src="{{ $p['image'] }}" style="width:36px;height:36px;object-fit:cover;" class="border">
+                                @else
+                                <span class="text-muted" style="font-size:0.7rem;">No img</span>
+                                @endif
+                            </td>
+                            <td class="text-center fw-bold">{{ $p['quantity'] }}</td>
+                            <td class="text-center text-muted">{{ number_format($p['unit_price'] ?? 0) }}</td>
+                            <td class="text-center text-muted">{{ $p['volume'] }}</td>
+                            <td class="text-center text-muted">{{ $p['category'] }}</td>
+                            <td class="text-center text-muted">{{ $p['brand'] }}</td>
+                            <td class="text-muted">{{ $p['concentration'] }}</td>
+                            <td class="text-center text-muted">{{ $p['expiry_date'] ?? '—' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
 
         @elseif($import->status === 'approved')
         @php

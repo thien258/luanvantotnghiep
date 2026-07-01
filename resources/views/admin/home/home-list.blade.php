@@ -220,13 +220,18 @@
                     </thead>
                     <tbody>
                         @forelse($expiringBatches as $item)
-                        <tr class="{{ $item->days_left <= 90 ? 'table-danger' : 'table-warning' }}">
-                            <td class="pl-4 py-2 font-weight-bold">{{ $item->product->title }}</td>
+                        <tr class="{{ $item->days_left <= 30 ? 'table-danger' : ($item->days_left <= 365 ? 'table-danger' : 'table-warning') }}">
+                            <td class="pl-4 py-2 font-weight-bold">
+                                {{ $item->product->title }}
+                                @if($item->days_left <= 30)
+                                    <span class="badge badge-danger ml-1" style="font-size:0.6rem;">🔴 RẤT GẤP</span>
+                                @endif
+                            </td>
                             <td class="text-center font-weight-bold">{{ $item->qty_left }}</td>
-                            <td class="text-center text-muted">
+                            <td class="text-center {{ $item->days_left <= 30 ? 'text-danger font-weight-bold' : 'text-muted' }}">
                                 {{ \Carbon\Carbon::parse($item->expiry_date)->format('d/m/Y') }}
                             </td>
-                            <td class="text-center font-weight-bold {{ $item->days_left <= 90 ? 'text-danger' : 'text-warning' }}">
+                            <td class="text-center font-weight-bold {{ $item->days_left <= 30 ? 'text-danger' : 'text-warning' }}">
                                 {{ $item->days_left }}
                             </td>
                         </tr>

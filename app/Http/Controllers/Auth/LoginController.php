@@ -26,7 +26,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/admin';
+
 
     /**
      * Create a new controller instance.
@@ -40,10 +40,18 @@ class LoginController extends Controller
     }
 protected function redirectTo()
 {
-    if (Auth::user()->role === 'admin') {
-        return route('admin.dashboard'); // /admin
+   $role = auth()->user()->role;
+
+    if ($role === 'admin') {
+        return '/admin';
+    }
+    if ($role === 'warehouse') {
+        return '/admin/orders';
+    }
+    if ($role === 'manufacturer') {
+        return '/admin/supplier-offers';
     }
 
-    return route('welcome'); // /
+    return '/';  // /
 }
 }

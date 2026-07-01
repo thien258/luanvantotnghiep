@@ -23,7 +23,22 @@ class OrderAdminController extends Controller
     // =========================================================================
     // INDEX — Danh sách đơn hàng, hỗ trợ tìm kiếm + lọc trạng thái
     // =========================================================================
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+        $role = auth()->user()->role;
+        // orders-damaged: admin và warehouse vào được
+        // orders thường: chỉ warehouse
+        if ($role === 'admin' && request()->routeIs('admin.orders.damaged')) {
+            return $next($request);
+        }
+        if ($role !== 'warehouse') {
+            abort(403);
+        }
+        return $next($request);
+    });
 
+    }
     public function index(Request $request)
     {
         // Lấy từ khóa tìm kiếm và filter trạng thái từ query string
@@ -51,8 +66,8 @@ class OrderAdminController extends Controller
                     $q->orWhere('id', $numericId);
                 }
                 $q->orWhere('fullname', 'like', "%{$keyword}%")
-                  ->orWhere('phone', 'like', "%{$keyword}%")
-                  ->orWhere('tracking_code', 'like', "%{$keyword}%");
+                    ->orWhere('phone', 'like', "%{$keyword}%")
+                    ->orWhere('tracking_code', 'like', "%{$keyword}%");
             });
         }
 
@@ -105,13 +120,88 @@ class OrderAdminController extends Controller
         if ($actionType === 'export_warehouse' && $order->status == 1) {
             $orderDetails = OrderDetail::where('idOrder', $id)->with('product')->get();
 
-            // Trừ tồn kho từng sản phẩm trong đơn
             foreach ($orderDetails as $detail) {
-                if ($detail->product) {
-                    $detail->product->decrement('quantity', $detail->quantity);
-                    // decrement() tự gọi Model::saving → Product::booted()
-                    // → nếu quantity về 0 thì status SP tự chuyển sang 0 (off)
+                if (!$detail->product) continue;
+
+                $product      = $detail->product;
+                $qtyToExport  = $detail->quantity; // tổng cần trừ cho SP này
+
+                // ── FIFO: trừ từ lô HSD gần nhất trước ──────────────────
+                // Lấy các lô import của SP này, sắp theo expiry_date tăng dần
+                // (HSD gần → xa), lô không có HSD xếp sau cùng
+                $importBatches = \App\Models\WarehouseStockLog::where('product_id', $product->id)
+                    ->where('type', 'import')
+                    ->orderByRaw('CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END ASC')
+                    ->orderBy('expiry_date', 'asc')
+                    ->orderBy('id', 'asc') // tie-break: nhập trước xuất trước
+                    ->get();
+
+                // Tính số đã xuất của từng lô (từ log export có cùng order_id gốc)
+                // Cách đơn giản: tổng import - tổng export tính đến nay = còn lại mỗi lô
+                // Dùng approach: loop từng lô, tính qty_left = total_import_lô - total_export đã dùng
+                // → ghi log export tương ứng với lô nào bị trừ
+
+                // Gom tổng import theo (product_id, expiry_date) để biết mỗi lô có bao nhiêu
+                $batchTotals = \App\Models\WarehouseStockLog::where('product_id', $product->id)
+                    ->where('type', 'import')
+                    ->selectRaw('expiry_date, SUM(quantity) as total_import')
+                    ->groupBy('expiry_date')
+                    ->orderByRaw('CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END ASC')
+                    ->orderBy('expiry_date', 'asc')
+                    ->get();
+
+                // Gom tổng export theo (product_id, expiry_date) — đã xuất bao nhiêu từ mỗi lô
+                $exportedByBatch = \App\Models\WarehouseStockLog::where('product_id', $product->id)
+                    ->where('type', 'export')
+                    ->selectRaw('expiry_date, SUM(quantity) as total_export')
+                    ->groupBy('expiry_date')
+                    ->get()
+                    ->keyBy(fn($r) => (string)($r->expiry_date ?? 'null'));
+
+                $remaining = $qtyToExport; // số còn cần trừ
+
+                foreach ($batchTotals as $batch) {
+                    if ($remaining <= 0) break;
+
+                    $batchKey     = (string)($batch->expiry_date ?? 'null');
+                    $totalImport  = (int) $batch->total_import;
+                    $totalExported = (int)($exportedByBatch[$batchKey]->total_export ?? 0);
+                    $qtyLeft      = $totalImport - $totalExported; // còn lại trong lô này
+
+                    if ($qtyLeft <= 0) continue; // lô này đã hết
+
+                    // Số lấy từ lô này: không vượt quá qty còn lại của lô
+                    $takeFromBatch = min($remaining, $qtyLeft);
+
+                    // Ghi log xuất kho cho lô này
+                    \App\Models\WarehouseStockLog::create([
+                        'receipt_id'  => null,
+                        'product_id'  => $product->id,
+                        'type'        => 'export',
+                        'quantity'    => $takeFromBatch,
+                        'stock_after' => max(0, $product->quantity - $takeFromBatch),
+                        'reason'      => "Xuất kho cho đơn hàng #{$id}",
+                        'expiry_date' => $batch->expiry_date ?: null, // gắn HSD của lô bị trừ
+                    ]);
+
+                    $remaining -= $takeFromBatch;
                 }
+
+                // Nếu còn thừa (SP không có log import nào — nhập thủ công): ghi log export chung
+                if ($remaining > 0) {
+                    \App\Models\WarehouseStockLog::create([
+                        'receipt_id'  => null,
+                        'product_id'  => $product->id,
+                        'type'        => 'export',
+                        'quantity'    => $remaining,
+                        'stock_after' => max(0, $product->quantity - $remaining),
+                        'reason'      => "Xuất kho cho đơn hàng #{$id} (không có lô HSD)",
+                        'expiry_date' => null,
+                    ]);
+                }
+
+                // Trừ tồn kho product (giữ nguyên như cũ)
+                $product->decrement('quantity', $qtyToExport);
             }
 
             // Chuyển đơn sang status=3 (đang giao)

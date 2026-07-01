@@ -8,6 +8,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
+ * User — Tài khoản người dùng trong hệ thống.
+ *
+ * Phân quyền qua cột 'role':
+ *   'admin'    — Quản trị viên toàn hệ thống
+ *   'staff'    — Nhân viên (kho, xử lý đơn, ...)
+ *   'customer' — Khách hàng thông thường
+ *
+ * Implement MustVerifyEmail: bắt buộc xác minh email trước khi dùng tài khoản.
+ *
  * @property int $id
  * @property string $name
  * @property string $email
@@ -46,23 +55,23 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Các cột được phép gán hàng loạt (mass assignment).
      *
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'password',
-        'address',
-        'role',
-        'remember_token',
-
+        'name',           // Họ tên đầy đủ
+        'email',          // Email đăng nhập (unique)
+        'phone',          // Số điện thoại
+        'password',       // Mật khẩu (được hash tự động qua cast bên dưới)
+        'address',        // Địa chỉ mặc định
+        'role',           // Vai trò: 'admin' | 'staff' | 'customer'
+        'remember_token', // Token ghi nhớ đăng nhập
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * Các cột bị ẩn khi serialize (trả về JSON / array).
+     * Đảm bảo password và remember_token không bao giờ lộ ra API response.
      *
      * @var list<string>
      */
@@ -72,7 +81,9 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Định nghĩa cách cast dữ liệu khi đọc từ DB:
+     *   - email_verified_at: string → Carbon datetime
+     *   - password: tự động hash bằng bcrypt khi gán giá trị mới
      *
      * @return array<string, string>
      */
@@ -80,13 +91,60 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
+
+    // =========================================================================
+    // KIỂM TRA PHÂN QUYỀN (Role helpers)
+    // =========================================================================
+
+    /** Kiểm tra user có phải admin không. */
     public function isAdmin()
     {
         return $this->role === 'admin';
     }
+
+    /** Kiểm tra user có phải nhân viên (staff) không. */
+    public function isStaff()
+    {
+        return $this->role === 'staff';
+    }
+
+    /** Kiểm tra user có phải khách hàng thông thường không. */
+    public function isCustomer()
+    {
+        return $this->role === 'customer';
+    }
+
+    /**
+     * Kiểm tra user có thuộc một trong các role truyền vào không.
+     * Hỗ trợ nhiều role: $user->hasRole('admin', 'staff')
+     *
+     * @param string ...$role Danh sách role cần kiểm tra
+     */
+    public function hasRole(string ...$role): bool
+    {
+        return in_array($this->role, $role);
+    }
+
+    // =========================================================================
+    // QUAN HỆ (Relationships)
+    // =========================================================================
+
+    /**
+     * Quan hệ: 1 user (NSX) có thể gắn với 1 hồ sơ ManuFacturer.
+     * Dùng khi tài khoản đăng nhập của nhà sản xuất cần lấy thông tin công ty.
+     */
+    public function manufacturer()
+    {
+        return $this->hasOne(ManuFacturer::class, 'user_id');
+    }
+
+    /**
+     * Quan hệ: 1 user có nhiều đơn hàng.
+     * Dùng cột idUser (thay vì chuẩn user_id) làm khóa ngoại ở bảng orders.
+     */
     public function orders()
     {
         // 'idUser' là tên cột khóa ngoại ở bảng orders

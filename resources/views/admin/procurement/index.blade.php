@@ -25,7 +25,9 @@
                     <th class="text-center py-2">Trạng thái</th>
                     <th class="text-center py-2">Hạn chót</th>
                     <th class="text-center py-2">Ngày tạo</th>
+                    @if(auth()->user()->isAdmin())
                     <th class="text-center py-2">Báo giá nhận</th>
+                    @endif
                     <th class="text-center py-2">Thao tác</th>
                 </tr>
             </thead>
@@ -45,11 +47,18 @@
                         {{ $req->deadline ? \Carbon\Carbon::parse($req->deadline)->format('d/m/Y') : '—' }}
                     </td>
                     <td class="text-center py-2 text-muted">{{ $req->created_at->format('d/m/Y') }}</td>
+                    @if(auth()->user()->isAdmin())
                     <td class="text-center py-2">
-                        <span class="font-weight-bold {{ $req->offers->count() > 0 ? 'text-success' : 'text-muted' }}">
-                            {{ $req->offers->count() }} báo giá
+                        @php
+                            $offerCount = $myManufacturerId
+                                ? $req->offers->where('manufacturer_id', $myManufacturerId)->count()
+                                : $req->offers->count();
+                        @endphp
+                        <span class="font-weight-bold {{ $offerCount > 0 ? 'text-success' : 'text-muted' }}">
+                            {{ $offerCount }} báo giá
                         </span>
                     </td>
+                    @endif
                     <td class="text-center py-2">
                         <a href="{{ route('admin.procurement.show', $req->id) }}"
                            class="btn btn-outline-dark btn-sm rounded-0 px-2 py-1" style="font-size:0.75rem;">
@@ -59,7 +68,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
+                    <td colspan="{{ auth()->user()->isAdmin() ? 7 : 6 }}" class="text-center text-muted py-4">
                         Chưa có yêu cầu nào. Vào trang <a href="{{ route('admin.product.index') }}">Sản phẩm</a> để tạo.
                     </td>
                 </tr>

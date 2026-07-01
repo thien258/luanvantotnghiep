@@ -22,22 +22,32 @@ use App\Models\WarehouseStockLog;
  */
 class AdminController extends Controller
 {
-    public function __construct()
-    {
-        // Yêu cầu đăng nhập
-        $this->middleware('auth');
+    // public function __construct()
+    // {
+    //     // Yêu cầu đăng nhập
+    //     $this->middleware('auth');
 
-        // Chỉ admin mới vào được — user thường bị chặn 403
-        $this->middleware(function ($request, $next) {
-            if (Auth::user()->role !== 'admin') {
-                abort(403, 'Bạn không có quyền truy cập trang này.');
-            }
-            return $next($request);
-        });
-    }
+    //     // Chỉ admin mới vào được — user thường bị chặn 403
+    //     $this->middleware(function ($request, $next) {
+    //         if (Auth::user()->role !== 'admin') {
+    //             abort(403, 'Bạn không có quyền truy cập trang này.');
+    //         }
+    //         return $next($request);
+    //     });
+    // }
 
     public function index()
     {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Bạn không có quyền truy cập trang này.');
+
+            if ($role === 'warehouse') {
+                return redirect()->route('admin.orders.index');
+            }
+            if ($role === 'manufacturer') {
+                return redirect()->route('admin.supplier-offers.index');
+            }
+        }
         // ── 1. TỔNG QUAN ──────────────────────────────────────────────
 
         // Doanh thu: tổng total_price của các đơn đã giao thành công (status = 4)
@@ -94,10 +104,9 @@ class AdminController extends Controller
 
         // ── 4. SẢN PHẨM BÁN CHẬM ─────────────────────────────────────
 
-        // Định nghĩa "bán chậm": Sản phẩm nhập kho >= 7 ngày mà tỷ lệ bán < 30%
-        // TODO: Đổi thành 30 ngày khi có đủ dữ liệu
+        // Định nghĩa "bán chậm": Sản phẩm nhập kho >= 30 ngày mà tỷ lệ bán < 30%
         $slowProducts = [];
-        $daysThreshold = 7; // TODO: Đổi thành 30 sau
+        $daysThreshold = 30;
         $daysAgo = now()->subDays($daysThreshold);
 
         // Lấy các log nhập kho từ N ngày trước trở về trước, nhóm theo product_id
@@ -113,7 +122,7 @@ class AdminController extends Controller
 
             // Tính tổng số lượng nhập từ các lần nhập >= N ngày
             $totalImported = $logs->sum('quantity');
-            
+
             // Lấy log nhập đầu tiên để biết ngày nhập
             $firstImportDate = $logs->first()->created_at;
             $daysInStock = now()->diffInDays($firstImportDate);
@@ -144,54 +153,39 @@ class AdminController extends Controller
 
         // ── 6. SẮP HẾT HẠN (HSD) ─────────────────────────────────────
 
-        // Lấy top 5 lô có HSD gần nhất còn tồn kho (FIFO by expiry_date)
-        // Chỉ lấy lô HSD trong vòng 365 ngày tới
-        $expiringBatches = [];
-        $today365 = now()->addDays(365)->toDateString();
+        // Lấy top 5 lô có HSD gần nhất chưa hết hạn, trong vòng 365 ngày tới
+        // Logic đơn giản: không FIFO, không trừ số đã bán — chỉ cần lô còn HSD thì hiện
         $todayStr  = now()->toDateString();
+        $today365  = now()->addDays(365)->toDateString();
 
-        $hsdLogs = WarehouseStockLog::where('type', 'import')
+        $expiringBatches = WarehouseStockLog::where('type', 'import')
             ->whereNotNull('expiry_date')
+            ->whereDate('expiry_date', '>=', $todayStr)
+            ->whereDate('expiry_date', '<=', $today365)
             ->selectRaw('product_id, expiry_date, SUM(quantity) as total_import')
             ->groupBy('product_id', 'expiry_date')
-            ->orderBy('product_id')
             ->orderBy('expiry_date', 'asc')
             ->get()
-            ->groupBy('product_id');
+            ->map(function ($row) {
+                $product = Product::find($row->product_id);
+                if (!$product) return null;
 
-        foreach ($hsdLogs as $productId => $batches) {
-            $product = Product::find($productId);
-            if (!$product) continue;
+                $expiryStr = $row->expiry_date instanceof \Carbon\Carbon
+                    ? $row->expiry_date->toDateString()
+                    : (string) $row->expiry_date;
 
-            $totalSoldHsd = DB::table('order_details')->where('idProduct', $productId)->sum('quantity');
-            $remaining = $totalSoldHsd;
-
-            foreach ($batches as $batch) {
-                $batchQty = (int) $batch->total_import;
-                if ($remaining >= $batchQty) { $remaining -= $batchQty; continue; }
-
-                $expiryStr = $batch->expiry_date instanceof \Carbon\Carbon
-                    ? $batch->expiry_date->toDateString()
-                    : (string) $batch->expiry_date;
-
-                $daysLeft = (int) now()->diffInDays($expiryStr, false);
-
-                // Chỉ lấy lô chưa hết hạn và trong 365 ngày tới
-                if ($expiryStr >= $todayStr && $expiryStr <= $today365) {
-                    $expiringBatches[] = (object)[
-                        'product'     => $product,
-                        'expiry_date' => $expiryStr,
-                        'qty_left'    => $batchQty - $remaining,
-                        'days_left'   => $daysLeft,
-                    ];
-                }
-                break;
-            }
-        }
-
-        // Sắp theo HSD gần nhất, lấy top 5
-        usort($expiringBatches, fn($a, $b) => $a->days_left <=> $b->days_left);
-        $expiringBatches = \array_slice($expiringBatches, 0, 5);
+                return (object) [
+                    'product'     => $product,
+                    'expiry_date' => $expiryStr,
+                    'qty_left'    => (int) $row->total_import,
+                    'days_left'   => (int) now()->diffInDays(\Carbon\Carbon::parse($expiryStr), false),
+                ];
+            })
+            ->filter()
+            ->sortBy('days_left')
+            ->take(5)
+            ->values()
+            ->all();
 
 
         // ── 5. SẢN PHẨM SẮP HẾT KHO ──────────────────────────────────

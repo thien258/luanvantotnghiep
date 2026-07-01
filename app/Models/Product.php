@@ -11,17 +11,17 @@ use Illuminate\Database\Eloquent\Model;
  * Các cột quan trọng:
  *   status   : 1 = đang bán, 0 = tạm ẩn / hết hàng
  *   quantity : tồn kho hiện tại
- *   price    : giá bán (₫), có thể bị giảm bởi Festival
+ *   price    : giá bán (VNĐ), có thể bị giảm bởi Festival
  *   volume   : dung tích (VD: 100ml)
  *
  * Quan hệ:
  *   belongsTo  Category, Brand, Concentration
  *   hasMany    Comment
- *   belongsToMany Festival (qua festival_product)
- *   belongsToMany ManuFacturer (qua manufacturers_product — danh bạ NSX)
+ *   belongsToMany Festival (qua bảng festival_product)
+ *   belongsToMany ManuFacturer (qua bảng manufacturers_product — danh bạ NSX)
  *
  * Tự động hóa:
- *   - Khi quantity về 0 → status tự chuyển sang 0 (off) qua booted()
+ *   - Khi quantity về 0 → status tự chuyển sang 0 (ẩn) qua hook booted()
  *
  * Bảng: products
  *
@@ -69,33 +69,38 @@ class Product extends Model
 {
     protected $table = "products";
 
+    // Các cột được phép gán hàng loạt
     protected $fillable = [
         "id",
-        "title",         // Tên sản phẩm
-        'image',         // URL ảnh sản phẩm
-        'decription',    // Mô tả (typo trong DB gốc, giữ nguyên)
-        'price',         // Giá bán (₫)
-        'quantity',      // Tồn kho
-        'volume',        // Dung tích (VD: 100ml, 50ml)
-        'status',        // 1 = đang bán, 0 = ẩn
-        'idConcentration', // FK → concentrations
-        'idBrand',         // FK → brands
-        'idCategory',      // FK → categories
+        "title",           // Tên sản phẩm
+        'image',           // Đường dẫn ảnh sản phẩm
+        'decription',      // Mô tả (tên cột typo trong DB gốc — giữ nguyên để khớp schema)
+        'price',           // Giá bán (VNĐ)
+        'quantity',        // Số lượng tồn kho
+        'volume',          // Dung tích (VD: 100ml, 50ml)
+        'status',          // 1 = đang bán, 0 = tạm ẩn / hết hàng
+        'idConcentration', // FK → concentrations (nồng độ: EDP, EDT, ...)
+        'idBrand',         // FK → brands (thương hiệu)
+        'idCategory',      // FK → categories (danh mục: Nam, Nữ, Unisex, ...)
     ];
 
-    /** Danh mục sản phẩm (Nam / Nữ / Unisex). */
+    // =========================================================================
+    // QUAN HỆ (Relationships)
+    // =========================================================================
+
+    /** Danh mục sản phẩm (Nam / Nữ / Unisex ...). */
     public function category()
     {
         return $this->belongsTo(Category::class, 'idCategory', 'id');
     }
 
-    /** Nồng độ nước hoa (EDP, EDT, ...). */
+    /** Nồng độ nước hoa (EDP, EDT, EDP, Parfum ...). */
     public function concentration()
     {
         return $this->belongsTo(Concentration::class, 'idConcentration', 'id');
     }
 
-    /** Thương hiệu (Chanel, Dior, ...). */
+    /** Thương hiệu sản phẩm (Chanel, Dior, ...). */
     public function brand()
     {
         return $this->belongsTo(Brand::class, 'idBrand', 'id');
@@ -103,23 +108,24 @@ class Product extends Model
 
     /**
      * Các Festival đang áp dụng giảm giá cho sản phẩm này.
-     * Many-to-many qua bảng festival_product.
+     * Quan hệ nhiều-nhiều qua bảng trung gian festival_product.
+     * Cột pivot: idProduct, idFestival.
      */
     public function festivals()
     {
         return $this->belongsToMany(Festival::class, 'festival_product', 'idProduct', 'idFestival');
     }
 
-    /** Bình luận của khách hàng về sản phẩm. */
+    /** Danh sách bình luận / đánh giá của khách về sản phẩm này. */
     public function comment()
     {
         return $this->hasMany(Comment::class, 'idProduct', 'id');
     }
 
     /**
-     * Danh sách NSX có thể cung cấp sản phẩm này.
-     * Many-to-many qua bảng manufacturers_product (danh bạ).
-     * Được sync tự động khi admin tạo PurchaseOrder.
+     * Danh sách nhà sản xuất (NSX) có thể cung cấp sản phẩm này.
+     * Quan hệ nhiều-nhiều qua bảng manufacturers_product.
+     * Được đồng bộ (sync) tự động khi admin tạo PurchaseOrder.
      */
     public function manufacturers()
     {
@@ -127,53 +133,74 @@ class Product extends Model
     }
 
     // =========================================================================
-    // BOOTED — Hook tự động khi lưu model
+    // BOOTED — Hook vòng đời model (tự động kích hoạt khi lưu)
     // =========================================================================
 
     /**
-     * Khi quantity thay đổi về 0 → tự động ẩn sản phẩm (status = 0).
-     * Không tự bật lại khi nhập hàng (phải bật thủ công).
+     * Đăng ký hook 'saving': chạy trước khi INSERT hoặc UPDATE.
+     *
+     * Logic: Khi tồn kho (quantity) giảm về 0 hoặc âm →
+     *   - Ép quantity = 0 (tránh lưu giá trị âm vào DB)
+     *   - Tự động ẩn sản phẩm (status = 0)
+     *
+     * Lưu ý: Khi nhập hàng lại, admin phải bật status thủ công — hệ thống KHÔNG
+     * tự động bật lại để tránh hiển thị sản phẩm khi chưa được kiểm tra.
      */
     protected static function booted(): void
     {
         static::saving(function (Product $product) {
-            // Chỉ can thiệp khi cột quantity vừa thay đổi
+            // isDirty('quantity') → chỉ xử lý khi cột quantity thực sự thay đổi
             if ($product->isDirty('quantity') && $product->quantity <= 0) {
-                $product->quantity = 0;     // đảm bảo không âm
-                $product->status   = 0;     // ẩn sản phẩm
+                $product->quantity = 0;  // đảm bảo không lưu số âm
+                $product->status   = 0;  // ẩn sản phẩm khỏi giao diện mua hàng
             }
         });
     }
 
     // =========================================================================
-    // METHODS — Tính giá sau giảm
+    // METHODS — Tính giá sau giảm từ Festival
     // =========================================================================
 
     /**
-     * Tính giá đã giảm dựa trên Festival đang diễn ra.
+     * Tính giá sau khi áp dụng Festival (nếu có).
      *
-     * Logic ẩn/hiện sản phẩm theo festival:
-     *   - Nếu SP có 2 festival đang active → chỉ hiện ở festival có discount cao hơn
-     *   - Festival discount thấp hơn sẽ ẩn SP đó đi
-     *   - Khi festival cao hơn hết hạn → SP hiện lại ở festival thấp hơn (nếu còn hạn)
+     * Quy tắc hiển thị sản phẩm trong festival:
+     *   - Nếu 1 SP có 2 festival đang active → chỉ hiện SP ở festival giảm GIÁ CAO HƠN.
+     *   - Festival giảm giá thấp hơn sẽ ẩn SP đó đi (tránh khách thấy giá cao hơn).
+     *   - Khi festival giảm giá cao hơn hết hạn → SP tự động hiện lại ở festival còn lại.
      *
      * @param Festival|null $festival
-     *   - Truyền vào: chỉ áp discount của festival đó (dùng ở trang /festival/{id})
-     *   - null: lấy discount cao nhất từ tất cả festival active (dùng ở trang chủ)
+     *   - Truyền vào object Festival cụ thể: chỉ áp discount của festival đó.
+     *     Dùng ở trang chi tiết festival: /festival/{id}
+     *   - null: tìm và áp discount CAO NHẤT từ tất cả festival đang active.
+     *     Dùng ở trang chủ / danh sách sản phẩm chung.
+     *
+     * @return float|int Giá sau giảm, hoặc giá gốc nếu không có festival nào áp dụng.
      */
     public function getDiscountedPrice(?Festival $festival = null)
     {
-        $today = Carbon::today()->toDateString();
+        $today = Carbon::today()->toDateString(); // Lấy ngày hôm nay để so sánh thời gian festival
 
         if ($festival !== null) {
-            // Kiểm tra festival được truyền vào có đang active và đúng thời gian không
+            /*
+             * Chế độ festival cụ thể:
+             * Kiểm tra festival được truyền vào có:
+             *   - status == 1 (đang kích hoạt)
+             *   - start_date <= hôm nay (đã bắt đầu)
+             *   - end_date >= hôm nay (chưa kết thúc)
+             * Nếu thỏa → lấy discount, ngược lại discount = 0.
+             */
             $maxDiscount = ($festival->status == 1
                 && $festival->start_date->toDateString() <= $today
                 && $festival->end_date->toDateString() >= $today)
                 ? $festival->discount
                 : 0;
         } else {
-            // Lấy mức giảm cao nhất từ tất cả festival đang active + đúng thời gian
+            /*
+             * Chế độ tự động: query tất cả festival active của SP này,
+             * lọc theo thời gian hợp lệ, lấy mức discount CAO NHẤT.
+             * ?? 0 → mặc định 0 nếu không có festival nào phù hợp.
+             */
             $maxDiscount = $this->festivals()
                 ->where('status', 1)
                 ->where('start_date', '<=', $today)
@@ -181,11 +208,12 @@ class Product extends Model
                 ->max('discount') ?? 0;
         }
 
-        // Áp dụng giảm giá nếu có
+        // Nếu có giảm giá: tính giá = giá gốc × (1 - discount%)
         if ($maxDiscount > 0) {
             return $this->price * (1 - ($maxDiscount / 100));
         }
 
-        return $this->price; // không có festival → trả giá gốc
+        // Không có festival → trả về giá gốc
+        return $this->price;
     }
 }

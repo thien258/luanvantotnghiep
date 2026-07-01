@@ -23,17 +23,31 @@ class ProcurementController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+      $this->middleware(function ($request, $next) {
+        $role = auth()->user()->role;
+        if (!in_array($role, ['admin', 'manufacturer'])) {
+            abort(403);
+        }
+        return $next($request);
+    });
     }
 
     // Danh sách tất cả yêu cầu thu mua
     public function index()
     {
-        $requests = ProcurementRequest::with('items.product')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $user = auth()->user();
+        $query = ProcurementRequest::with(['items.product', 'offers'])
+            ->orderBy('created_at', 'desc');
 
-        return view('admin.procurement.index', compact('requests'));
+        $requests = $query->paginate(15);
+
+        // Nếu là manufacturer, truyền manufacturer_id để blade lọc đúng số báo giá
+        $myManufacturerId = null;
+        if ($user->role === 'manufacturer') {
+            $myManufacturerId = $user->manufacturer?->id;
+        }
+
+        return view('admin.procurement.index', compact('requests', 'myManufacturerId'));
     }
 
     // Tạo yêu cầu thu mua từ modal trang sản phẩm
@@ -74,7 +88,7 @@ class ProcurementController extends Controller
                 'product_id'   => $pid,
                 'product_name' => $product->title,
                 'qty_needed'   => (int)($qtySuggest[$pid] ?? 10),
-                'note'         => 'Tồn kho hiện tại: ' . $product->quantity,
+                'note'         => '',
             ]);
         }
 
@@ -93,6 +107,19 @@ class ProcurementController extends Controller
             'offers.items',
             'creator',
         ])->findOrFail($id);
+
+        // manufacturer chỉ thấy báo giá của mình trong danh sách offers
+        if (auth()->user()->role === 'manufacturer') {
+            $manufacturer = auth()->user()->manufacturer;
+            if ($manufacturer) {
+                $procRequest->setRelation(
+                    'offers',
+                    $procRequest->offers->where('manufacturer_id', $manufacturer->id)
+                );
+            } else {
+                $procRequest->setRelation('offers', collect());
+            }
+        }
 
         return view('admin.procurement.show', compact('procRequest'));
     }

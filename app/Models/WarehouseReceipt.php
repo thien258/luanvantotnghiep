@@ -7,9 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * WarehouseReceipt — Phiếu nhập kho.
  *
- * Được tạo khi admin duyệt file nhập kho (WarehouseController::importApprove).
+ * Được tạo khi admin phê duyệt file Excel nhập kho (WarehouseController::importApprove).
  * Mỗi phiếu ghi nhận 1 lần nhập kho từ 1 nhà cung cấp.
- * receipt_code sinh tự động: PN + timestamp (VD: PN2606171530).
+ *
+ * receipt_code: mã phiếu sinh tự động theo định dạng PN + timestamp
+ *               VD: PN2606171530 (PN + ngày 26/06 + giờ 17:30)
+ *
+ * Sau khi phiếu được tạo, hệ thống tự sinh các WarehouseStockLog tương ứng
+ * cho từng dòng sản phẩm trong phiếu và cộng vào tồn kho (Product.quantity).
  *
  * Bảng: warehouse_receipts
  *
@@ -38,16 +43,17 @@ class WarehouseReceipt extends Model
 {
     protected $table = "warehouse_receipts";
 
+    // Các cột được phép gán hàng loạt
     protected $fillable = [
-        'receipt_code', // Mã phiếu nhập kho tự sinh
-        'supplier',     // Tên nhà cung cấp (string, chưa FK)
-        'note',         // Ghi chú phiếu
-        'total_items',  // Số dòng sản phẩm trong phiếu
+        'receipt_code', // Mã phiếu nhập kho (tự sinh, dạng PNddmmHHii)
+        'supplier',     // Tên nhà cung cấp (lưu dạng text, chưa liên kết FK)
+        'note',         // Ghi chú thêm cho phiếu nhập
+        'total_items',  // Tổng số dòng sản phẩm trong phiếu
     ];
 
     /**
-     * Danh sách log tồn kho thuộc phiếu này.
-     * Mỗi log là 1 sản phẩm được nhập với số lượng cụ thể.
+     * Quan hệ: 1 phiếu nhập kho sinh ra nhiều bản ghi log tồn kho.
+     * Mỗi WarehouseStockLog tương ứng với 1 sản phẩm và số lượng nhập cụ thể.
      */
     public function stockLogs()
     {

@@ -7,20 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * PurchaseOrder — Đơn đặt hàng admin tạo sau khi duyệt báo giá NSX.
  *
- * Luồng:
- *   Admin xem báo giá → tick SP muốn mua + điền số lượng
- *   → Tạo PurchaseOrder + PurchaseOrderItem
+ * Luồng tạo đơn:
+ *   Admin xem báo giá (SupplierOffer) → tick SP muốn mua + điền số lượng
+ *   → Tạo PurchaseOrder + các PurchaseOrderItem
  *   → Cập nhật SupplierOffer.status = 'accepted'
- *   → Sync SP vào manufacturers_product (danh bạ NSX)
+ *   → Sync SP mới vào bảng manufacturers_product (danh bạ NSX)
  *
- * Trạng thái (status):
- *   pending    — chờ xác nhận
- *   confirmed  — đã xác nhận với NSX
- *   delivering — hàng đang giao
- *   received   — đã nhận hàng (admin bấm xác nhận)
- *   cancelled  — đã hủy
+ * Vòng đời trạng thái (status):
+ *   pending    — vừa tạo, chờ xác nhận với NSX
+ *   confirmed  — đã xác nhận, NSX đang chuẩn bị hàng
+ *   delivering — hàng đang trên đường giao
+ *   received   — admin bấm xác nhận đã nhận hàng
+ *   cancelled  — đơn bị hủy
  *
- * Sau khi received → admin tải file CSV → upload vào trang Nhập Kho → cộng tồn kho.
+ * Sau khi received → admin tải file CSV xuất từ đơn → upload vào trang Nhập Kho
+ * → hệ thống cộng tồn kho tương ứng.
  *
  * Bảng: purchase_orders
  *
@@ -59,19 +60,21 @@ class PurchaseOrder extends Model
 {
     protected $table = "purchase_orders";
 
+    // Các cột được phép gán hàng loạt
     protected $fillable = [
         'offer_id',        // FK → supplier_offers (nullable — có thể đặt không qua báo giá)
-        'manufacturer_id', // FK → manufacturers
+        'manufacturer_id', // FK → manufacturers (NSX nhận đơn)
         'order_code',      // Mã đơn tự sinh: PO-YYYYMMDD-001
-        'total_amount',    // Tổng tiền = sum(quantity × unit_price)
+        'total_amount',    // Tổng tiền = sum(quantity × unit_price) tính khi tạo đơn
         'status',          // Trạng thái: pending / confirmed / delivering / received / cancelled
-        'expected_date',   // Ngày dự kiến nhận hàng
-        'note',            // Ghi chú
+        'expected_date',   // Ngày dự kiến nhận hàng (NSX cam kết)
+        'note',            // Ghi chú nội bộ
         'created_by',      // FK → users (admin nào tạo đơn)
     ];
 
     /**
-     * Nhà sản xuất của đơn đặt hàng này.
+     * Nhà sản xuất nhận đơn đặt hàng này.
+     * Dùng để hiển thị tên, SĐT NSX trong trang chi tiết đơn.
      */
     public function manufacturer()
     {
@@ -79,7 +82,8 @@ class PurchaseOrder extends Model
     }
 
     /**
-     * Báo giá gốc tạo ra đơn này (nullable).
+     * Báo giá gốc dẫn đến việc tạo đơn này (nullable).
+     * Dùng để truy ngược về báo giá khi admin cần kiểm tra lại giá đã chào.
      */
     public function offer()
     {
@@ -87,8 +91,8 @@ class PurchaseOrder extends Model
     }
 
     /**
-     * Danh sách sản phẩm trong đơn đặt hàng.
-     * 1 đơn có nhiều dòng PurchaseOrderItem.
+     * Danh sách các dòng sản phẩm trong đơn đặt hàng.
+     * 1 đơn có nhiều dòng, mỗi dòng là 1 sản phẩm với số lượng và đơn giá.
      */
     public function items()
     {

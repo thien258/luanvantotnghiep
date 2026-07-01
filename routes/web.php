@@ -68,6 +68,9 @@ Route::get('/festival_product/{festival}', [HomeController::class, 'festival_pro
 // Trang đăng ký (view riêng, không dùng auth scaffolding mặc định)
 Route::get('/register', fn() => view('register'))->name('register');
 
+// Override trang login mặc định → dùng view login.blade.php đẹp của project
+Route::get('/login', fn() => view('login'))->name('login');
+
 // Đăng nhập / đăng ký / xác minh email (tự generate bởi Auth::routes)
 Auth::routes(['verify' => true]);
 
@@ -132,7 +135,7 @@ Route::middleware('auth')->group(function () {
 // Kiểm tra role='admin' thực hiện trong AdminController::__construct()
 // =========================================================================
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse,manufacturer'])->group(function () {
 
     // Dashboard — trang tổng quan thống kê
     Route::get('/', [App\Http\Controllers\admin\AdminController::class, 'index'])->name('dashboard');
@@ -150,8 +153,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // AJAX gợi ý sản phẩm (dùng trong form tìm kiếm admin)
     Route::get('/product-suggest', [ProductController::class, 'suggest'])->name('product.suggest');
 
-    // ── Kho hàng — PHẢI đứng TRƯỚC resource product ─────────────────
-    // Nếu để sau resource, /product/warehouse sẽ bị bắt như show('warehouse')
+    /*
+     * QUAN TRỌNG: Route kho hàng PHẢI đặt TRƯỚC Route::resource('product', ...)
+     * Vì nếu để sau, Laravel sẽ hiểu /product/warehouse là show($id='warehouse')
+     * dẫn đến lỗi 404 hoặc gọi sai method.
+     */
     Route::get('product/warehouse',        [WarehouseController::class, 'index'])->name('product.warehouse.index');
     Route::post('product/warehouse/store', [WarehouseController::class, 'store'])->name('product.warehouse.store');
     Route::post('product/warehouse/attach-festival', [WarehouseController::class, 'attachToFestival'])->name('product.warehouse.attach-festival');
@@ -171,7 +177,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // ── Đơn hàng khách ──────────────────────────────────────────────
 
-    // Route lẻ phải đặt TRƯỚC resource để tránh bị resource route che mất
+    /*
+     * QUAN TRỌNG: Route lẻ xử lý action phải đặt TRƯỚC Route::resource('orders', ...)
+     * Nếu để sau, /orders/{id}/update-status sẽ bị bắt nhầm bởi resource route show($id)
+     */
     Route::post('/orders/{id}/update-status', [OrderAdminController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('/orders/{order}/return',      [OrderAdminController::class, 'returnOrder'])->name('orders.return');
     Route::post('/orders/{order}/return',     [OrderAdminController::class, 'processReturn'])->name('orders.processReturn');
@@ -182,6 +191,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // ── Nhà Sản Xuất (NSX) ──────────────────────────────────────────
 
+    // Tạo tài khoản user cho NSX (gắn role = manufacturer)
+    Route::post('manufacturer/{id}/create-account', [ManufacturerController::class, 'createAccount'])->name('manufacturer.create-account');
     // Quản lý danh sách NSX (CRUD cơ bản)
     Route::resource('manufacturer', ManufacturerController::class);
 
@@ -190,8 +201,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('supplier-offers/upload',       [SupplierOfferController::class, 'upload'])->name('supplier-offers.upload');
     Route::post('supplier-offers/{id}/reject',  [SupplierOfferController::class, 'reject'])->name('supplier-offers.reject');
 
-    // Đơn đặt hàng: tạo từ báo giá → theo dõi trạng thái → xuất file
-    // ── Yêu cầu thu mua công khai (Admin đăng → NSX xem + chào giá) ──
+    /*
+     * Luồng yêu cầu thu mua:
+     *   Admin tạo ProcurementRequest (open) → NSX xem và upload file chào giá
+     *   → Admin tạo PurchaseOrder từ báo giá → NSX xác nhận → nhận hàng → nhập kho
+     */
     Route::resource('procurement', ProcurementController::class)->only(['index', 'store', 'show']);
     Route::post('procurement/{id}/close',        [ProcurementController::class, 'close'])->name('procurement.close');
     Route::get('procurement/{id}/export-template', [ProcurementController::class, 'exportTemplate'])->name('procurement.export-template');

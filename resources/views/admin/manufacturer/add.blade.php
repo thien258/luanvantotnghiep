@@ -42,6 +42,21 @@
                     <textarea name="address" class="form-control" rows="3" placeholder="Nhập địa chỉ trụ sở hoặc xưởng sản xuất...">{{ old('address') }}</textarea>
                 </div>
 
+                <hr>
+                <h6 class="font-weight-bold text-dark mb-3"><i class="fa-solid fa-user mr-1"></i> Tài khoản đăng nhập (tùy chọn)</h6>
+                <p class="small text-muted">Điền để tạo tài khoản cho NSX đăng nhập ngay. Bỏ trống nếu muốn tạo sau.</p>
+
+                <div class="form-group row">
+                    <div class="col-sm-6 mb-3 mb-sm-0">
+                        <label class="font-weight-bold text-dark">Email đăng nhập</label>
+                        <input type="email" name="email" class="form-control" placeholder="email@example.com" value="{{ old('email') }}">
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="font-weight-bold text-dark">Mật khẩu</label>
+                        <input type="text" name="password" class="form-control" placeholder="Tối thiểu 8 ký tự" value="{{ old('password') }}" minlength="8">
+                    </div>
+                </div>
+
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary btn-icon-split shadow-sm">
                         <span class="icon text-white-50">

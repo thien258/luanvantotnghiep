@@ -27,15 +27,37 @@ class SupplierOfferController extends Controller
     // =========================================================================
     // INDEX — Danh sách báo giá + form upload trên cùng 1 trang
     // =========================================================================
-
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $role = auth()->user()->role;
+            if (!in_array($role, ['admin', 'manufacturer'])) {
+                abort(403);
+            }
+            return $next($request);
+        });
+    }
     public function index()
     {
-        // Lấy tất cả báo giá, kèm tên NSX, sắp theo mới nhất
-        $offers = SupplierOffer::with('manufacturer')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $user = auth()->user();
+        $query = SupplierOffer::with('manufacturer')
+            ->orderByRaw("FIELD(status, 'submitted', 'accepted', 'rejected', 'draft')")
+            ->orderBy('created_at', 'desc');
 
-        // Danh sách NSX để hiển thị trong dropdown chọn khi upload file
+        // manufacturer chỉ thấy báo giá của mình
+        if ($user->role === 'manufacturer') {
+            $manufacturer = $user->manufacturer;
+            if (!$manufacturer) {
+                // Tài khoản chưa được liên kết với NSX nào
+                return view('admin.supplier-offer.index', [
+                    'offers'        => collect(),
+                    'manufacturers' => collect(),
+                ]);
+            }
+            $query->where('manufacturer_id', $manufacturer->id);
+        }
+
+        $offers = $query->paginate(15);
         $manufacturers = ManuFacturer::orderBy('name')->get();
 
         return view('admin.supplier-offer.index', compact('offers', 'manufacturers'));
@@ -117,10 +139,6 @@ class SupplierOfferController extends Controller
 
     public function show(string $id)
     {
-        // Eager load đầy đủ để tránh N+1 query:
-        // - items: danh sách SP trong báo giá
-        // - items.product.*: thông tin SP trong hệ thống (ảnh, category, brand, concentration)
-        // - purchaseOrder: kiểm tra đã tạo PO chưa (để ẩn form nếu đã đặt)
         $offer = SupplierOffer::with([
             'manufacturer',
             'items.product.category',
@@ -128,6 +146,14 @@ class SupplierOfferController extends Controller
             'items.product.concentration',
             'purchaseOrder'
         ])->findOrFail($id);
+
+        // manufacturer chỉ xem offer của mình
+        if (auth()->user()->role === 'manufacturer') {
+            $manufacturer = auth()->user()->manufacturer;
+            if (!$manufacturer || $offer->manufacturer_id !== $manufacturer->id) {
+                abort(403, 'Bạn không có quyền xem báo giá này.');
+            }
+        }
 
         return view('admin.supplier-offer.show', compact('offer'));
     }

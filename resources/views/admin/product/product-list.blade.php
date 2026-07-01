@@ -221,16 +221,26 @@
                                     <th class="pl-3 py-2" style="width:5%">✓</th>
                                     <th style="width:7%">Ảnh</th>
                                     <th>Tên sản phẩm</th>
-                                    <th class="text-center" style="width:12%">Tồn kho</th>
-                                    <th class="text-center" style="width:15%">Cần nhập</th>
+                                    <th class="text-center" style="width:10%">Tồn kho</th>
+                                    <th class="text-center" style="width:13%">HSD gần nhất</th>
+                                    <th class="text-center" style="width:14%">Cần nhập</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($lowStockItems as $p)
-                                <tr class="@if($p->quantity < 5) table-danger @elseif($p->quantity < 10) table-warning @endif">
+                                @php
+                                    $pExpiry    = $expiryMap[$p->id] ?? null;
+                                    $pDaysLeft  = $pExpiry ? $pExpiry['days_left'] : null;
+                                    $isSlow     = in_array($p->id, $slowProductIds);
+                                    $isExpiring = $pDaysLeft !== null && $pDaysLeft <= 90;
+                                    // Cảnh báo kép: bán chậm + sắp hết hạn → KHÔNG nên đặt thêm
+                                    $isDoubleWarning = $isSlow && $isExpiring;
+                                @endphp
+                                <tr class="@if($isDoubleWarning) table-danger @elseif($p->quantity < 5) table-danger @elseif($p->quantity < 10) table-warning @endif">
                                     <td class="pl-3 py-2">
                                         <input type="checkbox" name="product_ids[]"
-                                               value="{{ $p->id }}" class="low-stock-check">
+                                               value="{{ $p->id }}" class="low-stock-check"
+                                               @if($isDoubleWarning) title="⚠️ SP này bán chậm + sắp hết hạn — cân nhắc trước khi đặt thêm" @endif>
                                     </td>
                                     <td class="py-2">
                                         @if($p->image)
@@ -241,20 +251,44 @@
                                     </td>
                                     <td class="py-2 font-weight-bold">
                                         {{ $p->title }}
-                                        @if($p->quantity == 0)
-                                            <span class="badge badge-danger rounded-0 ml-1 text-white" style="font-size:0.6rem;">HẾT</span>
-                                        @elseif($p->quantity < 5)
-                                            <span class="badge badge-warning rounded-0 ml-1 text-white" style="font-size:0.6rem;">SẮP HẾT</span>
-                                        @endif
+                                        <div class="mt-1 d-flex flex-wrap gap-1">
+                                            @if($p->quantity == 0)
+                                                <span class="badge badge-danger rounded-0 text-white" style="font-size:0.6rem;">HẾT HÀNG</span>
+                                            @elseif($p->quantity < 5)
+                                                <span class="badge badge-warning rounded-0 text-white" style="font-size:0.6rem;">SẮP HẾT</span>
+                                            @endif
+                                            @if($isSlow)
+                                                <span class="badge rounded-0 text-dark" style="font-size:0.6rem; background:#ffc107;">🐢 Bán chậm</span>
+                                            @endif
+                                            @if($isExpiring)
+                                                <span class="badge rounded-0 text-white" style="font-size:0.6rem; background:#dc3545;">⏰ HSD còn {{ $pDaysLeft }} ngày</span>
+                                            @endif
+                                            @if($isDoubleWarning)
+                                                <span class="badge rounded-0 text-white" style="font-size:0.6rem; background:#6f42c1; display:block; width:100%;">⚠️ Bán chậm + sắp hết hạn — cân nhắc kỹ trước khi đặt</span>
+                                            @endif
+                                        </div>
                                     </td>
                                     <td class="text-center py-2 font-weight-bold
                                         {{ $p->quantity == 0 ? 'text-danger' : ($p->quantity < 5 ? 'text-warning' : 'text-dark') }}">
                                         {{ $p->quantity }}
                                     </td>
+                                    <td class="text-center py-2" style="font-size:0.8rem;">
+                                        @if($pExpiry)
+                                            <span class="fw-bold {{ $pDaysLeft <= 30 ? 'text-danger' : ($pDaysLeft <= 90 ? 'text-warning' : 'text-muted') }}">
+                                                {{ \Carbon\Carbon::parse($pExpiry['date'])->format('d/m/Y') }}
+                                            </span>
+                                            <br><small class="text-muted">còn {{ $pDaysLeft }} ngày</small>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
                                     <td class="py-2">
                                         <input type="number" name="qty_suggest[{{ $p->id }}]"
-                                               value="10" min="1"
-                                               class="form-control form-control-sm rounded-0 text-center">
+                                               value="{{ $isDoubleWarning ? 0 : 10 }}" min="0"
+                                               class="form-control form-control-sm rounded-0 text-center {{ $isDoubleWarning ? 'bg-light text-muted' : '' }}">
+                                        @if($isDoubleWarning)
+                                            <small class="text-danger d-block text-center mt-1" style="font-size:0.6rem;">Xem lại!</small>
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforeach

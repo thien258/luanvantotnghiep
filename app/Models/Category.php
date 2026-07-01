@@ -5,6 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * Category — Danh mục phân loại sản phẩm.
+ *
+ * Dùng để phân nhóm sản phẩm theo đối tượng sử dụng.
+ * Ví dụ: Nam, Nữ, Unisex, ...
+ *
+ * status: 1 = hiện, 0 = ẩn (danh mục ẩn không hiển thị trên menu mua hàng).
+ *
+ * Bảng: categories
+ *
  * @property int $id
  * @property string $name
  * @property int $status
@@ -25,7 +34,18 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model
 {
     protected $table = "categories";
-    protected $fillable = ["id", "name", 'status'];
+
+    // Các cột được phép gán hàng loạt
+    protected $fillable = [
+        "id",
+        "name",   // Tên danh mục (VD: Nam, Nữ, Unisex)
+        'status', // 1 = hiện thị, 0 = ẩn
+    ];
+
+    /**
+     * Quan hệ: 1 danh mục có nhiều sản phẩm.
+     * Dùng cột idCategory làm khóa ngoại ở bảng products.
+     */
     public function product()
     {
         return $this->hasMany('App\Models\Product', 'idCategory', 'id');

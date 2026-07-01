@@ -102,25 +102,32 @@
     </div>
 </div>
 
-{{-- Nút xuất file — luôn hiện dù status nào --}}
+{{-- Nút xuất file theo role --}}
+@if(in_array(auth()->user()->role, ['warehouse', 'manufacturer']))
 <div class="mb-3 d-flex gap-2 flex-wrap">
+    {{-- Xuất CSV nhập kho: chỉ warehouse --}}
+    @if(auth()->user()->role === 'warehouse')
     <a href="{{ route('admin.purchase-orders.export-csv', $purchaseOrder->id) }}"
        class="btn btn-outline-dark rounded-0 px-4">
         <i class="fa-solid fa-file-csv mr-1"></i> Xuất CSV nhập kho
     </a>
+    @endif
+
+    {{-- Xuất Excel gửi NSX: chỉ manufacturer --}}
+    @if(auth()->user()->role === 'manufacturer')
     <a href="{{ route('admin.purchase-orders.export-excel', $purchaseOrder->id) }}"
        class="btn btn-success rounded-0 px-4">
         <i class="fa-solid fa-file-excel mr-1"></i> Xuất Đơn Mua Hàng (Excel)
     </a>
-    <small class="text-muted align-self-center">File CSV dùng để nhập kho · File Excel dùng để gửi NSX</small>
+    @endif
 </div>
+@endif
 
-{{-- Cập nhật trạng thái bằng nút bấm --}}
-@if(!in_array($purchaseOrder->status, ['received', 'cancelled']))
+{{-- Cập nhật trạng thái bằng nút bấm: chỉ manufacturer --}}
+@if(!in_array($purchaseOrder->status, ['received', 'cancelled']) && auth()->user()->role === 'manufacturer')
 <div class="d-flex gap-2 flex-wrap mb-3">
 
     @if($purchaseOrder->status === 'pending')
-        {{-- Chờ xác nhận → Xác nhận --}}
         <form action="{{ route('admin.purchase-orders.status', $purchaseOrder->id) }}" method="POST">
             @csrf
             <input type="hidden" name="status" value="confirmed">
@@ -139,7 +146,6 @@
     @endif
 
     @if($purchaseOrder->status === 'confirmed')
-        {{-- Đã xác nhận → Đang giao --}}
         <form action="{{ route('admin.purchase-orders.status', $purchaseOrder->id) }}" method="POST">
             @csrf
             <input type="hidden" name="status" value="delivering">
@@ -149,17 +155,19 @@
         </form>
     @endif
 
-    @if($purchaseOrder->status === 'delivering')
-        {{-- Đang giao → chỉ xác nhận nhận hàng, CSV xuất riêng ở trên --}}
-        <form action="{{ route('admin.purchase-orders.receive', $purchaseOrder->id) }}" method="POST"
-              onsubmit="return confirm('Xác nhận đã nhận hàng từ NSX?')">
-            @csrf
-            <button type="submit" class="btn btn-success rounded-0 px-4">
-                <i class="fa-solid fa-check mr-1"></i> Xác nhận đã nhận hàng
-            </button>
-        </form>
-    @endif
+</div>
+@endif
 
+{{-- Nút nhận hàng: chỉ warehouse --}}
+@if($purchaseOrder->status === 'delivering' && auth()->user()->role === 'warehouse')
+<div class="d-flex gap-2 flex-wrap mb-3">
+    <form action="{{ route('admin.purchase-orders.receive', $purchaseOrder->id) }}" method="POST"
+          onsubmit="return confirm('Xác nhận đã nhận hàng từ NSX?')">
+        @csrf
+        <button type="submit" class="btn btn-success rounded-0 px-4">
+            <i class="fa-solid fa-check mr-1"></i> Xác nhận đã nhận hàng
+        </button>
+    </form>
 </div>
 @endif
 

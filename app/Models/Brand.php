@@ -5,6 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * Brand — Thương hiệu nước hoa.
+ *
+ * Lưu thông tin các thương hiệu được bán trong hệ thống.
+ * Ví dụ: Chanel, Dior, Gucci, Versace, ...
+ *
+ * status: 1 = đang hoạt động, 0 = ẩn
+ *         (thương hiệu ẩn vẫn giữ liên kết với sản phẩm nhưng không hiển thị trên menu)
+ *
+ * Bảng: brands
+ *
  * @property int $id
  * @property string $name
  * @property string $image
@@ -28,10 +38,23 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Brand extends Model
 {
-    //
-    protected $table="brands";
-    protected $fillable=["id","name",'image','descrip','status'];
-    public function product(){
-        return $this->hasMany('App\Models\Product','idBrand','id');
+    protected $table = "brands";
+
+    // Các cột được phép gán hàng loạt
+    protected $fillable = [
+        "id",
+        "name",    // Tên thương hiệu (VD: Chanel, Dior)
+        'image',   // Đường dẫn logo / ảnh đại diện thương hiệu
+        'descrip', // Mô tả ngắn về thương hiệu
+        'status',  // 1 = đang hiển thị, 0 = ẩn
+    ];
+
+    /**
+     * Quan hệ: 1 thương hiệu có nhiều sản phẩm.
+     * Dùng cột idBrand làm khóa ngoại ở bảng products.
+     */
+    public function product()
+    {
+        return $this->hasMany('App\Models\Product', 'idBrand', 'id');
     }
 }

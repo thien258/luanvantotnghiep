@@ -43,7 +43,14 @@ class WarehouseController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware(function ($request, $next) {
+            $role = auth()->user()->role;
+            // Chỉ admin và warehouse vào được
+            if (!in_array($role, ['admin', 'warehouse'])) {
+                abort(403);
+            }
+            return $next($request);
+        });
     }
 
     // =========================================================================
@@ -149,10 +156,13 @@ class WarehouseController extends Controller
     public function importList()
     {
         $imports = WarehouseImport::with('uploader')
+            ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
-        return view('admin.product.import-list', compact('imports'));
+        $manufacturers = \App\Models\ManuFacturer::orderBy('name')->get();
+
+        return view('admin.product.import-list', compact('imports', 'manufacturers'));
     }
 
     /**
@@ -428,7 +438,7 @@ class WarehouseController extends Controller
         // Tính tỉ lệ đã bán / nhập của batch đó
         // Nếu < 30% → cảnh báo bán chậm
         $slowProducts = [];
-        $daysThreshold = 7; // TODO: Đổi thành 30 khi có đủ dữ liệu
+        $daysThreshold = 30;
         $daysAgo = now()->subDays($daysThreshold);
 
         // Lấy các log nhập kho từ N ngày trước trở về trước
@@ -449,9 +459,13 @@ class WarehouseController extends Controller
             $firstImportDate = $logs->first()->created_at;
             $daysInStock = now()->diffInDays($firstImportDate);
 
-            // Tính tổng đã bán (từ tất cả đơn hàng)
+            // Tính tổng đã bán — chỉ đơn hoàn tất (status = 4), đồng nhất với Dashboard
             $totalSold = Schema::hasTable('order_details')
-                ? DB::table('order_details')->where('idProduct', $product->id)->sum('quantity')
+                ? DB::table('order_details')
+                ->join('orders', 'order_details.idOrder', '=', 'orders.id')
+                ->where('order_details.idProduct', $product->id)
+                ->where('orders.status', 4)
+                ->sum('order_details.quantity')
                 : 0;
 
             // Tính tỉ lệ bán
@@ -497,10 +511,27 @@ class WarehouseController extends Controller
             rewind($stream);
 
             $headerLine = fgetcsv($stream, 1000, ',');
-            $delimiter  = (count($headerLine) <= 1) ? ';' : ',';
+
+            // Bỏ BOM UTF-8 nếu có ở đầu dòng
+            if (!empty($headerLine[0])) {
+                $headerLine[0] = ltrim($headerLine[0], "\xEF\xBB\xBF");
+            }
+
+            // Nếu dòng đầu là metadata "# supplier,...", bỏ qua và đọc header thật
+            if (!empty($headerLine[0]) && str_starts_with(trim($headerLine[0]), '# supplier')) {
+                $headerLine = fgetcsv($stream, 1000, ',');
+            }
+
+            $delimiter = (count($headerLine) <= 1) ? ';' : ',';
             if ($delimiter === ';') {
                 rewind($stream);
-                fgetcsv($stream, 1000, ';');
+                $firstLine = fgetcsv($stream, 1000, ';');
+                if (!empty($firstLine[0])) {
+                    $firstLine[0] = ltrim($firstLine[0], "\xEF\xBB\xBF");
+                }
+                if (!empty($firstLine[0]) && str_starts_with(trim($firstLine[0]), '# supplier')) {
+                    fgetcsv($stream, 1000, ';');
+                }
             }
 
             while (($data = fgetcsv($stream, 1000, $delimiter)) !== false) {
@@ -555,15 +586,24 @@ class WarehouseController extends Controller
             'category'      => trim($d[7] ?? ''),
             'brand'         => trim($d[8] ?? ''),
             'concentration' => trim($d[9] ?? ''),
-            'expiry_date' => (function($val) {
+            'expiry_date' => (function ($val) {
                 if (empty($val)) return '';
                 // Nếu là số serial của Excel (VD: 46200) → convert sang Y-m-d
                 if (is_numeric($val)) {
                     return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float)$val)->format('Y-m-d');
                 }
-                // Nếu là chuỗi thì thử parse bình thường
+                $val = trim((string)$val);
+                // Thử các format phổ biến: d/m/Y, d-m-Y, Y-m-d
+                $formats = ['d/m/Y', 'd-m-Y', 'Y-m-d', 'd/n/Y', 'n/d/Y'];
+                foreach ($formats as $format) {
+                    $date = \DateTime::createFromFormat($format, $val);
+                    if ($date && $date->format($format) === $val) {
+                        return $date->format('Y-m-d');
+                    }
+                }
+                // Fallback: Carbon parse
                 try {
-                    return \Carbon\Carbon::parse(trim((string)$val))->format('Y-m-d');
+                    return \Carbon\Carbon::parse($val)->format('Y-m-d');
                 } catch (\Exception $e) {
                     return '';
                 }
@@ -577,75 +617,43 @@ class WarehouseController extends Controller
      * Trừ dần số đã bán từ nhóm HSD gần nhất trước.
      * Trả về danh sách lô còn hàng và HSD nằm trong vòng $days ngày.
      */
-    private function getExpiringBatches(int $days = 365): array
+    private function getExpiringBatches(int $days = 730): array
     {
-        $result = []; // mảng kết quả — chứa các lô còn hàng và sắp hết hạn
+        $result = [];
 
-        // Ngưỡng cảnh báo: hôm nay + $days ngày (VD: 365 ngày tới)
         $threshold = now()->addDays($days)->toDateString();
-        // Ngày hôm nay — dùng để lọc bỏ lô đã hết hạn rồi
-        $today = now()->toDateString();
+        $today     = now()->toDateString();
 
-        // Truy vấn DB: lấy tất cả log nhập kho có expiry_date
-        // GROUP BY product_id + expiry_date → gộp các lô cùng SP + cùng HSD thành 1 dòng
-        // SUM(quantity) → tổng số lượng nhập của nhóm đó
-        // orderBy expiry_date asc → lô HSD gần nhất lên trước (FIFO)
+        // Lấy tất cả lô nhập kho có expiry_date, gộp theo product + HSD
+        // Không quan tâm đã bán bao nhiêu — chỉ cần lô có HSD trong ngưỡng thì hiện
         $batches = WarehouseStockLog::where('type', 'import')
             ->whereNotNull('expiry_date')
+            ->whereDate('expiry_date', '>=', $today)
+            ->whereDate('expiry_date', '<=', $threshold)
             ->selectRaw('product_id, expiry_date, SUM(quantity) as total_import')
             ->groupBy('product_id', 'expiry_date')
             ->orderBy('expiry_date', 'asc')
-            ->get()
-            ->groupBy('product_id'); // groupBy lần 2 trên PHP: gom theo product_id để loop từng SP
+            ->get();
 
-        foreach ($batches as $productId => $productBatches) {
-            $product = Product::with('festivals')->find($productId);
-            if (!$product) continue; // SP đã bị xóa → bỏ qua
+        foreach ($batches as $batch) {
+            $product = Product::with('festivals')->find($batch->product_id);
+            if (!$product) continue;
 
-            // Tổng số đã bán của SP này (từ tất cả đơn hàng đã có)
-            $totalSold = DB::table('order_details')->where('idProduct', $productId)->sum('quantity');
+            $expiryStr = $batch->expiry_date instanceof Carbon
+                ? $batch->expiry_date->toDateString()
+                : (string) $batch->expiry_date;
 
-            // $remaining = số đã bán cần trừ dần vào các lô (FIFO)
-            // Ban đầu = toàn bộ số đã bán
-            $remaining = $totalSold;
+            $dayLeft = now()->diffInDays(Carbon::parse($expiryStr), false);
 
-            // Loop từng lô theo thứ tự HSD gần → xa
-            foreach ($productBatches as $batch) {
-                $batchQty = (int) $batch->total_import; // tổng nhập của lô này
-
-                if ($remaining >= $batchQty) {
-                    // Số đã bán >= lô này → lô đã bán hết, trừ đi rồi đi tiếp
-                    $remaining -= $batchQty;
-                    continue;
-                }
-
-                // Lô này chưa bán hết → tính số còn lại
-                $leftInBatch = $batchQty - $remaining;
-                $remaining = 0; // reset về 0 vì đã trừ hết số bán vào các lô trước
-
-                // Chuẩn hóa expiry_date thành string 'Y-m-d'
-                // (DB trả về có thể là Carbon object hoặc string tùy driver)
-                $expiryStr = $batch->expiry_date instanceof Carbon
-                    ? $batch->expiry_date->toDateString()
-                    : (string) $batch->expiry_date;
-
-                // Chỉ lấy lô: HSD chưa qua ($expiryStr >= $today)
-                //              VÀ còn trong ngưỡng cảnh báo ($expiryStr <= $threshold)
-                if ($expiryStr >= $today && $expiryStr <= $threshold) {
-                    // Số ngày còn lại tới HSD (false = không lấy absolute, giữ dấu âm nếu quá hạn)
-                    $dayLeft = now()->diffInDays($expiryStr, false);
-
-                    $result[] = (object) [
-                        'product'     => $product,   // object Product để dùng $item->product->title
-                        'expiry_date' => $expiryStr, // ngày hết hạn dạng string
-                        'qty_left'    => $leftInBatch, // số lượng còn lại của lô này
-                        'days_left'   => (int) $dayLeft, // số ngày còn lại
-                    ];
-                }
-            }
+            $result[] = (object) [
+                'product'     => $product,
+                'expiry_date' => $expiryStr,
+                'qty_left'    => (int) $batch->total_import,
+                'days_left'   => (int) $dayLeft,
+            ];
         }
 
-        // Sắp xếp: lô HSD gần nhất (days_left nhỏ nhất) lên đầu
+        // Sắp xếp: HSD gần nhất lên đầu
         usort($result, fn($a, $b) => $a->days_left <=> $b->days_left);
 
         return $result;

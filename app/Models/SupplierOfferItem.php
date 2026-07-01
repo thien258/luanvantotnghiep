@@ -5,14 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * SupplierOfferItem — Dòng sản phẩm trong báo giá NSX.
+ * SupplierOfferItem — Dòng sản phẩm trong phiếu báo giá NSX.
  *
- * Mỗi dòng là 1 sản phẩm NSX chào giá.
- * Lưu ý: KHÔNG có cột quantity ở đây vì NSX chỉ chào giá,
- * ADMIN mới là người quyết định mua bao nhiêu (quantity nằm trong PurchaseOrderItem).
+ * Mỗi dòng là 1 SP mà NSX đang chào giá.
  *
- * product_id có thể NULL nếu sản phẩm chưa tồn tại trong hệ thống.
- * product_name luôn có (lưu dự phòng phòng khi product bị xóa).
+ * Lưu ý quan trọng:
+ *   - KHÔNG có cột quantity: NSX chỉ chào giá, KHÔNG quyết định số lượng.
+ *     Số lượng mua do admin tự điền khi tạo PurchaseOrderItem.
+ *   - product_id nullable: SP có thể chưa tồn tại trong hệ thống khi NSX báo giá.
+ *   - product_name luôn có: phòng trường hợp product bị xóa sau này,
+ *     tên SP vẫn còn trong lịch sử báo giá.
  *
  * Bảng: supplier_offer_items
  *
@@ -43,16 +45,18 @@ class SupplierOfferItem extends Model
 {
     protected $table = "supplier_offer_items";
 
+    // Các cột được phép gán hàng loạt
     protected $fillable = [
-        "offer_id",      // FK → supplier_offers (thuộc báo giá nào)
-        "product_id",    // FK → products (nullable — SP có thể chưa có trong hệ thống)
-        "product_name",  // Tên SP NSX tự ghi (dùng khi product_id = null)
-        "unit_price",    // Giá NSX chào (₫)
-        "note",          // Ghi chú thêm của NSX cho sản phẩm này
+        "offer_id",     // FK → supplier_offers (thuộc phiếu báo giá nào)
+        "product_id",   // FK → products (nullable — SP có thể chưa có trong hệ thống)
+        "product_name", // Tên SP NSX tự ghi (fallback khi product_id = null)
+        "unit_price",   // Giá NSX chào cho SP này (đơn vị: ₫)
+        "note",         // Ghi chú riêng của NSX cho dòng SP này (VD: còn hàng, hết hàng...)
     ];
 
     /**
-     * Báo giá chứa dòng sản phẩm này.
+     * Phiếu báo giá chứa dòng sản phẩm này.
+     * Dùng để truy ngược về thông tin NSX, trạng thái báo giá.
      */
     public function offer()
     {
@@ -61,7 +65,8 @@ class SupplierOfferItem extends Model
 
     /**
      * Sản phẩm tương ứng trong hệ thống (nullable).
-     * Dùng để lấy ảnh, dung tích, category, brand để hiển thị trong bảng.
+     * Dùng để hiển thị ảnh, dung tích, danh mục, thương hiệu
+     * trong bảng báo giá cho admin tiện so sánh.
      */
     public function product()
     {

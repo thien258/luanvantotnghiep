@@ -7,9 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * OrderDetail — Dòng chi tiết trong đơn hàng.
  *
- * Mỗi dòng = 1 sản phẩm khách mua trong đơn.
- * price lưu giá tại thời điểm mua (không phụ thuộc giá hiện tại của SP).
- * name lưu tên SP tại thời điểm mua (dự phòng SP bị xóa sau).
+ * Mỗi dòng tương ứng 1 sản phẩm khách mua trong đơn.
+ *
+ * Lưu ý thiết kế:
+ *   - price lưu giá TẠI THỜI ĐIỂM MUA (không phụ thuộc giá hiện tại của sản phẩm).
+ *   - name lưu tên sản phẩm lúc mua (dự phòng trường hợp sản phẩm bị xóa sau).
+ *   Hai cột trên đảm bảo dữ liệu lịch sử đơn hàng không bị ảnh hưởng khi admin
+ *   chỉnh sửa hoặc xóa sản phẩm.
  *
  * Bảng: order_details
  *
@@ -39,17 +43,18 @@ class OrderDetail extends Model
 {
     protected $table = "order_details";
 
+    // Các cột được phép gán hàng loạt
     protected $fillable = [
-        'idOrder',   // FK → orders
-        'idProduct', // FK → products (nullable nếu SP đã bị xóa)
-        'name',      // Tên SP lúc mua (lưu snapshot tránh mất data)
+        'idOrder',   // FK → orders (đơn hàng chứa dòng này)
+        'idProduct', // FK → products (nullable nếu sản phẩm đã bị xóa sau này)
+        'name',      // Snapshot tên sản phẩm tại thời điểm mua — tránh mất data lịch sử
         'quantity',  // Số lượng mua
-        'price',     // Đơn giá lúc mua (có thể đã áp discount festival)
+        'price',     // Đơn giá tại thời điểm mua (có thể đã áp giảm giá Festival)
     ];
 
     /**
-     * Sản phẩm tương ứng.
-     * Có thể null nếu SP đã bị xóa khỏi hệ thống sau khi mua.
+     * Quan hệ: Dòng chi tiết thuộc về 1 sản phẩm (Product).
+     * Kết quả có thể null nếu sản phẩm đã bị xóa khỏi hệ thống sau khi đặt hàng.
      */
     public function product()
     {

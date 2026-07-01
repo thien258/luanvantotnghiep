@@ -25,15 +25,21 @@
             <td>{{ $user->role }}</td>
 
 <td>
+  @if($user->id === Auth::id())
+    <span class="badge badge-secondary px-2 py-1">Tài khoản của bạn</span>
+  @else
   <form action="{{ route('admin.user.update', $user->id) }}" method="POST">
     @csrf
     @method('PUT')
-
-    <button type="submit" class="btn btn-sm btn-warning">
-        {{ $user->role === 'admin' ? 'Hạ quyền' : 'Lên admin' }}
-    </button>
-</form>
-
+    <select name="role" class="form-control form-control-sm d-inline-block" style="width:auto;"
+        onchange="this.form.submit()">
+      <option value="customer"      {{ $user->role === 'customer'     ? 'selected' : '' }}>Customer</option>
+      <option value="warehouse"     {{ $user->role === 'warehouse'    ? 'selected' : '' }}>Nhân viên kho</option>
+      <option value="manufacturer"  {{ $user->role === 'manufacturer' ? 'selected' : '' }}>Nhà sản xuất</option>
+      <option value="admin"         {{ $user->role === 'admin'        ? 'selected' : '' }}>Admin</option>
+    </select>
+  </form>
+  @endif
 </td>
 <td>
     <a href="{{ route('admin.user.destroy', $user->id) }}"

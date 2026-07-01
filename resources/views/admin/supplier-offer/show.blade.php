@@ -57,6 +57,8 @@
 @endif
 
 @if($offer->status === 'submitted')
+{{-- Form đặt hàng: chỉ admin --}}
+@if(auth()->user()->isAdmin())
 <form action="{{ route('admin.purchase-orders.store') }}" method="POST" id="orderForm">
 @csrf
 <input type="hidden" name="offer_id" value="{{ $offer->id }}">
@@ -130,6 +132,49 @@
 </div>
 
 </form>
+@else
+{{-- manufacturer thấy bảng SP nhưng không có nút đặt hàng --}}
+<div class="card shadow-none border rounded-0 mb-3">
+    <div class="card-header bg-white py-2 border-bottom">
+        <span class="small font-weight-bold text-uppercase text-muted">Sản phẩm NSX chào giá (chỉ xem)</span>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-sm mb-0 small table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th class="py-2" style="width:5%">Ảnh</th>
+                    <th class="py-2">Tên sản phẩm</th>
+                    <th class="text-center py-2">Giá chào</th>
+                    <th class="text-center py-2">Dung tích</th>
+                    <th class="py-2">Nồng độ</th>
+                    <th class="py-2">Category</th>
+                    <th class="py-2">Brand</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($offer->items as $item)
+                @php $p = $item->product; @endphp
+                <tr>
+                    <td class="py-2 text-center">
+                        @if($p?->image)
+                            <img src="{{ $p->image }}" style="width:36px;height:36px;object-fit:cover;" class="border rounded">
+                        @else
+                            <span class="text-muted" style="font-size:0.7rem;">—</span>
+                        @endif
+                    </td>
+                    <td class="py-2 font-weight-bold">{{ $item->product_name }}</td>
+                    <td class="text-center py-2 text-success font-weight-bold">{{ number_format($item->unit_price, 0, ',', '.') }}₫</td>
+                    <td class="text-center py-2 text-muted">{{ $p?->volume ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $p?->concentration?->concentration ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $p?->category?->name ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $p?->brand?->name ?? '—' }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
 
 @else
 

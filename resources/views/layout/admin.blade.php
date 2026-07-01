@@ -26,14 +26,20 @@
 
             <hr class="sidebar-divider my-2">
 
+            @php $role = auth()->user()->role; @endphp
+
+            {{-- Dashboard: chỉ admin --}}
+            @if($role === 'admin')
             <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{ route('admin.dashboard') }}">
                     <i class="fa-solid fa-chart-line text-dark mr-3"></i>
                     <span>Dashboard Overview</span>
                 </a>
             </li>
+            @endif
 
-            {{-- ── DROPDOWN DANH MỤC & SẢN PHẨM ───────────────────── --}}
+            {{-- ── DROPDOWN DANH MỤC & SẢN PHẨM: chỉ admin ────────── --}}
+            @if($role === 'admin')
             @php
                 $catalogActive = request()->routeIs('admin.category.*')
                               || request()->routeIs('admin.brand.*')
@@ -81,8 +87,10 @@
                     </ul>
                 </div>
             </li>
+            @endif
 
-            {{-- ── DROPDOWN ORDER & KHO ─────────────────────────────── --}}
+            {{-- ── DROPDOWN ORDER & KHO: admin và warehouse ─────────── --}}
+            @if(in_array($role, ['admin', 'warehouse']))
             @php
                 $orderKhoActive = request()->routeIs('admin.orders.*')
                                || request()->routeIs('admin.product.warehouse.index')
@@ -100,34 +108,51 @@
                 </a>
                 <div class="collapse {{ $orderKhoActive ? 'show' : '' }}" id="orderKhoSubmenu">
                     <ul class="nav flex-column pl-4 pb-1">
+
+                        {{-- Order: chỉ warehouse --}}
+                        @if($role === 'warehouse')
                         <li class="nav-item {{ request()->routeIs('admin.orders.index') ? 'active font-weight-bold' : '' }}">
                             <a class="nav-link text-dark py-1 small" href="{{ route('admin.orders.index') }}">
                                 <i class="fa-solid fa-bag-shopping text-muted mr-2"></i>Order
                             </a>
                         </li>
+                        @endif
+
+                        {{-- Hàng Hỏng: admin và warehouse --}}
                         <li class="nav-item {{ request()->routeIs('admin.orders.damaged') ? 'active font-weight-bold' : '' }}">
                             <a class="nav-link text-dark py-1 small" href="{{ route('admin.orders.damaged') }}">
                                 <i class="fa-solid fa-triangle-exclamation text-danger mr-2"></i>Hàng Hỏng
                             </a>
                         </li>
+
+                        {{-- Kho & Cảnh báo Sale: chỉ admin --}}
+                        @if($role === 'admin')
                         <li class="nav-item {{ request()->routeIs('admin.product.warehouse.index') ? 'active font-weight-bold' : '' }}">
                             <a class="nav-link text-dark py-1 small" href="{{ route('admin.product.warehouse.index') }}">
                                 <i class="fa-solid fa-boxes-packing text-muted mr-2"></i>Kho &amp; Cảnh báo Sale
                             </a>
                         </li>
+                        @endif
+
+                        {{-- Nhập Kho: admin và warehouse --}}
                         <li class="nav-item {{ request()->routeIs('admin.warehouse.imports') || request()->routeIs('admin.warehouse.imports.show') ? 'active font-weight-bold' : '' }}">
                             <a class="nav-link text-dark py-1 small" href="{{ route('admin.warehouse.imports') }}">
                                 <i class="fa-solid fa-file-arrow-up text-muted mr-2"></i>Nhập Kho
                             </a>
                         </li>
+
                     </ul>
                 </div>
             </li>
-            {{-- ── DROPDOWN NSX ──────────────────────────────────────── --}}
+            @endif
+
+            {{-- ── DROPDOWN NSX: admin, manufacturer, warehouse ──────── --}}
+            @if(in_array($role, ['admin', 'manufacturer', 'warehouse']))
             @php
                 $nsxActive = request()->routeIs('admin.manufacturer.*')
                           || request()->routeIs('admin.supplier-offers.*')
-                          || request()->routeIs('admin.purchase-orders.*');
+                          || request()->routeIs('admin.purchase-orders.*')
+                          || request()->routeIs('admin.procurement.*');
             @endphp
             <li class="nav-item">
                 <a class="nav-link text-dark d-flex justify-content-between align-items-center"
@@ -138,34 +163,51 @@
                         <i class="fa-solid fa-building text-dark mr-3"></i>
                         <span>Nhà Sản Xuất</span>
                     </span>
-               
                 </a>
                 <div class="collapse {{ $nsxActive ? 'show' : '' }}" id="nsxSubmenu">
                     <ul class="nav flex-column pl-4 pb-1">
+
+                        {{-- Quản lý NSX: chỉ admin --}}
+                        @if($role === 'admin')
                         <li class="nav-item {{ request()->routeIs('admin.manufacturer.*') ? 'active font-weight-bold' : '' }}">
                             <a class="nav-link text-dark py-1 small" href="{{ route('admin.manufacturer.index') }}">
                                 <i class="fa-solid fa-boxes-packing text-muted mr-2"></i>Quản lý NSX
                             </a>
                         </li>
+                        @endif
+
+                        {{-- Báo giá NSX: admin và manufacturer --}}
+                        @if(in_array($role, ['admin', 'manufacturer']))
                         <li class="nav-item {{ request()->routeIs('admin.supplier-offers.*') ? 'active font-weight-bold' : '' }}">
                             <a class="nav-link text-dark py-1 small" href="{{ route('admin.supplier-offers.index') }}">
                                 <i class="fa-solid fa-file-invoice text-muted mr-2"></i>Báo giá NSX
                             </a>
                         </li>
+                        @endif
+
+                        {{-- Đơn đặt hàng: tất cả 3 role --}}
                         <li class="nav-item {{ request()->routeIs('admin.purchase-orders.*') ? 'active font-weight-bold' : '' }}">
                             <a class="nav-link text-dark py-1 small" href="{{ route('admin.purchase-orders.index') }}">
                                 <i class="fa-solid fa-cart-flatbed text-muted mr-2"></i>Đơn đặt hàng
                             </a>
                         </li>
+
+                        {{-- Yêu cầu nhập hàng: admin và manufacturer --}}
+                        @if(in_array($role, ['admin', 'manufacturer']))
                         <li class="nav-item {{ request()->routeIs('admin.procurement.*') ? 'active font-weight-bold' : '' }}">
                             <a class="nav-link text-dark py-1 small" href="{{ route('admin.procurement.index') }}">
                                 <i class="fa-solid fa-bullhorn text-muted mr-2"></i>Yêu cầu nhập hàng
                             </a>
                         </li>
+                        @endif
+
                     </ul>
                 </div>
             </li>
+            @endif
 
+            {{-- Contact, Title, User, Footer: chỉ admin --}}
+            @if($role === 'admin')
             <li class="nav-item {{ request()->routeIs('admin.contacts.index') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{ route('admin.contacts.index') }}">
                     <i class="fa-regular fa-circle-question text-dark mr-3"></i>
@@ -184,21 +226,30 @@
                     <span>User</span>
                 </a>
             </li>
-
             <li class="nav-item {{ request()->routeIs('admin.footer.index') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{ route('admin.footer.index') }}">
                     <i class="fa-solid fa-grip-lines-bottom text-dark mr-3"></i>
                     <span>Footer</span>
                 </a>
             </li>
+            @endif
 
             <hr class="sidebar-divider d-none d-md-block mt-auto mb-0">
 
             <li class="nav-item p-3 d-flex align-items-center">
-                <img class="img-profile rounded-circle border border-dark mr-3" src="img/undraw_profile.svg" width="35" height="35" alt="User">
                 <div class="d-flex flex-column text-left">
                     <span class="text-dark font-weight-bold text-uppercase small">{{ auth()->user()->name ?? 'ADMIN USER' }}</span>
-                    <span class="text-muted text-uppercase"><small>Quản trị viên</small></span>
+                    <span class="text-muted text-uppercase"><small>
+                        @php
+                            $roleLabel = [
+                                'admin'        => 'Quản trị viên',
+                                'warehouse'    => 'Nhân viên kho',
+                                'manufacturer' => 'Nhà sản xuất',
+                                'user'         => 'Người dùng',
+                            ][$role] ?? $role;
+                        @endphp
+                        {{ $roleLabel }}
+                    </small></span>
                 </div>
             </li>
 
@@ -220,23 +271,21 @@
                     <ul class="navbar-nav ml-auto align-items-center">
 
                         <li class="nav-item dropdown no-arrow mx-1">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="alertsDropdown" role="button" data-toggle="dropdown">
-                                <i class="fa-regular fa-bell h5 mb-0"></i>
-                            </a>
-                        </li>
-
-                        <li class="nav-item mx-1">
-                            <a class="nav-link text-dark" href="#">
-                                <i class="fa-solid fa-gear h5 mb-0"></i>
-                            </a>
-                        </li>
-
-                        <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle text-dark" href="#" id="userDropdown" role="button" data-toggle="dropdown">
                                 <i class="fa-regular fa-circle-user h4 mb-0"></i>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow-sm border rounded-0 animated--grow-in" aria-labelledby="userDropdown">
-                                <a class="dropdown-item text-dark" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <div class="dropdown-header small text-muted px-3 py-2 border-bottom">
+                                    <i class="fa-regular fa-circle-user me-1"></i>
+                                    {{ Auth::user()->name }}
+                                    <span class="badge bg-dark rounded-0 ms-1" style="font-size:0.6rem;">{{ Auth::user()->role }}</span>
+                                </div>
+                                <a class="dropdown-item text-dark py-2" href="{{ route('profile.index') }}">
+                                    <i class="fa-solid fa-user-pen fa-sm fa-fw mr-2 text-muted"></i>
+                                    Trang cá nhân
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-dark py-2" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-dark"></i>
                                     Logout
                                 </a>

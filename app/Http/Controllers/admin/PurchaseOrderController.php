@@ -30,12 +30,43 @@ class PurchaseOrderController extends Controller
     // INDEX — Danh sách đơn đặt hàng
     // =========================================================================
 
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $role = auth()->user()->role;
+            if (!in_array($role, ['admin', 'warehouse', 'manufacturer'])) {
+                abort(403);
+            }
+            return $next($request);
+        });
+    }
+
     public function index()
     {
-        // Lấy tất cả đơn, kèm tên NSX, sắp theo mới nhất
-        $orders = PurchaseOrder::with('manufacturer')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $user = auth()->user();
+        $query = PurchaseOrder::with('manufacturer');
+
+        // manufacturer chỉ thấy đơn của mình
+        if ($user->role === 'manufacturer') {
+            $manufacturer = $user->manufacturer;
+            if ($manufacturer) {
+                $query->where('manufacturer_id', $manufacturer->id);
+            } else {
+                $query->whereRaw('1=0'); // không có NSX liên kết → không thấy gì
+            }
+        }
+
+        // Sắp xếp: đang giao lên đầu, đã nhận/hủy xuống cuối
+        $query->orderByRaw("CASE status
+                WHEN 'delivering' THEN 1
+                WHEN 'pending'    THEN 2
+                WHEN 'confirmed'  THEN 3
+                WHEN 'received'   THEN 4
+                WHEN 'cancelled'  THEN 5
+                ELSE 6
+            END ASC")->orderBy('created_at', 'desc');
+
+        $orders = $query->paginate(15);
 
         return view('admin.purchase-order.purchase-order-list', compact('orders'));
     }
@@ -224,9 +255,12 @@ class PurchaseOrderController extends Controller
             // BOM UTF-8: giúp Excel mở file và hiển thị đúng tiếng Việt
             fputs($handle, "\xEF\xBB\xBF");
 
+            // Dòng metadata NSX — warehouse dùng để tự điền dropdown
+            fputcsv($handle, ['# supplier', $po->manufacturer?->name ?? '']);
+
             // Dòng header — khớp đúng format WarehouseController::mapRow()
             // Bao gồm cả sl_order (đã đặt) và quantity (thực nhận) + unit_price (giá nhập)
-            fputcsv($handle, ['title', 'image', 'decription', 'unit_price', 'sl_order', 'quantity', 'volume', 'category', 'brand', 'concentration']);
+            fputcsv($handle, ['title', 'image', 'decription', 'unit_price', 'sl_order', 'quantity', 'volume', 'category', 'brand', 'concentration', 'expiry_date']);
 
             foreach ($po->items as $item) {
                 $product = $item->product;
@@ -241,6 +275,7 @@ class PurchaseOrderController extends Controller
                     $product?->category?->name ?? '',             // Danh mục
                     $product?->brand?->name ?? '',                // Thương hiệu
                     $product?->concentration?->concentration ?? '', // Nồng độ
+                    '',                                           // HSD - để trống cho NV kho điền
                 ]);
             }
 

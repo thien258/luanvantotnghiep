@@ -50,8 +50,8 @@
     </div>
 </div>
 
-{{-- Nút đóng yêu cầu --}}
-@if($procRequest->status === 'open')
+{{-- Nút đóng yêu cầu: chỉ admin --}}
+@if($procRequest->status === 'open' && auth()->user()->isAdmin())
 <form action="{{ route('admin.procurement.close', $procRequest->id) }}" method="POST" class="mb-3"
       onsubmit="return confirm('Đóng yêu cầu này? NSX sẽ không upload báo giá được nữa.')">
     @csrf
@@ -61,8 +61,8 @@
 </form>
 @endif
 
-{{-- Form upload file báo giá từ NSX --}}
-@if($procRequest->status === 'open')
+{{-- Form upload file báo giá: chỉ manufacturer --}}
+@if($procRequest->status === 'open' && auth()->user()->role === 'manufacturer')
 <div class="card shadow-none border rounded-0 mb-4">
     <div class="card-header bg-white py-2 border-bottom d-flex justify-content-between align-items-center">
         <span class="small font-weight-bold text-uppercase text-muted">
@@ -80,12 +80,10 @@
             <div class="form-row align-items-end">
                 <div class="form-group col-md-4 mb-2">
                     <label class="small font-weight-bold">Nhà sản xuất <span class="text-danger">*</span></label>
-                    <select name="manufacturer_id" class="form-control form-control-sm rounded-0" required>
-                        <option value="">— Chọn NSX —</option>
-                        @foreach(\App\Models\ManuFacturer::orderBy('name')->get() as $m)
-                            <option value="{{ $m->id }}">{{ $m->name }}</option>
-                        @endforeach
-                    </select>
+                    @php $myManufacturer = auth()->user()->manufacturer; @endphp
+                    <input type="hidden" name="manufacturer_id" value="{{ $myManufacturer?->id }}">
+                    <input type="text" class="form-control form-control-sm rounded-0 bg-light"
+                           value="{{ $myManufacturer?->name ?? '—' }}" readonly>
                 </div>
                 <div class="form-group col-md-4 mb-2">
                     <label class="small font-weight-bold">
@@ -146,7 +144,8 @@
                     <td class="py-2 text-muted">{{ $item->product?->category?->name ?? '—' }}</td>
                     <td class="py-2 text-muted">{{ $item->product?->concentration?->concentration ?? '—' }}</td>
                     <td class="text-center py-2 font-weight-bold text-primary">{{ $item->qty_needed }}</td>
-                    <td class="py-2 text-muted">{{ $item->note ?: '—' }}</td>
+
+                    <td class="py-2 text-muted small">{{ $item->note ?: '—' }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -190,10 +189,17 @@
                     </td>
                     <td class="text-center py-2 text-muted">{{ $offer->created_at->format('d/m/Y H:i') }}</td>
                     <td class="text-center py-2">
+                        @if(auth()->user()->isAdmin())
                         <a href="{{ route('admin.supplier-offers.show', $offer->id) }}"
                            class="btn btn-outline-dark btn-sm rounded-0 px-2 py-1" style="font-size:0.75rem;">
                             <i class="fa-solid fa-eye mr-1"></i> Xem & Đặt hàng
                         </a>
+                        @else
+                        <a href="{{ route('admin.supplier-offers.show', $offer->id) }}"
+                           class="btn btn-outline-secondary btn-sm rounded-0 px-2 py-1" style="font-size:0.75rem;">
+                            <i class="fa-solid fa-eye mr-1"></i> Xem
+                        </a>
+                        @endif
                     </td>
                 </tr>
                 @empty

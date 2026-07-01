@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
+use App\Mail\OrderConfirmationMail;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * OrderController — Xử lý đơn hàng phía khách hàng.
@@ -181,10 +183,20 @@ class OrderController extends Controller
                 // Fallback: trang QR VietQR nếu chưa cấu hình PayOS
                 return redirect()->route('order.payment', ['id' => $order->id]);
             }
+            $payosUrl = null;
+            if (env('PAYOS_CLIENT_ID') && env('PAYOS_API_KEY') && env('PAYOS_CHECKSUM_KEY')) {
+                $payosUrl = $this->createPayOSLink($order);
+            }
+            try {
+                $order->load(['details', 'user']);
+                Mail::to($order->user->email)
+                    ->send(new OrderConfirmationMail($order, $payosUrl));
+            } catch (\Exception $e) {
+                Log::error('send COD email failed: ' . $e->getMessage());
+            }
 
             return redirect()->route('welcome')
                 ->with('success', 'Đặt hàng thành công! Đơn hàng sẽ được giao trong 3-5 ngày.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('placeOrder exception: ' . $e->getMessage());
@@ -246,12 +258,12 @@ class OrderController extends Controller
                 'isActive'  => $isActive,
                 // dot: xanh = đang ở đây | đen = đã qua | xám = chưa tới
                 'dotClass'  => $isActive ? 'bg-success text-white border-success'
-                             : ($isDone  ? 'bg-dark text-white border-dark'
-                                         : 'bg-white text-secondary border-secondary'),
+                    : ($isDone  ? 'bg-dark text-white border-dark'
+                        : 'bg-white text-secondary border-secondary'),
                 // label text
                 'textClass' => $isActive ? 'text-success fw-semibold'
-                             : ($isDone  ? 'text-dark fw-semibold'
-                                         : 'text-secondary'),
+                    : ($isDone  ? 'text-dark fw-semibold'
+                        : 'text-secondary'),
                 // đường nối sang bước tiếp theo
                 'lineClass' => $isDone   ? 'bg-dark' : 'bg-secondary-subtle',
             ]);
@@ -380,7 +392,7 @@ class OrderController extends Controller
      * Signature: HMAC-SHA256 của chuỗi "amount=...&cancelUrl=...&description=...&orderCode=...&returnUrl=..."
      * (sắp xếp theo alphabet, đây là yêu cầu của PayOS)
      */
-    private function createPayOSLink($order)
+    public function createPayOSLink($order)
     {
         $clientId    = env('PAYOS_CLIENT_ID');
         $apiKey      = env('PAYOS_API_KEY');
@@ -478,11 +490,29 @@ class OrderController extends Controller
             if (isset($matches[1])) {
                 $orderId = $matches[1];
                 $order = Order::find($orderId);
-                
+
                 if ($order) {
-                    if ($order->status == 0) {
-                        $order->update(['status' => 1]); // xác nhận đã thanh toán
-                        Log::info("Order #{$orderId} updated: status 0 → 1");
+                    // Cho phép xử lý:
+                    //   status=0 → BANK TRANSFER chờ thanh toán
+                    //   status=1 + COD → COD đã đặt nhưng khách quét QR trong email để chuyển khoản
+                    $isBankTransferPending = $order->status == 0;
+                    $isCodUpgrade = $order->status == 1 && $order->payment_method === 'COD';
+
+                    if ($isBankTransferPending || $isCodUpgrade) {
+                        $updateData = ['status' => 1];
+                        if ($order->payment_method === 'COD') {
+                            // Đơn COD → khách đã chuyển khoản → đổi sang BANK TRANSFER
+                            $updateData['payment_method'] = 'BANK TRANSFER';
+                        }
+                        $order->update($updateData);
+                        Log::info("Order #{$orderId} updated: payment confirmed, method={$order->fresh()->payment_method}");
+                        try {
+                            $order->load(['details', 'user']);
+                            Mail::to($order->user->email)
+                                ->send(new OrderConfirmationMail($order));
+                        } catch (\Exception $e) {
+                            Log::error('send webhook email failed: ' . $e->getMessage());
+                        }
                     } else {
                         Log::warning("Order #{$orderId} already processed (status={$order->status})");
                     }

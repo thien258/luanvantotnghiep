@@ -20,7 +20,8 @@
     </div>
 @endif
 
-{{-- ── FORM UPLOAD FILE ──────────────────────────────────────── --}}
+{{-- ── FORM UPLOAD FILE: chỉ manufacturer ──────────────────── --}}
+@if(auth()->user()->role === 'manufacturer')
 <div class="card shadow-none border rounded-0 mb-4">
     <div class="card-header bg-white py-2 border-bottom">
         <span class="small font-weight-bold text-uppercase text-muted">
@@ -33,12 +34,10 @@
             <div class="form-row align-items-end">
                 <div class="form-group col-md-4 mb-2">
                     <label class="small font-weight-bold">Nhà sản xuất <span class="text-danger">*</span></label>
-                    <select name="manufacturer_id" class="form-control form-control-sm rounded-0" required>
-                        <option value="">— Chọn NSX —</option>
-                        @foreach($manufacturers as $m)
-                            <option value="{{ $m->id }}">{{ $m->name }}</option>
-                        @endforeach
-                    </select>
+                    @php $myManufacturer = auth()->user()->manufacturer; @endphp
+                    <input type="hidden" name="manufacturer_id" value="{{ $myManufacturer?->id }}">
+                    <input type="text" class="form-control form-control-sm rounded-0 bg-light"
+                           value="{{ $myManufacturer?->name ?? '—' }}" readonly>
                 </div>
                 <div class="form-group col-md-4 mb-2">
                     <label class="small font-weight-bold">
@@ -67,6 +66,7 @@
         </div>
     </div>
 </div>
+@endif
 
 {{-- ── DANH SÁCH BÁO GIÁ ────────────────────────────────────── --}}
 <div class="card shadow-none border rounded-0">

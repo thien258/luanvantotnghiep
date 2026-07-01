@@ -202,20 +202,25 @@
                         </thead>
                         <tbody>
                             @forelse($expiring as $item)
-                            <tr class="{{ $item->days_left <= 365 ? 'table-danger' : 'table-warning' }}">
-                                <td><span class="fw-bold text-dark">{{ $item->product->title }}</span></td>
+                            <tr class="{{ $item->days_left <= 30 ? 'table-danger' : ($item->days_left <= 365 ? 'table-danger' : 'table-warning') }}">
+                                <td>
+                                    <span class="fw-bold text-dark">{{ $item->product->title }}</span>
+                                   
+                                </td>
                                 <td class="text-center fw-bold">{{ $item->qty_left }} chai</td>
-                                <td class="text-center">{{ \Carbon\Carbon::parse($item->expiry_date)->format('d/m/Y') }}</td>
+                                <td class="text-center {{ $item->days_left <= 30 ? 'fw-bold text-danger' : '' }}">{{ \Carbon\Carbon::parse($item->expiry_date)->format('d/m/Y') }}</td>
                                 <td class="text-center fw-bold
-                                    {{ $item->days_left <= 365 ? 'text-danger' : 'text-warning' }}">
+                                    {{ $item->days_left <= 30 ? 'text-danger' : ($item->days_left <= 365 ? 'text-danger' : 'text-warning') }}">
                                     {{ $item->days_left }} ngày
                                 </td>
                                 <td class="text-center">
-                                    @if($item->days_left <= 365)
-                                        <span class="badge  rounded-0" style="font-size:0.65rem;">🔴 TRONG NĂM NAY</span>
-                                        @else
+                                    @if($item->days_left <= 30)
+                                        <span class="badge  rounded-0" style="font-size:0.65rem;">🔴 HẾT HẠN TRONG THÁNG NÀY</span>
+                                    @elseif($item->days_left <= 365)
+                                        <span class="badge rounded-0" style="font-size:0.65rem;">🔴 TRONG NĂM NAY</span>
+                                    @else
                                         <span class="badge bg-warning text-dark rounded-0" style="font-size:0.65rem;">🟡 THEO DÕI (NĂM SAU)</span>
-                                        @endif
+                                    @endif
                                 </td>
                                 {{-- Cột Festival: hiện badge nếu SP đã được thêm vào festival nào --}}
                                 <td class="text-center">

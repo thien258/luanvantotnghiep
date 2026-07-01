@@ -49,41 +49,50 @@ class ProductController extends Controller
         // Tất cả SP cho modal tạo yêu cầu nhập hàng (không phân trang)
         $allProducts = Product::orderBy('quantity', 'asc')->get();
 
-        // Lấy HSD gần nhất còn hàng cho từng SP (FIFO by expiry_date)
-        // $expiryMap[product_id] = ['date' => 'Y-m-d', 'days_left' => int]
+        // Tính danh sách SP bán chậm — dùng đúng logic như tab Bán Chậm trong Kho:
+        // nhập kho >= 7 ngày + tỉ lệ (tổng bán / tổng nhập) < 30%
+        $slowProductIds = [];
+        $oldImportLogs = \App\Models\WarehouseStockLog::where('type', 'import')
+            ->where('created_at', '<=', now()->subDays(30))
+            ->get()
+            ->groupBy('product_id');
+
+        foreach ($oldImportLogs as $productId => $logs) {
+            $totalImported = $logs->sum('quantity');
+            $totalSold     = DB::table('order_details')
+                ->join('orders', 'order_details.idOrder', '=', 'orders.id')
+                ->where('order_details.idProduct', $productId)
+                ->where('orders.status', 4)
+                ->sum('order_details.quantity');
+            $saleRate      = $totalImported > 0 ? ($totalSold / $totalImported) * 100 : 0;
+            if ($saleRate < 30) {
+                $slowProductIds[] = $productId;
+            }
+        }
+
+        // Lấy HSD gần nhất (còn hiệu lực) cho từng SP — đơn giản: min(expiry_date) >= hôm nay
+        // Không cần FIFO, chỉ cần biết SP này có lô nào sắp hết hạn để cảnh báo
         $expiryMap = [];
 
         $logs = \App\Models\WarehouseStockLog::where('type', 'import')
             ->whereNotNull('expiry_date')
-            ->selectRaw('product_id, expiry_date, SUM(quantity) as total_import')
-            ->groupBy('product_id', 'expiry_date')
-            ->orderBy('product_id')
-            ->orderBy('expiry_date', 'asc')
-            ->get()
-            ->groupBy('product_id');
+            ->whereDate('expiry_date', '>=', now()->toDateString())
+            ->selectRaw('product_id, MIN(expiry_date) as nearest_expiry')
+            ->groupBy('product_id')
+            ->get();
 
-        foreach ($logs as $productId => $batches) {
-            $totalSold = DB::table('order_details')
-                ->where('idProduct', $productId)->sum('quantity');
-            $remaining = $totalSold;
+        foreach ($logs as $row) {
+            $expiryStr = $row->nearest_expiry instanceof \Carbon\Carbon
+                ? $row->nearest_expiry->toDateString()
+                : (string) $row->nearest_expiry;
 
-            foreach ($batches as $batch) {
-                $batchQty = (int) $batch->total_import;
-                if ($remaining >= $batchQty) { $remaining -= $batchQty; continue; }
-
-                $expiryStr = $batch->expiry_date instanceof \Carbon\Carbon
-                    ? $batch->expiry_date->toDateString()
-                    : (string) $batch->expiry_date;
-
-                $expiryMap[$productId] = [
-                    'date'      => $expiryStr,
-                    'days_left' => (int) now()->diffInDays($expiryStr, false),
-                ];
-                break; // chỉ lấy lô HSD gần nhất còn hàng
-            }
+            $expiryMap[$row->product_id] = [
+                'date'      => $expiryStr,
+                'days_left' => (int) now()->diffInDays(\Carbon\Carbon::parse($expiryStr), false),
+            ];
         }
 
-        return view('admin.product.product-list', compact('products', 'expiryMap', 'allProducts'));
+        return view('admin.product.product-list', compact('products', 'expiryMap', 'allProducts', 'slowProductIds'));
     }
 
     // =========================================================================

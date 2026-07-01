@@ -5,14 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * WarehouseStockLog — Log biến động tồn kho.
+ * WarehouseStockLog — Nhật ký biến động tồn kho.
  *
- * Ghi lại mỗi lần tồn kho của 1 sản phẩm thay đổi.
- * type = 'import': nhập kho (cộng tồn kho)
- * type = 'export': xuất kho (trừ tồn kho — hiện chưa dùng, dự phòng)
+ * Ghi lại mỗi lần số lượng tồn kho của 1 sản phẩm thay đổi.
+ * Mỗi bản ghi = 1 sự kiện tăng/giảm tồn kho.
  *
- * stock_after: tồn kho sau khi thực hiện thao tác
- * reason: ghi chú lý do (VD: "Nhập kho từ phiếu PN...", "Tạo mới từ phiếu...")
+ * Loại biến động (type):
+ *   'import' — Nhập kho: cộng thêm tồn kho (từ phiếu nhập / WarehouseReceipt)
+ *   'export' — Xuất kho: trừ tồn kho (hiện chưa sử dụng, để dự phòng)
+ *
+ * stock_after: snapshot tồn kho SAU khi thực hiện thao tác — dùng để tra cứu
+ *              lịch sử mà không cần tính lại từ đầu.
+ * expiry_date: hạn sử dụng của lô hàng nhập (null với log xuất kho).
  *
  * Bảng: warehouse_stock_logs
  *
@@ -45,20 +49,27 @@ class WarehouseStockLog extends Model
 {
     protected $table = "warehouse_stock_logs";
 
+    // Các cột được phép gán hàng loạt
     protected $fillable = [
-        'receipt_id',  // FK → warehouse_receipts (phiếu nhập kho nào)
-        'product_id',  // FK → products (sản phẩm nào)
-        'type',        // 'import' hoặc 'export'
-        'quantity',    // Số lượng thay đổi
-        'stock_after', // Tồn kho sau thay đổi (snapshot)
-        'reason',      // Lý do / ghi chú
-        'expiry_date', // Ngày hết hạn của lô hàng (nullable — log export không cần)
+        'receipt_id',  // FK → warehouse_receipts (phiếu nhập kho sinh ra log này; null nếu nhập tay)
+        'product_id',  // FK → products (sản phẩm được nhập/xuất)
+        'type',        // Loại thao tác: 'import' | 'export'
+        'quantity',    // Số lượng thay đổi trong lần này
+        'stock_after', // Tồn kho sau thao tác (snapshot — không cần tính lại)
+        'reason',      // Ghi chú lý do (VD: "Nhập từ phiếu PN2506...", "Điều chỉnh thủ công")
+        'expiry_date', // Hạn sử dụng của lô hàng nhập (nullable — log xuất không cần)
     ];
-    protected $casts = [
-        'expiry_date' => 'date', // tự cast thành Carbon date khi đọc ra
-    ];
+
     /**
-     * Sản phẩm liên quan đến log này.
+     * Cast expiry_date thành Carbon date khi đọc ra từ DB.
+     * Cho phép dùng $log->expiry_date->format('d/m/Y') hoặc so sánh trực tiếp.
+     */
+    protected $casts = [
+        'expiry_date' => 'date',
+    ];
+
+    /**
+     * Quan hệ: Log này thuộc về sản phẩm nào.
      */
     public function product()
     {
@@ -66,7 +77,8 @@ class WarehouseStockLog extends Model
     }
 
     /**
-     * Phiếu nhập kho tạo ra log này.
+     * Quan hệ: Log này thuộc về phiếu nhập kho nào.
+     * Có thể null nếu log được tạo không qua phiếu nhập (VD: nhập thủ công).
      */
     public function warehouse()
     {
