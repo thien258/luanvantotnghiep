@@ -10,6 +10,7 @@ use App\Models\Concentration;
 use App\Models\WarehouseReceipt;
 use App\Models\WarehouseStockLog;
 use App\Models\WarehouseImport;
+use App\Models\Festival;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -63,87 +64,10 @@ class WarehouseController extends Controller
     public function index()
     {
         [$receipt, $stockLogs, $slowProducts] = $this->getWarehouseData();
+        //trong ham admin
         $expiring  = $this->getExpiringBatches(730); // cảnh báo trong vòng 2 năm
-        $festivals = \App\Models\Festival::where('status', 1)->get(); // festival đang active
+        $festivals = Festival::where('status', 1)->get(); // festival đang active
         return view('admin.product.warehouse', compact('receipt', 'stockLogs', 'slowProducts', 'expiring', 'festivals'));
-    }
-
-    /**
-     * Nhập kho thủ công qua form trực tiếp.
-     * Nếu SP đã tồn tại → cộng thêm, nếu chưa → tạo mới SP.
-     */
-    public function store(Request $request)
-    {
-        $productNames = $request->input('product_name', []);
-        $quantities   = $request->input('quantity', []);
-        $prices       = $request->input('price', []);
-        $notes        = $request->input('note', []);
-
-        // Lọc chỉ giữ các dòng có tên SP và số lượng > 0
-        $validItems = [];
-        foreach ($productNames as $index => $name) {
-            if (!empty($name) && !empty($quantities[$index]) && (int)$quantities[$index] > 0) {
-                $validItems[] = [
-                    'product_name' => trim($name),
-                    'quantity'     => (int)$quantities[$index],
-                    'price'        => isset($prices[$index]) ? (int)$prices[$index] : 0,
-                    'note'         => trim($notes[$index] ?? ''),
-                ];
-            }
-        }
-
-        if (empty($validItems)) {
-            return redirect()->back()->with('error', 'Không tìm thấy dữ liệu hợp lệ để nhập kho.');
-        }
-
-        // Tạo phiếu nhập kho — mã tự sinh theo timestamp
-        $receiptCode = 'PN' . Carbon::now()->format('ymdHis');
-        $receipt = WarehouseReceipt::create([
-            'receipt_code' => $receiptCode,
-            'supplier'     => $request->input('supplier'),
-            'note'         => $request->input('note'),
-            'total_items'  => count($validItems),
-        ]);
-
-        $successCount = 0;
-        foreach ($validItems as $item) {
-            $product = Product::where('title', $item['product_name'])->first();
-
-            if ($product) {
-                // SP đã có → cộng thêm số lượng
-                $product->increment('quantity', $item['quantity']);
-                $reasonText = "Nhập kho bổ sung từ phiếu {$receiptCode}";
-            } else {
-                // SP chưa có → tạo mới với thông tin mặc định
-                $product = Product::create([
-                    'title'           => $item['product_name'],
-                    'image'           => '',
-                    'decription'      => "Tự động tạo từ phiếu nhập kho {$receiptCode}",
-                    'price'           => $item['price'] > 0 ? $item['price'] * 1.2 : 450000,
-                    'quantity'        => $item['quantity'],
-                    'volume'          => '100ml',
-                    'status'          => 1,
-                    'idConcentration' => Concentration::value('id') ?? 1,
-                    'idBrand'         => Brand::value('id') ?? 1,
-                    'idCategory'      => Category::value('id') ?? 1,
-                ]);
-                $reasonText = "Tạo mới sản phẩm từ phiếu {$receiptCode}";
-            }
-
-            // Ghi log biến động tồn kho
-            WarehouseStockLog::create([
-                'receipt_id'  => $receipt->id,
-                'product_id'  => $product->id,
-                'type'        => 'import',
-                'quantity'    => $item['quantity'],
-                'stock_after' => $product->quantity,
-                'reason'      => $reasonText . ($item['note'] ? ' / ' . $item['note'] : ''),
-            ]);
-            $successCount++;
-        }
-
-        return redirect()->route('admin.product.warehouse.index')
-            ->with('success', "Nhập kho hoàn tất! Đã cập nhật {$successCount} sản phẩm.");
     }
 
     // =========================================================================
@@ -187,11 +111,11 @@ class WarehouseController extends Controller
         $path = $file->store('warehouse_imports', 'local'); // lưu private
 
         WarehouseImport::create([
-            'file_path'     => $path,
-            'original_name' => $file->getClientOriginalName(),
-            'supplier'      => $request->input('supplier'),
+            'file_path'     => $path, // đường dẫn file trong storage
+            'original_name' => $file->getClientOriginalName(),// tên file gốc người dùng upload
+            'supplier'      => $request->input('supplier'), // nhà cung cấp (có thể null)
             'note'          => $request->input('note'),
-            'uploaded_by'   => Auth::id(),
+            'uploaded_by'   => Auth::id(),// ai upload
             'status'        => 'pending', // chờ admin xem
         ]);
 
@@ -213,10 +137,10 @@ class WarehouseController extends Controller
         );
 
         return view('admin.product.import-show', compact(
-            'import',
-            'productsPreview',
-            'approvedItems',
-            'approvedByTitle',
+            'import', // object WarehouseImport (status, tên file, người upload...)
+            'productsPreview',// tất cả SP trong file (để render bảng)
+            'approvedItems',// SP đã nhập thực tế (nếu đã duyệt)
+            'approvedByTitle',// map tra cứu nhanh theo tên SP
         ));
     }
 
@@ -279,10 +203,11 @@ class WarehouseController extends Controller
 
             if ($product) {
                 // SP đã có → cộng tồn kho + cập nhật thông tin nếu admin đã chỉnh
-                $product->increment('quantity', $qty);
-                if ($price > 0) $product->update(['price' => $price]);
-                if ($image)     $product->update(['image' => $image]);
-                if ($desc)      $product->update(['decription' => $desc]);
+                $product->increment('quantity', $qty);// cộng tồn kho
+
+                if ($price > 0) $product->update(['price' => $price]); // cập nhật giá nếu admin chỉnh
+                if ($image)     $product->update(['image' => $image]); // cập nhật ảnh nếu có
+                if ($desc)      $product->update(['decription' => $desc]); // cập nhật mô tả
                 $reason = "Nhập kho từ phiếu {$code}";
             } else {
                 // SP chưa có → tìm hoặc tạo mới category/brand/concentration theo tên
@@ -338,12 +263,12 @@ class WarehouseController extends Controller
             ]);
 
             $approvedItems[] = [
-                'row_index'     => (int) $i,
+                'row_index'     => (int) $i,// dùng để map lại với dòng file gốc
                 'title'         => $title,
                 'image'         => $image,
                 'decription'    => $desc,
-                'unit_price'    => (float)($unitPrices[$i] ?? 0),
-                'sl_order'      => (int)($slOrders[$i] ?? 0),
+                'unit_price'    => (float)($unitPrices[$i] ?? 0),// giá nhập gốc từ NSX
+                'sl_order'      => (int)($slOrders[$i] ?? 0),// số lượng đã order
                 'quantity'      => $qty,
                 'price'         => $price,
                 'volume'        => $volumes[$i] ?? '100ml',
@@ -407,7 +332,7 @@ class WarehouseController extends Controller
             return back()->with('error', 'Vui lòng chọn festival và ít nhất 1 sản phẩm.');
         }
 
-        $festival = \App\Models\Festival::findOrFail($festivalId);
+        $festival =Festival::findOrFail($festivalId);
 
         // Thêm SP vào festival — không xóa quan hệ festival cũ của SP
         $festival->products()->syncWithoutDetaching($productIds);

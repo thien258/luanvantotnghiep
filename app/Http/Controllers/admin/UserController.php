@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\ManuFacturer;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -50,6 +51,23 @@ class UserController extends Controller
 
         $user->role = $newRole;
         $user->save();
+
+        // Khi set role = manufacturer → tự tạo record trong bảng manufacturers nếu chưa có
+        if ($newRole === 'manufacturer') {
+            ManuFacturer::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'name'    => $user->name,
+                    'phone'   => $user->phone ?? '',
+                    'address' => $user->address ?? '',
+                ]
+            );
+        }
+
+        // Khi bỏ role manufacturer → hủy liên kết (xóa user_id, giữ record NSX)
+        if ($newRole !== 'manufacturer') {
+            ManuFacturer::where('user_id', $user->id)->update(['user_id' => null]);
+        }
 
         return redirect()->back()->with('success', "Đã đổi quyền {$user->name} thành {$newRole}.");
     }

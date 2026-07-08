@@ -9,6 +9,7 @@ use App\Models\Brand;
 use App\Models\Festival;
 use App\Models\ManuFacturer;
 use App\Models\ProcurementRequest;
+use App\Models\WarehouseStockLog;
 use App\Models\ProcurementRequestItem;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -52,7 +53,7 @@ class ProductController extends Controller
         // Tính danh sách SP bán chậm — dùng đúng logic như tab Bán Chậm trong Kho:
         // nhập kho >= 7 ngày + tỉ lệ (tổng bán / tổng nhập) < 30%
         $slowProductIds = [];
-        $oldImportLogs = \App\Models\WarehouseStockLog::where('type', 'import')
+        $oldImportLogs = WarehouseStockLog::where('type', 'import')
             ->where('created_at', '<=', now()->subDays(30))
             ->get()
             ->groupBy('product_id');
@@ -74,13 +75,13 @@ class ProductController extends Controller
         // Không cần FIFO, chỉ cần biết SP này có lô nào sắp hết hạn để cảnh báo
         $expiryMap = [];
 
-        $logs = \App\Models\WarehouseStockLog::where('type', 'import')
-            ->whereNotNull('expiry_date')
-            ->whereDate('expiry_date', '>=', now()->toDateString())
-            ->selectRaw('product_id, MIN(expiry_date) as nearest_expiry')
+        $logs = WarehouseStockLog::where('type', 'import')
+            ->whereNotNull('expiry_date')  // phải có hạn sử dụn
+            ->whereDate('expiry_date', '>=', now()->toDateString()) // chưa hết hạn
+            ->selectRaw('product_id, MIN(expiry_date) as nearest_expiry') // lấy hạn GẦN NHẤT
             ->groupBy('product_id')
             ->get();
-
+        // Chuẩn hóa về string 'YYYY-MM-DD'
         foreach ($logs as $row) {
             $expiryStr = $row->nearest_expiry instanceof \Carbon\Carbon
                 ? $row->nearest_expiry->toDateString()

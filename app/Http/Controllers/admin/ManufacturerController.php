@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ManuFacturer;
+use App\Models\User;
 
 class ManufacturerController extends Controller
 {
@@ -22,7 +23,6 @@ class ManufacturerController extends Controller
      */
     public function create()
     {
-        //
         return view('admin.manufacturer.add');
     }
 
@@ -49,7 +49,7 @@ class ManufacturerController extends Controller
 
         // Tạo tài khoản nếu email được điền
         if ($request->filled('email') && $request->filled('password')) {
-            $user = \App\Models\User::create([
+            $user = User::create([
                 'name'              => $request->name,
                 'email'             => $request->email,
                 'phone'             => $request->phone ?? '',
@@ -63,15 +63,6 @@ class ManufacturerController extends Controller
 
         return redirect()->route('admin.manufacturer.index')
             ->with('success', 'Đã tạo NSX' . ($request->filled('email') ? ' và tài khoản đăng nhập' : '') . ' thành công.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-
     }
 
     /**
@@ -92,12 +83,11 @@ class ManufacturerController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'name'    => 'required|string|max:255',
+            'phone'   => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
         ]);
 
-        // Đã sửa thành find() giống hàm edit
         $manufacturer = ManuFacturer::find($id);
 
         if (!$manufacturer) {
@@ -105,8 +95,8 @@ class ManufacturerController extends Controller
         }
 
         $manufacturer->update([
-            'name' => $request->name,
-            'phone' => $request->phone,
+            'name'    => $request->name,
+            'phone'   => $request->phone,
             'address' => $request->address,
         ]);
 
@@ -132,7 +122,7 @@ class ManufacturerController extends Controller
             'email.unique' => 'Email này đã được dùng cho tài khoản khác.',
         ]);
 
-        $user = \App\Models\User::create([
+        $user = User::create([
             'name'               => $manufacturer->name,
             'email'              => $request->email,
             'phone'              => $manufacturer->phone ?? '',
@@ -153,7 +143,7 @@ class ManufacturerController extends Controller
      */
     public function destroy(string $id)
     {
-        $manufacturer = Manufacturer::find($id);
+        $manufacturer = ManuFacturer::find($id);
 
         if ($manufacturer) {
             $manufacturer->delete();

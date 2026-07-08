@@ -149,8 +149,7 @@
             {{-- ── DROPDOWN NSX: admin, manufacturer, warehouse ──────── --}}
             @if(in_array($role, ['admin', 'manufacturer', 'warehouse']))
             @php
-                $nsxActive = request()->routeIs('admin.manufacturer.*')
-                          || request()->routeIs('admin.supplier-offers.*')
+                $nsxActive = request()->routeIs('admin.supplier-offers.*')
                           || request()->routeIs('admin.purchase-orders.*')
                           || request()->routeIs('admin.procurement.*');
             @endphp
@@ -166,15 +165,6 @@
                 </a>
                 <div class="collapse {{ $nsxActive ? 'show' : '' }}" id="nsxSubmenu">
                     <ul class="nav flex-column pl-4 pb-1">
-
-                        {{-- Quản lý NSX: chỉ admin --}}
-                        @if($role === 'admin')
-                        <li class="nav-item {{ request()->routeIs('admin.manufacturer.*') ? 'active font-weight-bold' : '' }}">
-                            <a class="nav-link text-dark py-1 small" href="{{ route('admin.manufacturer.index') }}">
-                                <i class="fa-solid fa-boxes-packing text-muted mr-2"></i>Quản lý NSX
-                            </a>
-                        </li>
-                        @endif
 
                         {{-- Báo giá NSX: admin và manufacturer --}}
                         @if(in_array($role, ['admin', 'manufacturer']))

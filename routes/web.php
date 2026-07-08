@@ -14,7 +14,6 @@ use App\Http\Controllers\admin\ContactAdminController;
 use App\Http\Controllers\admin\FestivalController;
 use App\Http\Controllers\admin\OrderAdminController;
 use App\Http\Controllers\admin\UserController;
-use App\Http\Controllers\admin\ManufacturerController;
 use App\Http\Controllers\admin\SupplierOfferController;   // Báo giá NSX
 use App\Http\Controllers\admin\PurchaseOrderController;   // Đơn đặt hàng NSX
 use App\Http\Controllers\admin\ProcurementController;     // Yêu cầu thu mua công khai
@@ -159,7 +158,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse
      * dẫn đến lỗi 404 hoặc gọi sai method.
      */
     Route::get('product/warehouse',        [WarehouseController::class, 'index'])->name('product.warehouse.index');
-    Route::post('product/warehouse/store', [WarehouseController::class, 'store'])->name('product.warehouse.store');
     Route::post('product/warehouse/attach-festival', [WarehouseController::class, 'attachToFestival'])->name('product.warehouse.attach-festival');
 
     // Tạo yêu cầu nhập hàng từ modal trang sản phẩm
@@ -190,11 +188,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse
     Route::resource('orders', OrderAdminController::class);
 
     // ── Nhà Sản Xuất (NSX) ──────────────────────────────────────────
-
-    // Tạo tài khoản user cho NSX (gắn role = manufacturer)
-    Route::post('manufacturer/{id}/create-account', [ManufacturerController::class, 'createAccount'])->name('manufacturer.create-account');
-    // Quản lý danh sách NSX (CRUD cơ bản)
-    Route::resource('manufacturer', ManufacturerController::class);
 
     // Báo giá NSX: upload file → xem → tick SP → đặt hàng
     Route::resource('supplier-offers', SupplierOfferController::class)->only(['index', 'show']);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Http\Request;
+use \App\Models\WarehouseStockLog;
 
 /**
  * OrderAdminController — Quản lý đơn hàng khách trong trang admin.
@@ -26,18 +27,17 @@ class OrderAdminController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-        $role = auth()->user()->role;
-        // orders-damaged: admin và warehouse vào được
-        // orders thường: chỉ warehouse
-        if ($role === 'admin' && request()->routeIs('admin.orders.damaged')) {
+            $role = auth()->user()->role;
+            // orders-damaged: admin và warehouse vào được
+            // orders thường: chỉ warehouse
+            if ($role === 'admin' && request()->routeIs('admin.orders.damaged')) {
+                return $next($request);
+            }
+            if ($role !== 'warehouse') {
+                abort(403);
+            }
             return $next($request);
-        }
-        if ($role !== 'warehouse') {
-            abort(403);
-        }
-        return $next($request);
-    });
-
+        });
     }
     public function index(Request $request)
     {
@@ -127,36 +127,25 @@ class OrderAdminController extends Controller
                 $qtyToExport  = $detail->quantity; // tổng cần trừ cho SP này
 
                 // ── FIFO: trừ từ lô HSD gần nhất trước ──────────────────
-                // Lấy các lô import của SP này, sắp theo expiry_date tăng dần
-                // (HSD gần → xa), lô không có HSD xếp sau cùng
-                $importBatches = \App\Models\WarehouseStockLog::where('product_id', $product->id)
-                    ->where('type', 'import')
-                    ->orderByRaw('CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END ASC')
-                    ->orderBy('expiry_date', 'asc')
-                    ->orderBy('id', 'asc') // tie-break: nhập trước xuất trước
-                    ->get();
-
-                // Tính số đã xuất của từng lô (từ log export có cùng order_id gốc)
-                // Cách đơn giản: tổng import - tổng export tính đến nay = còn lại mỗi lô
-                // Dùng approach: loop từng lô, tính qty_left = total_import_lô - total_export đã dùng
-                // → ghi log export tương ứng với lô nào bị trừ
-
                 // Gom tổng import theo (product_id, expiry_date) để biết mỗi lô có bao nhiêu
-                $batchTotals = \App\Models\WarehouseStockLog::where('product_id', $product->id)
+                $batchTotals = WarehouseStockLog::where('product_id', $product->id)
                     ->where('type', 'import')
                     ->selectRaw('expiry_date, SUM(quantity) as total_import')
                     ->groupBy('expiry_date')
                     ->orderByRaw('CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END ASC')
+                    // → lô có HSD lên trước, lô NULL xuống sau
                     ->orderBy('expiry_date', 'asc')
                     ->get();
 
                 // Gom tổng export theo (product_id, expiry_date) — đã xuất bao nhiêu từ mỗi lô
-                $exportedByBatch = \App\Models\WarehouseStockLog::where('product_id', $product->id)
+                $exportedByBatch = WarehouseStockLog::where('product_id', $product->id)
                     ->where('type', 'export')
                     ->selectRaw('expiry_date, SUM(quantity) as total_export')
                     ->groupBy('expiry_date')
                     ->get()
                     ->keyBy(fn($r) => (string)($r->expiry_date ?? 'null'));
+                // keyBy → chuyển thành mảng tra cứu nhanh theo expiry_date
+                // VD: { "2027-01-01": {total_export: 20}, "null": {total_export: 5} }
 
                 $remaining = $qtyToExport; // số còn cần trừ
 
@@ -174,7 +163,7 @@ class OrderAdminController extends Controller
                     $takeFromBatch = min($remaining, $qtyLeft);
 
                     // Ghi log xuất kho cho lô này
-                    \App\Models\WarehouseStockLog::create([
+                    WarehouseStockLog::create([
                         'receipt_id'  => null,
                         'product_id'  => $product->id,
                         'type'        => 'export',
@@ -189,7 +178,7 @@ class OrderAdminController extends Controller
 
                 // Nếu còn thừa (SP không có log import nào — nhập thủ công): ghi log export chung
                 if ($remaining > 0) {
-                    \App\Models\WarehouseStockLog::create([
+                    WarehouseStockLog::create([
                         'receipt_id'  => null,
                         'product_id'  => $product->id,
                         'type'        => 'export',

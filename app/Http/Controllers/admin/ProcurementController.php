@@ -54,16 +54,17 @@ class ProcurementController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'product_ids'   => 'required|array|min:1',
-            'product_ids.*' => 'exists:products,id',
-            'deadline'      => 'nullable|date|after:today',
+            'product_ids'   => 'required|array|min:1',// phải là mảng, ít nhất 1 phần tử
+            'product_ids.*' => 'exists:products,id',  // mỗi id phải tồn tại trong bảng products 
+            //  dấu * nghĩa là kiểm tra từng phần tử trong mảng, không phải cả mảng.
+            'deadline'      => 'nullable|date|after:today',// có thể bỏ trống, nếu có thì phải sau hôm nay
         ], [
             'product_ids.required' => 'Vui lòng chọn ít nhất 1 sản phẩm.',
             'deadline.after'       => 'Hạn chót phải sau ngày hôm nay.',
         ]);
 
-        $productIds = $request->input('product_ids', []);
-        $qtySuggest = $request->input('qty_suggest', []);
+        $productIds = $request->input('product_ids', []);// mảng id sản phẩm: [1, 5, 12]
+        $qtySuggest = $request->input('qty_suggest', []);// mảng số lượng gợi ý: [1=>20, 5=>15, 12=>10]
 
         // Sinh request_code tự động: PRQ-YYYYMMDD-001
         $count = ProcurementRequest::whereDate('created_at', today())->count() + 1;
