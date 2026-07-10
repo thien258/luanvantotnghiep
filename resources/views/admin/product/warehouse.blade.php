@@ -47,7 +47,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="alert alert-warning rounded-0 border-0 small mb-0 flex-grow-1 me-3">
                         <i class="fa fa-lightbulb me-1"></i> <strong>Gợi ý hệ thống:</strong>
-                        Danh sách sản phẩm nhập kho từ <strong>7 ngày trở lên</strong> mà tỷ lệ bán chưa đạt <strong>30%</strong>.
+                        Sản phẩm bán được <strong>≤ 30%</strong> số lượng nhập sau <strong>30 ngày</strong> kể từ lần nhập gần nhất.
                         Hệ thống đề xuất lập tức bật <strong>Flash Sale</strong> hoặc <strong>Giảm giá</strong> để giải phóng kho.
                     </div>
                     <button type="button" class="btn btn-success btn-sm rounded-0 text-nowrap"
@@ -63,6 +63,7 @@
                                 <th class="text-center">Lượng nhập</th>
                                 <th class="text-center">Đã tiêu thụ</th>
                                 <th class="text-center">Tỉ lệ bán</th>
+                                <th class="text-center">Ngày nhập</th>
                                 <th class="text-center">Festival</th>
                                 <th class="text-center">Đề xuất</th>
                             </tr>
@@ -76,12 +77,19 @@
                                 <td class="text-center">
                                     <span class="badge bg-danger rounded-0" style="font-size:0.65rem;">{{ $sp->sale_rate }}%</span>
                                 </td>
+                                <td class="text-center" style="font-size:0.75rem;">
+                                    @if($sp->last_import_at)
+                                        {{ $sp->last_import_at->format('d/m/Y') }}
+                                        <br><span class="text-muted">{{ $sp->days_since }} ngày trước</span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-0 px-2 py-1" style="font-size:0.65rem;">
                                         <i class="fa fa-bolt me-1"></i> CẦN GIẢM GIÁ SALE
                                     </span>
                                 </td>
-                                {{-- Hiện festival SP đang tham gia (nếu có) --}}
                                 <td class="text-center">
                                     @forelse($sp->festivals as $fes)
                                         <span class="badge bg-info text-dark rounded-0 mb-1" style="font-size:0.65rem;">
@@ -94,7 +102,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-3">Không có sản phẩm bán chậm (tất cả SP nhập từ 7 ngày trước đã bán > 30%).</td>
+                                <td colspan="7" class="text-center text-muted py-3">Không có sản phẩm bán chậm (tất cả SP nhập đã bán > 30% sau 30 ngày).</td>
                             </tr>
                             @endforelse
                         </tbody>

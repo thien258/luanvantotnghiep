@@ -28,12 +28,12 @@
 
             @php $role = auth()->user()->role; @endphp
 
-            {{-- Dashboard: chỉ admin --}}
-            @if($role === 'admin')
+            {{-- Dashboard: admin và director --}}
+            @if(in_array($role, ['admin', 'director']))
             <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{ route('admin.dashboard') }}">
                     <i class="fa-solid fa-chart-line text-dark mr-3"></i>
-                    <span>Dashboard Overview</span>
+                    <span>{{ $role === 'director' ? 'Báo cáo Doanh thu' : 'Dashboard Overview' }}</span>
                 </a>
             </li>
             @endif
@@ -233,6 +233,7 @@
                         @php
                             $roleLabel = [
                                 'admin'        => 'Quản trị viên',
+                                'director'     => 'Giám đốc',
                                 'warehouse'    => 'Nhân viên kho',
                                 'manufacturer' => 'Nhà sản xuất',
                                 'user'         => 'Người dùng',

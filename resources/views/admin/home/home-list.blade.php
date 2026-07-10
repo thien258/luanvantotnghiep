@@ -4,7 +4,8 @@
 {{-- ── THẺ TỔNG QUAN ──────────────────────────────────────────────────── --}}
 <div class="row mt-4 text-left">
 
-    {{-- Tổng doanh thu --}}
+    {{-- Tổng doanh thu — chỉ hiển thị nếu có dữ liệu (không hiển thị với admin) --}}
+    @if(!is_null($totalRevenue))
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card shadow-none border rounded-0 border-left-success h-100" style="border-left-width:4px !important;">
             <div class="card-body py-3">
@@ -15,6 +16,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     {{-- Tổng đơn hàng --}}
     <div class="col-xl-3 col-md-6 mb-4">
@@ -48,7 +50,8 @@
 
 </div>
 
-{{-- ── BIỂU ĐỒ DOANH THU THEO THÁNG ──────────────────────────────────── --}}
+{{-- ── BIỂU ĐỒ DOANH THU THEO THÁNG — chỉ khi có dữ liệu doanh thu ─── --}}
+@if(!is_null($totalRevenue))
 <div class="card shadow-none border rounded-0 mb-4 text-left">
     <div class="card-header bg-white py-3 border-bottom-0 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-dark text-uppercase small" style="letter-spacing:1px;">
@@ -71,6 +74,7 @@
         </div>
     </div>
 </div>
+@endif
 
 {{-- ── BẢNG TOP SẢN PHẨM + KHO ─────────────────────────────────────── --}}
 <div class="row text-left">
@@ -80,7 +84,7 @@
         <div class="card shadow-none border rounded-0 border-left-success" style="border-left-width:4px !important;">
             <div class="card-header bg-white py-3 border-bottom-0">
                 <h6 class="m-0 font-weight-bold text-success text-uppercase small" style="letter-spacing:1px;">
-                    <i class="fa-solid fa-fire mr-2"></i>Top 5 sản phẩm bán chạy
+                    <i class="fa-solid fa-fire mr-2"></i>Top 5 sản phẩm bán chạy (30 ngày gần nhất)
                 </h6>
             </div>
             <div class="card-body p-0">
@@ -90,7 +94,6 @@
                             <th class="pl-4 py-2">#</th>
                             <th class="py-2">Tên sản phẩm</th>
                             <th class="text-center py-2">Đã bán</th>
-                            <th class="text-center py-2">Doanh thu</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -99,13 +102,10 @@
                             <td class="pl-4 py-2 text-muted">{{ $i + 1 }}</td>
                             <td class="py-2 font-weight-bold">{{ $sp->title }}</td>
                             <td class="text-center text-success font-weight-bold">{{ $sp->total_sold }}</td>
-                            <td class="text-center text-muted">
-                                {{ number_format($sp->total_revenue, 0, ',', '.') }}₫
-                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="text-center text-muted py-3">Chưa có dữ liệu</td>
+                            <td colspan="3" class="text-center text-muted py-3">Chưa có dữ liệu trong 30 ngày</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -119,7 +119,7 @@
         <div class="card shadow-none border rounded-0 border-left-danger" style="border-left-width:4px !important;">
             <div class="card-header bg-white py-3 border-bottom-0">
                 <h6 class="m-0 font-weight-bold text-danger text-uppercase small" style="letter-spacing:1px;">
-                    <i class="fa-solid fa-hourglass-half mr-2"></i>Sản phẩm bán chậm (Nhập ≥7 ngày, bán <30%)
+                    <i class="fa-solid fa-hourglass-half mr-2"></i>Sản phẩm bán chậm (≤ 30% lượng nhập sau 30 ngày)
                 </h6>
             </div>
             <div class="card-body p-0">
@@ -127,17 +127,24 @@
                     <thead class="table-light">
                         <tr>
                             <th class="pl-4 py-2">Tên sản phẩm</th>
-                            <th class="text-center py-2">Đã bán</th>
-                            <th class="text-center py-2">Tỉ lệ</th>
+                            <th class="text-center py-2">Đã bán / Đã nhập</th>
+                            <th class="text-center py-2">Tỷ lệ</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($slowProducts as $sp)
                         <tr>
                             <td class="pl-4 py-2 font-weight-bold">{{ $sp->title }}</td>
-                            <td class="text-center text-muted font-weight-bold">{{ $sp->total_sold }}/{{ $sp->total_import }}</td>
+                            <td class="text-center font-weight-bold {{ $sp->sold_30 == 0 ? 'text-danger' : 'text-warning' }}">
+                                {{ $sp->sold_30 }} / {{ $sp->stock > 0 ? $sp->stock : '—' }}
+                            </td>
                             <td class="text-center">
-                                <span class="badge badge-danger">{{ $sp->sale_rate }}%</span>
+                                @php
+                                    $ratio = ($sp->stock > 0) ? round($sp->sold_30 / $sp->stock * 100, 1) : 0;
+                                @endphp
+                                <span class="badge badge-danger">
+                                    {{ $ratio }}%
+                                </span>
                             </td>
                         </tr>
                         @empty

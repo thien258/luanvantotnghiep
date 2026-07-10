@@ -46,18 +46,8 @@
         @php
             $expiry   = $expiryMap[$object->id] ?? null;
             $daysLeft = $expiry ? $expiry['days_left'] : null;
-
-            // Border trái chỉ theo HSD — độc lập với màu row
-            if ($daysLeft !== null && $daysLeft <= 30) {
-                $borderStyle = 'border-left: 5px solid #dc3545 !important;'; // đỏ
-            } elseif ($daysLeft !== null && $daysLeft <= 90) {
-                $borderStyle = 'border-left: 5px solid #fd7e14 !important;'; // cam
-            } else {
-                $borderStyle = '';
-            }
         @endphp
-        <tr class="@if($object->quantity < 5) table-danger @elseif($object->quantity < 10) table-warning @endif"
-            style="{{ $borderStyle }}">
+        <tr class="@if($object->quantity < 5) table-danger @elseif($object->quantity < 10) table-warning @endif @if($daysLeft !== null && $daysLeft <= 30) border-left-danger @elseif($daysLeft !== null && $daysLeft <= 90) border-left-warning @endif">
             <td class="fw-bold">{{$object->title}}</td>
             <td>{{$object->decription}}</td>
             <td>{{$object->category?->name ?? 'Trống'}}</td>
@@ -89,8 +79,8 @@
                 @else text-dark @endif">
                 {{ $object->quantity }}
                 @if($expiry)
-                <br><small class="fw-normal"
-                    style="font-size:0.65rem; color: {{ $daysLeft <= 30 ? '#dc3545' : ($daysLeft <= 90 ? '#fd7e14' : '#6c757d') }}">
+                <br><small class="fw-normal @if($daysLeft <= 30) text-danger @elseif($daysLeft <= 90) text-warning @else text-muted @endif"
+                    style="font-size:0.65rem;">
                     ⏰ {{ \Carbon\Carbon::parse($expiry['date'])->format('d/m/Y') }}
                 </small>
                 @endif
@@ -231,9 +221,12 @@
                                 @php
                                     $pExpiry    = $expiryMap[$p->id] ?? null;
                                     $pDaysLeft  = $pExpiry ? $pExpiry['days_left'] : null;
-                                    $isSlow     = in_array($p->id, $slowProductIds);
+                                    $speedInfo  = $saleSpeedMap[$p->id] ?? null;
+                                    $speedStatus = $speedInfo['status'] ?? null;
+                                    $isSlow     = $speedStatus === 'slow';
+                                    $isFast     = $speedStatus === 'fast';
+                                    $isWatching = $speedStatus === 'watching';
                                     $isExpiring = $pDaysLeft !== null && $pDaysLeft <= 90;
-                                    // Cảnh báo kép: bán chậm + sắp hết hạn → KHÔNG nên đặt thêm
                                     $isDoubleWarning = $isSlow && $isExpiring;
                                 @endphp
                                 <tr class="@if($isDoubleWarning) table-danger @elseif($p->quantity < 5) table-danger @elseif($p->quantity < 10) table-warning @endif">
@@ -258,7 +251,11 @@
                                                 <span class="badge badge-warning rounded-0 text-white" style="font-size:0.6rem;">SẮP HẾT</span>
                                             @endif
                                             @if($isSlow)
-                                                <span class="badge rounded-0 text-dark" style="font-size:0.6rem; background:#ffc107;">🐢 Bán chậm</span>
+                                                <span class="badge rounded-0 text-dark" style="font-size:0.6rem; background:#ffc107;">🐢 Bán chậm ({{ $speedInfo['ratio'] ?? 0 }}%)</span>
+                                            @elseif($isFast)
+                                                <span class="badge rounded-0 text-white" style="font-size:0.6rem; background:#28a745;">🔥 Bán nhanh ({{ $speedInfo['ratio'] ?? 0 }}%)</span>
+                                            @elseif($isWatching)
+                                                <span class="badge rounded-0 text-dark" style="font-size:0.6rem; background:#e2e3e5;">⏳ Đang theo dõi (còn {{ $speedInfo['days_left'] }} ngày)</span>
                                             @endif
                                             @if($isExpiring)
                                                 <span class="badge rounded-0 text-white" style="font-size:0.6rem; background:#dc3545;">⏰ HSD còn {{ $pDaysLeft }} ngày</span>
@@ -315,9 +312,5 @@
 
 @section('script')
 <script src="{{ asset('js/admin/adminProduct_search.js') }}"></script>
-<script>
-    document.getElementById('selectAllLow')?.addEventListener('change', function () {
-        document.querySelectorAll('.low-stock-check').forEach(cb => cb.checked = this.checked);
-    });
-</script>
+<script src="{{ asset('js/admin/product-list.js') }}"></script>
 @endsection

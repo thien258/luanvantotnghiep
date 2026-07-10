@@ -32,8 +32,8 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        // Admin/warehouse/manufacturer dùng layout admin
-        if (in_array($user->role, ['admin', 'warehouse', 'manufacturer'])) {
+        // Admin/warehouse/manufacturer/director dùng layout admin
+        if (in_array($user->role, ['admin', 'warehouse', 'manufacturer', 'director'])) {
             return view('admin.profile', compact('user'));
         }
 

@@ -44,7 +44,7 @@ class UserController extends Controller
         $newRole = $request->input('role');
 
         // Chỉ chấp nhận các role hợp lệ
-        $validRoles = ['admin', 'warehouse', 'manufacturer', 'customer'];
+        $validRoles = ['admin', 'warehouse', 'manufacturer', 'customer', 'director'];
         if (!in_array($newRole, $validRoles)) {
             return redirect()->back()->with('error', 'Role không hợp lệ.');
         }

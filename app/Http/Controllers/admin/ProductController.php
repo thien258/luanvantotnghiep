@@ -10,6 +10,7 @@ use App\Models\Festival;
 use App\Models\ManuFacturer;
 use App\Models\ProcurementRequest;
 use App\Models\WarehouseStockLog;
+use App\Http\Controllers\admin\SaleSpeedHelper;
 use App\Models\ProcurementRequestItem;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -50,26 +51,17 @@ class ProductController extends Controller
         // Tất cả SP cho modal tạo yêu cầu nhập hàng (không phân trang)
         $allProducts = Product::orderBy('quantity', 'asc')->get();
 
-        // Tính danh sách SP bán chậm — dùng đúng logic như tab Bán Chậm trong Kho:
-        // nhập kho >= 7 ngày + tỉ lệ (tổng bán / tổng nhập) < 30%
-        $slowProductIds = [];
-        $oldImportLogs = WarehouseStockLog::where('type', 'import')
-            ->where('created_at', '<=', now()->subDays(30))
-            ->get()
-            ->groupBy('product_id');
+        // Tính badge bán nhanh / bán chậm / đang theo dõi cho từng SP
+        // Dùng SaleSpeedHelper — logic mới: tỷ lệ bán/nhập sau 30 ngày kể từ lần nhập gần nhất
+        $saleSpeedMap = SaleSpeedHelper::getStatusMap(
+            Product::with('festivals')->where('quantity', '>', 0)->get()
+        );
 
-        foreach ($oldImportLogs as $productId => $logs) {
-            $totalImported = $logs->sum('quantity');
-            $totalSold     = DB::table('order_details')
-                ->join('orders', 'order_details.idOrder', '=', 'orders.id')
-                ->where('order_details.idProduct', $productId)
-                ->where('orders.status', 4)
-                ->sum('order_details.quantity');
-            $saleRate      = $totalImported > 0 ? ($totalSold / $totalImported) * 100 : 0;
-            if ($saleRate < 30) {
-                $slowProductIds[] = $productId;
-            }
-        }
+        // Backward compat: slowProductIds dùng cho badge cũ trong view
+        $slowProductIds = array_keys(array_filter(
+            $saleSpeedMap,
+            fn($item) => $item['status'] === 'slow'
+        ));
 
         // Lấy HSD gần nhất (còn hiệu lực) cho từng SP — đơn giản: min(expiry_date) >= hôm nay
         // Không cần FIFO, chỉ cần biết SP này có lô nào sắp hết hạn để cảnh báo

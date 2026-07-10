@@ -134,7 +134,7 @@ Route::middleware('auth')->group(function () {
 // Kiểm tra role='admin' thực hiện trong AdminController::__construct()
 // =========================================================================
 
-Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse,manufacturer'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse,manufacturer,director'])->group(function () {
 
     // Dashboard — trang tổng quan thống kê
     Route::get('/', [App\Http\Controllers\admin\AdminController::class, 'index'])->name('dashboard');

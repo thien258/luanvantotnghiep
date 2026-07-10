@@ -36,6 +36,7 @@
       <option value="customer"      {{ $user->role === 'customer'     ? 'selected' : '' }}>Customer</option>
       <option value="warehouse"     {{ $user->role === 'warehouse'    ? 'selected' : '' }}>Nhân viên kho</option>
       <option value="manufacturer"  {{ $user->role === 'manufacturer' ? 'selected' : '' }}>Nhà sản xuất</option>
+      <option value="director"      {{ $user->role === 'director'     ? 'selected' : '' }}>Giám đốc</option>
       <option value="admin"         {{ $user->role === 'admin'        ? 'selected' : '' }}>Admin</option>
     </select>
   </form>

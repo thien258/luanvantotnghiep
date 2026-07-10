@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Models\Product;
 use App\Models\WarehouseStockLog;
+use App\Http\Controllers\admin\SaleSpeedHelper;
 
 /**
  * AdminController — Trang tổng quan (Dashboard) của admin.
@@ -38,20 +39,28 @@ class AdminController extends Controller
 
     public function index()
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403, 'Bạn không có quyền truy cập trang này.');
+        $role = Auth::user()->role;
 
+        // Director: chỉ được xem trang doanh thu riêng
+        if ($role === 'director') {
+            return $this->directorDashboard();
+        }
+
+        // Các role không phải admin không được vào dashboard tổng quan
+        if ($role !== 'admin') {
             if ($role === 'warehouse') {
                 return redirect()->route('admin.orders.index');
             }
             if ($role === 'manufacturer') {
                 return redirect()->route('admin.supplier-offers.index');
             }
+            abort(403, 'Bạn không có quyền truy cập trang này.');
         }
-        // ── 1. TỔNG QUAN ──────────────────────────────────────────────
 
-        // Doanh thu: tổng total_price của các đơn đã giao thành công (status = 4)
-        $totalRevenue = DB::table('orders')->where('status', 4)->sum('total_price');
+        // ── 1. TỔNG QUAN (admin — KHÔNG hiển thị doanh thu) ───────────
+
+        // Doanh thu bị ẩn với admin — set null để view biết không render
+        $totalRevenue = null;
 
         // Tổng đơn hàng — bỏ qua đơn chờ thanh toán PayOS (status = 0)
         $totalOrders = DB::table('orders')->where('status', '!=', 0)->count();
@@ -86,7 +95,7 @@ class AdminController extends Controller
 
         // ── 3. TOP 5 SẢN PHẨM BÁN CHẠY ───────────────────────────────
 
-        // Chỉ tính từ đơn hoàn tất (status = 4) — phản ánh doanh số thực
+        // Chỉ tính từ đơn hoàn tất (status = 4) trong 30 ngày gần nhất — nhất quán với bán chậm
         $topSelling = DB::table('order_details')
             ->join('orders', 'order_details.idOrder', '=', 'orders.id')
             ->join('products', 'order_details.idProduct', '=', 'products.id')
@@ -97,59 +106,30 @@ class AdminController extends Controller
                 DB::raw('SUM(order_details.quantity * order_details.price) as total_revenue')
             )
             ->where('orders.status', 4)
+            ->where('orders.created_at', '>=', now()->subDays(30))
             ->groupBy('products.id', 'products.title')
             ->orderBy('total_sold', 'desc')
             ->take(5)
             ->get();
 
         // ── 4. SẢN PHẨM BÁN CHẬM ─────────────────────────────────────
+        // Dùng SaleSpeedHelper — logic mới: tỷ lệ bán/nhập sau 30 ngày kể từ lần nhập gần nhất
+        $allActiveProducts = Product::with('festivals')
+            ->where('status', 1)
+            ->orWhere('quantity', '>', 0)
+            ->get();
 
-        // Định nghĩa "bán chậm": Sản phẩm nhập kho >= 30 ngày mà tỷ lệ bán < 30%
-        $slowProducts = [];
-        $daysThreshold = 30;
-        $daysAgo = now()->subDays($daysThreshold);
+        $slowItems = array_values(SaleSpeedHelper::getSlowProducts($allActiveProducts));
 
-        // Lấy các log nhập kho từ N ngày trước trở về trước, nhóm theo product_id
-        $oldImportLogs = WarehouseStockLog::where('type', 'import')
-            ->where('created_at', '<=', $daysAgo)
-            ->orderBy('created_at', 'asc')
-            ->get()
-            ->groupBy('product_id');
-
-        foreach ($oldImportLogs as $productId => $logs) {
-            $product = Product::find($productId);
-            if (!$product) continue;
-
-            // Tính tổng số lượng nhập từ các lần nhập >= N ngày
-            $totalImported = $logs->sum('quantity');
-
-            // Lấy log nhập đầu tiên để biết ngày nhập
-            $firstImportDate = $logs->first()->created_at;
-            $daysInStock = now()->diffInDays($firstImportDate);
-
-            // Tổng số đã bán từ đơn hoàn tất (status = 4)
-            $totalSold = DB::table('order_details')
-                ->join('orders', 'order_details.idOrder', '=', 'orders.id')
-                ->where('order_details.idProduct', $product->id)
-                ->where('orders.status', 4)
-                ->sum('order_details.quantity');
-
-            // Tính tỉ lệ bán
-            $saleRate = $totalImported > 0 ? ($totalSold / $totalImported) * 100 : 0;
-
-            // Cảnh báo nếu tỉ lệ < 30%
-            if ($saleRate < 30) {
-                $product->total_import = $totalImported;
-                $product->total_sold = $totalSold;
-                $product->sale_rate = round($saleRate, 1);
-                $product->days_in_stock = $daysInStock;
-                $product->first_import_date = $firstImportDate;
-                $slowProducts[] = $product;
-            }
-        }
-
-        // Giới hạn 5 sản phẩm để tránh bảng quá dài
-        $slowProducts = \array_slice($slowProducts, 0, 5);
+        // Chuyển về format cũ để view dùng được
+        $slowProducts = array_slice(array_map(function ($item) {
+            $p = $item->product;
+            $p->sold_30 = $item->sold_after;
+            $p->stock   = $item->imported_qty > 0
+                ? $item->imported_qty        // SP đã nhập kho → dùng qty nhập
+                : (int) $item->product->quantity; // fallback → dùng tồn kho hiện tại
+            return $p;
+        }, $slowItems), 0, 5);
 
         // ── 6. SẮP HẾT HẠN (HSD) ─────────────────────────────────────
 
@@ -207,6 +187,67 @@ class AdminController extends Controller
             'slowProducts',
             'lowStockProducts',
             'expiringBatches'
+        ));
+    }
+
+    /**
+     * Dashboard dành riêng cho Giám đốc (director).
+     * Hiển thị doanh thu và chi phí nhập hàng theo từng tháng.
+     */
+    private function directorDashboard()
+    {
+        $year = now()->year;
+
+        // ── Doanh thu theo tháng (đơn hoàn tất status = 4) ─────────────
+        $revenueRows = DB::table('orders')
+            ->selectRaw('MONTH(updated_at) as month, SUM(total_price) as revenue')
+            ->where('status', 4)
+            ->whereYear('updated_at', $year)
+            ->groupBy(DB::raw('MONTH(updated_at)'))
+            ->get()
+            ->keyBy('month');
+
+        // ── Chi phí nhập hàng theo tháng (đơn received) ────────────────
+        // Lấy từ purchase_orders.total_amount, tháng tính theo updated_at (ngày nhận hàng)
+        $importCostRows = DB::table('purchase_orders')
+            ->selectRaw('MONTH(updated_at) as month, SUM(total_amount) as cost')
+            ->where('status', 'received')
+            ->whereYear('updated_at', $year)
+            ->groupBy(DB::raw('MONTH(updated_at)'))
+            ->get()
+            ->keyBy('month');
+
+        // Build mảng 12 tháng cho cả 2 chỉ số (đơn vị: triệu VNĐ)
+        $monthlyRevenue    = [];
+        $monthlyImportCost = [];
+        $monthlyProfit     = [];
+
+        for ($m = 1; $m <= 12; $m++) {
+            $rev  = isset($revenueRows[$m])    ? (float) $revenueRows[$m]->revenue    : 0;
+            $cost = isset($importCostRows[$m]) ? (float) $importCostRows[$m]->cost    : 0;
+
+            $monthlyRevenue[]    = round($rev  / 1_000_000, 1);
+            $monthlyImportCost[] = round($cost / 1_000_000, 1);
+            $monthlyProfit[]     = round(($rev - $cost) / 1_000_000, 1);
+        }
+
+        // ── Tổng cả năm ─────────────────────────────────────────────────
+        $totalRevenue    = DB::table('orders')->where('status', 4)->whereYear('updated_at', $year)->sum('total_price');
+        $totalImportCost = DB::table('purchase_orders')->where('status', 'received')->whereYear('updated_at', $year)->sum('total_amount');
+        $totalProfit     = $totalRevenue - $totalImportCost;
+
+        // Tổng đơn hàng (không tính đơn chờ PayOS)
+        $totalOrders = DB::table('orders')->where('status', '!=', 0)->count();
+
+        return view('admin.home.director-dashboard', compact(
+            'totalRevenue',
+            'totalImportCost',
+            'totalProfit',
+            'totalOrders',
+            'monthlyRevenue',
+            'monthlyImportCost',
+            'monthlyProfit',
+            'year'
         ));
     }
 }

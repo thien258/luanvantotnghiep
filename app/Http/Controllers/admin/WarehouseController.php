@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Controllers\admin\SaleSpeedHelper;
 
 /**
  * WarehouseController — Quản lý kho hàng và nhập kho qua file.
@@ -358,54 +359,13 @@ class WarehouseController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Tab 1: Sản phẩm bán chậm - logic mới:
-        // Lấy các lần nhập kho cách đây >= 7 ngày (có thể đổi thành 30 sau)
-        // Tính tỉ lệ đã bán / nhập của batch đó
-        // Nếu < 30% → cảnh báo bán chậm
-        $slowProducts = [];
-        $daysThreshold = 30;
-        $daysAgo = now()->subDays($daysThreshold);
+        // Tab 1: Sản phẩm bán chậm — dùng SaleSpeedHelper
+        // Logic: tính ratio bán/nhập sau mỗi lần nhập kho (cửa sổ 30 ngày)
+        $activeProducts = Product::with('festivals')->where('quantity', '>', 0)->get();
+        $slowProducts   = array_values(SaleSpeedHelper::getSlowProducts($activeProducts));
 
-        // Lấy các log nhập kho từ N ngày trước trở về trước
-        $oldImportLogs = WarehouseStockLog::where('type', 'import')
-            ->where('created_at', '<=', $daysAgo)
-            ->orderBy('created_at', 'asc')
-            ->get()
-            ->groupBy('product_id');
-
-        foreach ($oldImportLogs as $productId => $logs) {
-            $product = Product::with('festivals')->find($productId); // load festivals để hiện badge
-            if (!$product) continue;
-
-            // Tính tổng số lượng nhập từ các lần nhập >= N ngày trước
-            $totalImported = $logs->sum('quantity');
-
-            // Lấy log nhập đầu tiên để biết ngày nhập
-            $firstImportDate = $logs->first()->created_at;
-            $daysInStock = now()->diffInDays($firstImportDate);
-
-            // Tính tổng đã bán — chỉ đơn hoàn tất (status = 4), đồng nhất với Dashboard
-            $totalSold = Schema::hasTable('order_details')
-                ? DB::table('order_details')
-                ->join('orders', 'order_details.idOrder', '=', 'orders.id')
-                ->where('order_details.idProduct', $product->id)
-                ->where('orders.status', 4)
-                ->sum('order_details.quantity')
-                : 0;
-
-            // Tính tỉ lệ bán
-            $saleRate = $totalImported > 0 ? ($totalSold / $totalImported) * 100 : 0;
-
-            // Cảnh báo nếu tỉ lệ < 30%
-            if ($saleRate < 30) {
-                $product->total_import = $totalImported;
-                $product->total_sold = $totalSold;
-                $product->sale_rate = round($saleRate, 1);
-                $product->days_in_stock = $daysInStock;
-                $product->first_import_date = $firstImportDate;
-                $slowProducts[] = $product;
-            }
-        }
+        // Sắp xếp: ratio thấp nhất lên đầu (bán chậm nhất)
+        usort($slowProducts, fn($a, $b) => $a->sale_rate <=> $b->sale_rate);
 
         return [$receipt, $stockLogs, $slowProducts];
     }

@@ -51,6 +51,9 @@ protected function redirectTo()
     if ($role === 'manufacturer') {
         return '/admin/supplier-offers';
     }
+    if ($role === 'director') {
+        return '/admin';
+    }
 
     return '/';  // /
 }

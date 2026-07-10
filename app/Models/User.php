@@ -11,7 +11,8 @@ use Illuminate\Notifications\Notifiable;
  * User — Tài khoản người dùng trong hệ thống.
  *
  * Phân quyền qua cột 'role':
- *   'admin'    — Quản trị viên toàn hệ thống
+ *   'admin'    — Quản trị viên toàn hệ thống (không xem doanh thu)
+ *   'director' — Giám đốc (chỉ xem doanh thu)
  *   'staff'    — Nhân viên (kho, xử lý đơn, ...)
  *   'customer' — Khách hàng thông thường
  *
@@ -115,6 +116,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isCustomer()
     {
         return $this->role === 'customer';
+    }
+
+    /** Kiểm tra user có phải giám đốc không. */
+    public function isDirector()
+    {
+        return $this->role === 'director';
     }
 
     /**
