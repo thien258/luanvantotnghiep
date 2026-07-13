@@ -31,7 +31,7 @@ class SupplierOfferController extends Controller
     {
         $this->middleware(function ($request, $next) {
             $role = auth()->user()->role;
-            if (!in_array($role, ['admin', 'manufacturer'])) {
+            if (!in_array($role, ['admin', 'manufacturer', 'director', 'root'])) {
                 abort(403);
             }
             return $next($request);

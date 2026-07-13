@@ -38,6 +38,7 @@
       <option value="manufacturer"  {{ $user->role === 'manufacturer' ? 'selected' : '' }}>Nhà sản xuất</option>
       <option value="director"      {{ $user->role === 'director'     ? 'selected' : '' }}>Giám đốc</option>
       <option value="admin"         {{ $user->role === 'admin'        ? 'selected' : '' }}>Admin</option>
+      <option value="root"          {{ $user->role === 'root'         ? 'selected' : '' }}>Root</option>
     </select>
   </form>
   @endif

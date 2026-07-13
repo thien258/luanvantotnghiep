@@ -38,13 +38,10 @@
                                    value="{{ $title->button }}">
                         </div>
 
-            
-
                         <div class="text-end">
                             <button type="submit" class="btn btn-success">
                                 <i class="bi bi-save"></i> Cập nhật
                             </button>
-        
                         </div>
                     </form>
                 </div>

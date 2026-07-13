@@ -46,6 +46,11 @@ class AdminController extends Controller
             return $this->directorDashboard();
         }
 
+        // Root: xem dashboard đầy đủ như admin + có thêm doanh thu
+        if ($role === 'root') {
+            return $this->rootDashboard();
+        }
+
         // Các role không phải admin không được vào dashboard tổng quan
         if ($role !== 'admin') {
             if ($role === 'warehouse') {
@@ -174,6 +179,102 @@ class AdminController extends Controller
         $lowStockProducts = Product::where('quantity', '>', 0)
             ->where('quantity', '<', 5)
             ->orderBy('quantity', 'asc') // sắp xếp theo tồn kho tăng dần (nguy hiểm nhất lên đầu)
+            ->take(5)
+            ->get();
+
+        return view('admin.home.home-list', compact(
+            'totalRevenue',
+            'totalOrders',
+            'totalUsers',
+            'totalProducts',
+            'monthlyRevenue',
+            'topSelling',
+            'slowProducts',
+            'lowStockProducts',
+            'expiringBatches'
+        ));
+    }
+
+    /**
+     * Dashboard dành riêng cho Root.
+     * Giống admin nhưng hiển thị thêm doanh thu (như director).
+     */
+    private function rootDashboard()
+    {
+        $year = now()->year;
+
+        // Doanh thu ẩn với root — set null để view không render thẻ doanh thu và biểu đồ
+        $totalRevenue = null;
+
+        // Mảng 12 tháng toàn 0 — view cần biến này để không lỗi JS chart
+        $monthlyRevenue = array_fill(0, 12, 0);
+
+        $totalOrders  = DB::table('orders')->where('status', '!=', 0)->count();
+        $totalUsers   = DB::table('users')->whereNotIn('role', ['admin', 'root'])->count();
+        $totalProducts = Product::where('status', 1)->count();
+
+        // Top 5 bán chạy
+        $topSelling = DB::table('order_details')
+            ->join('orders', 'order_details.idOrder', '=', 'orders.id')
+            ->join('products', 'order_details.idProduct', '=', 'products.id')
+            ->select(
+                'products.id',
+                'products.title',
+                DB::raw('SUM(order_details.quantity) as total_sold'),
+                DB::raw('SUM(order_details.quantity * order_details.price) as total_revenue')
+            )
+            ->where('orders.status', 4)
+            ->where('orders.created_at', '>=', now()->subDays(30))
+            ->groupBy('products.id', 'products.title')
+            ->orderBy('total_sold', 'desc')
+            ->take(5)
+            ->get();
+
+        // Bán chậm
+        $allActiveProducts = Product::with('festivals')
+            ->where('status', 1)
+            ->orWhere('quantity', '>', 0)
+            ->get();
+
+        $slowItems    = array_values(SaleSpeedHelper::getSlowProducts($allActiveProducts));
+        $slowProducts = array_slice(array_map(function ($item) {
+            $p         = $item->product;
+            $p->sold_30 = $item->sold_after;
+            $p->stock  = $item->imported_qty > 0 ? $item->imported_qty : (int) $item->product->quantity;
+            return $p;
+        }, $slowItems), 0, 5);
+
+        // Sắp hết hạn
+        $todayStr = now()->toDateString();
+        $today365 = now()->addDays(365)->toDateString();
+
+        $expiringBatches = WarehouseStockLog::where('type', 'import')
+            ->whereNotNull('expiry_date')
+            ->whereDate('expiry_date', '>=', $todayStr)
+            ->whereDate('expiry_date', '<=', $today365)
+            ->selectRaw('product_id, expiry_date, SUM(quantity) as total_import')
+            ->groupBy('product_id', 'expiry_date')
+            ->orderBy('expiry_date', 'asc')
+            ->get()
+            ->map(function ($row) {
+                $product = Product::find($row->product_id);
+                if (!$product) return null;
+                $expiryStr = $row->expiry_date instanceof \Carbon\Carbon
+                    ? $row->expiry_date->toDateString()
+                    : (string) $row->expiry_date;
+                return (object) [
+                    'product'     => $product,
+                    'expiry_date' => $expiryStr,
+                    'qty_left'    => (int) $row->total_import,
+                    'days_left'   => (int) now()->diffInDays(\Carbon\Carbon::parse($expiryStr), false),
+                ];
+            })
+            ->filter()->sortBy('days_left')->take(5)->values()->all();
+
+        // Sắp hết kho
+        $lowStockProducts = Product::where('quantity', '>', 0)
+            ->where('quantity', '<', 5)
+            ->orderBy('quantity', 'asc')
             ->take(5)
             ->get();
 

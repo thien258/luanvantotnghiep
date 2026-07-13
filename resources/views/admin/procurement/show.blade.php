@@ -125,6 +125,7 @@
                     <th class="py-2">Brand</th>
                     <th class="py-2">Danh mục</th>
                     <th class="py-2">Nồng độ</th>
+                    <th class="text-center py-2">Tốc độ bán</th>
                     <th class="text-center py-2">Cần nhập</th>
                     <th class="py-2">Ghi chú</th>
                 </tr>
@@ -143,6 +144,16 @@
                     <td class="py-2 text-muted">{{ $item->product?->brand?->name ?? '—' }}</td>
                     <td class="py-2 text-muted">{{ $item->product?->category?->name ?? '—' }}</td>
                     <td class="py-2 text-muted">{{ $item->product?->concentration?->concentration ?? '—' }}</td>
+                    <td class="text-center py-2">
+                        @php $sale = $saleStatusMap[$item->product_id] ?? null; @endphp
+                        @if(($sale['status'] ?? '') === 'fast')
+                            <span class="badge badge-danger rounded-0 px-2 py-1" title="Tỷ lệ bán: {{ $sale['ratio'] }}%">🔥 Bán nhanh</span>
+                        @elseif(($sale['status'] ?? '') === 'slow')
+                            <span class="badge badge-warning rounded-0 px-2 py-1 text-dark" title="Tỷ lệ bán: {{ $sale['ratio'] }}%">🐢 Bán chậm</span>
+                        @else
+                            <span class="text-muted small">—</span>
+                        @endif
+                    </td>
                     <td class="text-center py-2 font-weight-bold text-primary">{{ $item->qty_needed }}</td>
 
                     <td class="py-2 text-muted small">{{ $item->note ?: '—' }}</td>

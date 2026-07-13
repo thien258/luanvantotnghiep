@@ -124,6 +124,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'director';
     }
 
+    /** Kiểm tra user có phải root (toàn quyền) không. */
+    public function isRoot()
+    {
+        return $this->role === 'root';
+    }
+
     /**
      * Kiểm tra user có thuộc một trong các role truyền vào không.
      * Hỗ trợ nhiều role: $user->hasRole('admin', 'staff')

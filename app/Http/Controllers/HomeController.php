@@ -11,7 +11,7 @@ use App\Models\Title;
 use App\Models\Concentration;
 use App\Models\Festival;
 use App\Models\Product;
-use App\Models\Manufacturer;
+use App\Models\ManuFacturer;
 use Illuminate\Support\Facades\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -368,11 +368,10 @@ class HomeController extends Controller
                 ->max('discount') ?? 0;
 
             // Chỉ hiển thị nếu festival đang xem có discount = cao nhất
-            // (bằng nhau cũng OK để tránh trường hợp 2 festival cùng discount)
             return $festival->discount >= $maxActiveDiscount;
         })->values();
 
-        // Filter giá — dùng giá của đúng festival đang xem (không phải discount cao nhất)
+        // Filter giá — dùng giá của đúng festival đang xem
         if ($request->has('min_price') && $request->has('max_price')) {
             $min      = (int) $request->min_price;
             $max      = (int) $request->max_price;
@@ -477,8 +476,6 @@ class HomeController extends Controller
                 ->where('status', 1)
                 ->values();
         }
-      
-    
 
         return view('manufacturer-demo', compact('manufacturer', 'products'));
     }

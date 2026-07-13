@@ -85,7 +85,7 @@ class ProductController extends Controller
             ];
         }
 
-        return view('admin.product.product-list', compact('products', 'expiryMap', 'allProducts', 'slowProductIds'));
+        return view('admin.product.product-list', compact('products', 'expiryMap', 'allProducts', 'slowProductIds', 'saleSpeedMap'));
     }
 
     // =========================================================================

@@ -3,6 +3,43 @@
 
 ---
 
+## [2026-07-10] Thêm Role Root + Activity Log cho Director
+
+### Tổng quan
+Thêm role `root` có toàn quyền (xem hết như admin + doanh thu như director) và hệ thống ghi log tự động để director theo dõi root làm gì.
+
+### File tạo mới
+| File | Mô tả |
+|------|-------|
+| `database/migrations/2026_07_10_093005_create_root_activity_logs_table.php` | Tạo bảng `root_activity_logs` (id, user_id, user_name, user_email, action, created_at) |
+| `app/Models/RootActivityLog.php` | Model cho bảng trên |
+| `app/Http/Middleware/LogRootActivity.php` | Middleware tự động ghi log mọi request của root trong /admin, map URL → mô tả tiếng Việt |
+| `app/Http/Controllers/admin/ActivityLogController.php` | Controller cho director xem log, có filter theo ngày và tên/email |
+| `resources/views/admin/activity-log/index.blade.php` | View bảng log với badge màu theo loại hành động, phân trang 50 dòng |
+
+### File sửa
+| File | Thay đổi |
+|------|----------|
+| `bootstrap/app.php` | Đăng ký middleware alias `log-root` → `LogRootActivity` |
+| `routes/web.php` | Thêm `root` vào middleware group `/admin`, thêm middleware `log-root`, thêm route `GET /admin/activity-log` |
+| `app/Http/Controllers/admin/AdminController.php` | Thêm nhánh `root` → `rootDashboard()` (dashboard đầy đủ có doanh thu) |
+| `app/Http/Controllers/admin/UserController.php` | Thêm `'root'` vào `$validRoles` để admin có thể gán role root |
+| `resources/views/layout/admin.blade.php` | Thêm root vào tất cả `@if` check role trong menu sidebar, thêm link "Lịch sử hoạt động Root" cho director và root |
+
+### Cách dùng
+1. Chạy `php artisan migrate` để tạo bảng `root_activity_logs`
+2. Vào `/admin/user` → đổi role user bất kỳ thành `root`
+3. Đăng nhập bằng tài khoản root → thao tác bình thường trong admin
+4. Đăng nhập bằng director → vào menu "Lịch sử hoạt động Root" để xem log
+
+### Lưu ý
+- Log chỉ ghi khi role = `root`, không ghi các role khác
+- GET không map được trong actionMap → bỏ qua (không ghi)
+- POST/PUT/DELETE không map được → ghi raw URL làm fallback
+
+---
+
+
 ## [2026-06-11] Sửa Validation & Error Display
 
 ---

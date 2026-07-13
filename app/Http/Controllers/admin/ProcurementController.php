@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\admin\SaleSpeedHelper;
 use App\Models\ProcurementRequest;
 use App\Models\ProcurementRequestItem;
 use App\Models\ManuFacturer;
@@ -25,7 +26,7 @@ class ProcurementController extends Controller
     {
       $this->middleware(function ($request, $next) {
         $role = auth()->user()->role;
-        if (!in_array($role, ['admin', 'manufacturer'])) {
+        if (!in_array($role, ['admin', 'manufacturer', 'director', 'root'])) {
             abort(403);
         }
         return $next($request);
@@ -122,7 +123,12 @@ class ProcurementController extends Controller
             }
         }
 
-        return view('admin.procurement.show', compact('procRequest'));
+        // Tính trạng thái bán nhanh/chậm cho các SP trong yêu cầu
+        $productIds   = $procRequest->items->pluck('product_id')->filter()->all();
+        $products     = Product::whereIn('id', $productIds)->get();
+        $saleStatusMap = SaleSpeedHelper::getStatusMap($products);
+
+        return view('admin.procurement.show', compact('procRequest', 'saleStatusMap'));
     }
 
     // Đóng yêu cầu — không nhận báo giá nữa

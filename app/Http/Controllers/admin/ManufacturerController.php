@@ -5,12 +5,23 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ManuFacturer;
-use App\Models\User;
 
+/**
+ * ManufacturerController — Quản lý danh sách nhà sản xuất.
+ *
+ * Luồng tạo NSX:
+ *   NSX tự đăng ký tài khoản bình thường → admin vào trang User đổi role = 'manufacturer'
+ *   → UserController::update() tự động tạo record Manufacturer và liên kết user_id
+ *
+ * Controller này chỉ xử lý:
+ *   - Xem danh sách NSX
+ *   - Sửa thông tin NSX (tên, SĐT, địa chỉ)
+ *   - Xóa NSX
+ */
 class ManufacturerController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Danh sách tất cả nhà sản xuất.
      */
     public function index()
     {
@@ -19,66 +30,7 @@ class ManufacturerController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('admin.manufacturer.add');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'phone'    => 'nullable|string|max:20',
-            'address'  => 'nullable|string|max:500',
-            'email'    => 'nullable|email|unique:users,email',
-            'password' => 'nullable|min:8',
-        ], [
-            'email.unique' => 'Email này đã được dùng cho tài khoản khác.',
-        ]);
-
-        $manufacturer = ManuFacturer::create([
-            'name'    => $request->name,
-            'phone'   => $request->phone,
-            'address' => $request->address,
-        ]);
-
-        // Tạo tài khoản nếu email được điền
-        if ($request->filled('email') && $request->filled('password')) {
-            $user = User::create([
-                'name'              => $request->name,
-                'email'             => $request->email,
-                'phone'             => $request->phone ?? '',
-                'address'           => $request->address ?? '',
-                'password'          => bcrypt($request->password),
-                'role'              => 'manufacturer',
-                'email_verified_at' => now(),
-            ]);
-            $manufacturer->update(['user_id' => $user->id]);
-        }
-
-        return redirect()->route('admin.manufacturer.index')
-            ->with('success', 'Đã tạo NSX' . ($request->filled('email') ? ' và tài khoản đăng nhập' : '') . ' thành công.');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $mainufacturer = ManuFacturer::with('user')->find($id);
-        if (!$mainufacturer) {
-            return redirect()->route('admin.manufacturer.index')->with('error', 'Manufacturer not found.');
-        }
-        return view('admin.manufacturer.edit', compact('mainufacturer'));
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Cập nhật thông tin NSX (tên, SĐT, địa chỉ).
      */
     public function update(Request $request, string $id)
     {
@@ -100,46 +52,12 @@ class ManufacturerController extends Controller
             'address' => $request->address,
         ]);
 
-        return redirect()->route('admin.manufacturer.index')->with('success', 'Manufacturer updated successfully.');
+        return redirect()->route('admin.manufacturer.index')->with('success', 'Cập nhật NSX thành công.');
     }
 
     /**
-     * Tạo tài khoản đăng nhập cho NSX và liên kết với manufacturer.
-     */
-    public function createAccount(Request $request, string $id)
-    {
-        $manufacturer = ManuFacturer::findOrFail($id);
-
-        // Nếu đã có tài khoản rồi thì không tạo thêm
-        if ($manufacturer->user_id) {
-            return back()->with('error', 'NSX này đã có tài khoản đăng nhập rồi.');
-        }
-
-        $request->validate([
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-        ], [
-            'email.unique' => 'Email này đã được dùng cho tài khoản khác.',
-        ]);
-
-        $user = User::create([
-            'name'               => $manufacturer->name,
-            'email'              => $request->email,
-            'phone'              => $manufacturer->phone ?? '',
-            'address'            => $manufacturer->address ?? '',
-            'password'           => bcrypt($request->password),
-            'role'               => 'manufacturer',
-            'email_verified_at'  => now(),
-        ]);
-
-        // Liên kết user với manufacturer
-        $manufacturer->update(['user_id' => $user->id]);
-
-        return back()->with('success', 'Đã tạo tài khoản ' . $request->email . ' cho NSX ' . $manufacturer->name . '.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
+     * Xóa nhà sản xuất.
+     * Lưu ý: không xóa User liên kết — chỉ xóa record Manufacturer.
      */
     public function destroy(string $id)
     {
@@ -147,7 +65,7 @@ class ManufacturerController extends Controller
 
         if ($manufacturer) {
             $manufacturer->delete();
-            return redirect()->route('admin.manufacturer.index')->with('success', 'Manufacturer deleted successfully.');
+            return redirect()->route('admin.manufacturer.index')->with('success', 'Đã xóa NSX thành công.');
         }
 
         return redirect()->route('admin.manufacturer.index')->with('error', 'Manufacturer not found.');

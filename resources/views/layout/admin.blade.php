@@ -28,18 +28,22 @@
 
             @php $role = auth()->user()->role; @endphp
 
-            {{-- Dashboard: admin và director --}}
-            @if(in_array($role, ['admin', 'director']))
+            {{-- Dashboard: admin, director và root --}}
+            @if(in_array($role, ['admin', 'director', 'root']))
             <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{ route('admin.dashboard') }}">
                     <i class="fa-solid fa-chart-line text-dark mr-3"></i>
-                    <span>{{ $role === 'director' ? 'Báo cáo Doanh thu' : 'Dashboard Overview' }}</span>
-                </a>
+                    <span>
+                        @if($role === 'director') Báo cáo Doanh thu
+                        @elseif($role === 'root') Dashboard (Root)
+                        @else Dashboard Overview
+                        @endif
+                    </span>                </a>
             </li>
             @endif
 
-            {{-- ── DROPDOWN DANH MỤC & SẢN PHẨM: chỉ admin ────────── --}}
-            @if($role === 'admin')
+            {{-- ── DROPDOWN DANH MỤC & SẢN PHẨM: admin và root ────────── --}}
+            @if(in_array($role, ['admin', 'root']))
             @php
                 $catalogActive = request()->routeIs('admin.category.*')
                               || request()->routeIs('admin.brand.*')
@@ -89,8 +93,8 @@
             </li>
             @endif
 
-            {{-- ── DROPDOWN ORDER & KHO: admin và warehouse ─────────── --}}
-            @if(in_array($role, ['admin', 'warehouse']))
+            {{-- ── DROPDOWN ORDER & KHO: admin, warehouse và root ─────────── --}}
+            @if(in_array($role, ['admin', 'warehouse', 'root']))
             @php
                 $orderKhoActive = request()->routeIs('admin.orders.*')
                                || request()->routeIs('admin.product.warehouse.index')
@@ -146,8 +150,8 @@
             </li>
             @endif
 
-            {{-- ── DROPDOWN NSX: admin, manufacturer, warehouse ──────── --}}
-            @if(in_array($role, ['admin', 'manufacturer', 'warehouse']))
+            {{-- ── DROPDOWN NSX: admin, manufacturer, warehouse, root ──────── --}}
+            @if(in_array($role, ['admin', 'manufacturer', 'warehouse', 'root']))
             @php
                 $nsxActive = request()->routeIs('admin.supplier-offers.*')
                           || request()->routeIs('admin.purchase-orders.*')
@@ -166,8 +170,8 @@
                 <div class="collapse {{ $nsxActive ? 'show' : '' }}" id="nsxSubmenu">
                     <ul class="nav flex-column pl-4 pb-1">
 
-                        {{-- Báo giá NSX: admin và manufacturer --}}
-                        @if(in_array($role, ['admin', 'manufacturer']))
+                        {{-- Báo giá NSX: admin, manufacturer và root --}}
+                        @if(in_array($role, ['admin', 'manufacturer', 'root']))
                         <li class="nav-item {{ request()->routeIs('admin.supplier-offers.*') ? 'active font-weight-bold' : '' }}">
                             <a class="nav-link text-dark py-1 small" href="{{ route('admin.supplier-offers.index') }}">
                                 <i class="fa-solid fa-file-invoice text-muted mr-2"></i>Báo giá NSX
@@ -182,8 +186,8 @@
                             </a>
                         </li>
 
-                        {{-- Yêu cầu nhập hàng: admin và manufacturer --}}
-                        @if(in_array($role, ['admin', 'manufacturer']))
+                        {{-- Yêu cầu nhập hàng: admin, manufacturer và root --}}
+                        @if(in_array($role, ['admin', 'manufacturer', 'root']))
                         <li class="nav-item {{ request()->routeIs('admin.procurement.*') ? 'active font-weight-bold' : '' }}">
                             <a class="nav-link text-dark py-1 small" href="{{ route('admin.procurement.index') }}">
                                 <i class="fa-solid fa-bullhorn text-muted mr-2"></i>Yêu cầu nhập hàng
@@ -196,8 +200,8 @@
             </li>
             @endif
 
-            {{-- Contact, Title, User, Footer: chỉ admin --}}
-            @if($role === 'admin')
+            {{-- Contact, Title, User, Footer: admin và root --}}
+            @if(in_array($role, ['admin', 'root']))
             <li class="nav-item {{ request()->routeIs('admin.contacts.index') ? 'active font-weight-bold' : '' }}">
                 <a class="nav-link text-dark" href="{{ route('admin.contacts.index') }}">
                     <i class="fa-regular fa-circle-question text-dark mr-3"></i>
@@ -224,6 +228,16 @@
             </li>
             @endif
 
+            {{-- Activity Log: chỉ director xem, root không thấy --}}
+            @if($role === 'director')
+            <li class="nav-item {{ request()->routeIs('admin.activity-log.index') ? 'active font-weight-bold' : '' }}">
+                <a class="nav-link text-dark" href="{{ route('admin.activity-log.index') }}">
+                    <i class="fa-solid fa-clock-rotate-left text-dark mr-3"></i>
+                    <span>Lịch sử hoạt động Root</span>
+                </a>
+            </li>
+            @endif
+
             <hr class="sidebar-divider d-none d-md-block mt-auto mb-0">
 
             <li class="nav-item p-3 d-flex align-items-center">
@@ -233,6 +247,7 @@
                         @php
                             $roleLabel = [
                                 'admin'        => 'Quản trị viên',
+                                'root'         => 'Root',
                                 'director'     => 'Giám đốc',
                                 'warehouse'    => 'Nhân viên kho',
                                 'manufacturer' => 'Nhà sản xuất',

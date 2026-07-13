@@ -261,7 +261,6 @@
                                                 <span class="badge rounded-0 text-white" style="font-size:0.6rem; background:#dc3545;">⏰ HSD còn {{ $pDaysLeft }} ngày</span>
                                             @endif
                                             @if($isDoubleWarning)
-                                                <span class="badge rounded-0 text-white" style="font-size:0.6rem; background:#6f42c1; display:block; width:100%;">⚠️ Bán chậm + sắp hết hạn — cân nhắc kỹ trước khi đặt</span>
                                             @endif
                                         </div>
                                     </td>

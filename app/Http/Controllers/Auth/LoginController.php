@@ -42,6 +42,9 @@ protected function redirectTo()
 {
    $role = auth()->user()->role;
 
+    if ($role === 'root') {
+        return '/admin';  // root → dashboard đầy đủ
+    }
     if ($role === 'admin') {
         return '/admin';
     }
@@ -55,6 +58,6 @@ protected function redirectTo()
         return '/admin';
     }
 
-    return '/';  // /
+    return '/';  // customer → trang chủ
 }
 }

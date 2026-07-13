@@ -48,7 +48,7 @@ class WarehouseController extends Controller
         $this->middleware(function ($request, $next) {
             $role = auth()->user()->role;
             // Chỉ admin và warehouse vào được
-            if (!in_array($role, ['admin', 'warehouse'])) {
+            if (!in_array($role, ['admin', 'warehouse', 'director', 'root'])) {
                 abort(403);
             }
             return $next($request);

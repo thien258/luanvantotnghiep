@@ -34,7 +34,7 @@ class PurchaseOrderController extends Controller
     {
         $this->middleware(function ($request, $next) {
             $role = auth()->user()->role;
-            if (!in_array($role, ['admin', 'warehouse', 'manufacturer'])) {
+            if (!in_array($role, ['admin', 'warehouse', 'manufacturer', 'director', 'root'])) {
                 abort(403);
             }
             return $next($request);

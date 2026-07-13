@@ -28,6 +28,10 @@ class OrderAdminController extends Controller
     {
         $this->middleware(function ($request, $next) {
             $role = auth()->user()->role;
+            // director và root có toàn quyền xem mọi trang đơn hàng
+            if (in_array($role, ['director', 'root'])) {
+                return $next($request);
+            }
             // orders-damaged: admin và warehouse vào được
             // orders thường: chỉ warehouse
             if ($role === 'admin' && request()->routeIs('admin.orders.damaged')) {

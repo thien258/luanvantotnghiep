@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UserAddressController;
 use App\Http\Controllers\admin\WarehouseController;
+use App\Http\Controllers\admin\ActivityLogController;
 
 
 // =========================================================================
@@ -134,7 +135,7 @@ Route::middleware('auth')->group(function () {
 // Kiểm tra role='admin' thực hiện trong AdminController::__construct()
 // =========================================================================
 
-Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse,manufacturer,director'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse,manufacturer,director,root','log-root'])->group(function () {
 
     // Dashboard — trang tổng quan thống kê
     Route::get('/', [App\Http\Controllers\admin\AdminController::class, 'index'])->name('dashboard');
@@ -214,4 +215,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse
     Route::resource('footer',  FooterController::class);
     Route::resource('title',   TitleController::class);
     Route::resource('contacts', ContactAdminController::class);
+
+    // ── Activity Log — chỉ director xem, root KHÔNG được vào ───────────
+    Route::get('activity-log', [ActivityLogController::class, 'index'])
+        ->middleware('role:director')  // chỉ director, không cho root vào xem log của chính mình
+        ->name('activity-log.index');
 });
