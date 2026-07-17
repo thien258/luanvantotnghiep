@@ -96,13 +96,20 @@ class BrandController extends Controller
      */
     public function destroy(string $id)
     {
-        //
-                $brand = Brand::find($id);
-                $brand->delete();
-                if ($brand)          
-                return redirect()->route('admin.brand.index');
-            else {
-                return back();
-            }
+        $brand = Brand::find($id);
+        $brand->delete();
+        if ($brand)
+            return redirect()->route('admin.brand.index');
+        else {
+            return back();
+        }
+    }
+
+    public function toggleStatus(string $id)
+    {
+        $brand = Brand::findOrFail($id);
+        $brand->status = $brand->status == 1 ? 0 : 1;
+        $brand->save();
+        return redirect()->back()->with('success', "Đã " . ($brand->status ? 'bật' : 'tắt') . " thương hiệu {$brand->name}.");
     }
 }

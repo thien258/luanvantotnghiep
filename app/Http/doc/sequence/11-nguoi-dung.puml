@@ -1,0 +1,43 @@
+@startuml
+title Sơ đồ tuần tự - Quản lý Người dùng
+
+actor "Admin" as A
+participant ":B_NguoiDung" as B
+participant ":C_UserAdmin" as C
+participant ":E_User" as EU
+participant ":E_Manufacturer" as EM
+
+== Đổi quyền hạn ==
+A -> B : 1: Chọn người dùng, chọn quyền mới
+A -> B : 2: Nhấn Lưu
+B -> C : 3: Cập nhật quyền (user, role)
+C -> C : 4: Kiểm tra admin không tự đổi quyền mình
+
+alt Admin không tự đổi quyền mình
+    C -> EU : 5: Cập nhật quyền người dùng
+    EU --> C : 6: Trả về kết quả
+
+    alt Quyền = Nhà sản xuất
+        C -> EM : 7: Tạo hoặc lấy hồ sơ nhà sản xuất
+        EM --> C : 8: Trả về kết quả
+    else Quyền khác
+        C -> EM : 9: Hủy liên kết nhà sản xuất
+        EM --> C : 10: Trả về kết quả
+    end
+
+    C --> A : 11: Đổi quyền thành công
+else Admin tự đổi quyền mình
+    C --> A : 12: Không được phép
+end
+
+== Xóa người dùng ==
+A -> B : 1: Chọn người dùng và nhấn Xóa
+B -> C : 2: Xóa người dùng (id)
+C -> EU : 3: Tìm người dùng theo id
+EU --> C : 4: Trả về người dùng
+C -> EU : 5: Xóa chi tiết đơn hàng của người dùng
+C -> EU : 6: Xóa đơn hàng của người dùng
+C -> EU : 7: Xóa tài khoản người dùng
+EU --> C : 8: Trả về kết quả
+C --> A : 9: Chuyển về danh sách người dùng
+@enduml

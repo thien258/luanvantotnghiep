@@ -1,0 +1,51 @@
+@startuml
+title Sơ đồ tuần tự - Quản lý Đơn đặt hàng NSX
+
+actor "Admin" as A
+actor "Nhà sản xuất" as NSX
+actor "NV Kho" as NV
+participant ":B_DonDatHang" as B
+participant ":C_PurchaseOrder" as C
+participant ":E_PurchaseOrder" as EPO
+participant ":E_SupplierOffer" as ESO
+participant ":E_ProcRequest" as EPR
+
+== Tạo đơn đặt hàng ==
+A -> B : 1: Vào trang chi tiết báo giá
+A -> B : 2: Tick chọn sản phẩm, nhập số lượng
+A -> B : 3: Nhập ngày dự kiến nhận và nhấn Đặt hàng
+B -> C : 4: store(offer_id, items, expected_date)
+C -> C : 5: validate(data)
+
+alt Có sản phẩm được chọn
+    C -> EPO : 6: createPurchaseOrder(code, items)
+    EPO --> C : 7: return(order)
+    C -> ESO : 8: updateStatus(offer_id, accepted)
+    C -> EPR : 9: closeRequest(request_id)
+    C --> A : 10: Tạo đơn thành công
+else Số lượng < 1
+    C --> A : 11: Thông báo lỗi
+end
+
+== Cập nhật trạng thái (NSX) ==
+NSX -> B : 1: Vào trang chi tiết đơn
+NSX -> B : 2: Nhấn Xác nhận đơn hàng
+B -> C : 3: updateStatus(id, confirmed)
+C -> EPO : 4: updateStatus(id, confirmed)
+EPO --> C : 5: return
+C --> NSX : 6: Trạng thái: Đã xác nhận
+
+NSX -> B : 7: Nhấn Bắt đầu giao hàng
+B -> C : 8: updateStatus(id, delivering)
+C -> EPO : 9: updateStatus(id, delivering)
+EPO --> C : 10: return
+C --> NSX : 11: Trạng thái: Đang giao
+
+== Xác nhận nhận hàng (NV Kho) ==
+NV -> B : 1: Vào trang chi tiết đơn (status=delivering)
+NV -> B : 2: Nhấn Xác nhận đã nhận hàng
+B -> C : 3: receive(id)
+C -> EPO : 4: updateStatus(id, received)
+EPO --> C : 5: return
+C --> NV : 6: Đã xác nhận nhận hàng (cần nhập kho riêng)
+@enduml

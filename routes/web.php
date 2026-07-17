@@ -212,7 +212,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse
 
     // ── Người dùng & Nội dung ───────────────────────────────────────
     Route::resource('user',    UserController::class);
-    Route::resource('footer',  FooterController::class);
+    Route::patch('user/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('user.toggleStatus');    Route::resource('footer',  FooterController::class);
     Route::resource('title',   TitleController::class);
     Route::resource('contacts', ContactAdminController::class);
 

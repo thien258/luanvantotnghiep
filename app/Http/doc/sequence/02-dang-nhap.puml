@@ -1,0 +1,32 @@
+@startuml
+title Sơ đồ tuần tự - Đăng nhập
+
+actor "Người dùng" as KH
+participant ":B_DangNhap" as B
+participant ":C_DangNhap" as C
+participant ":E_User" as E
+
+KH -> B : 1: Truy cập trang đăng nhập
+B --> KH : 2: formDangNhap()
+KH -> B : 3: Nhập email và mật khẩu
+KH -> B : 4: Nhấn nút Đăng nhập
+B -> C : 5: login(email, password)
+C -> E : 6: findUser(email)
+E --> C : 7: return(user)
+
+alt Thông tin hợp lệ
+    C -> C : 8: kiemTraMatKhau(password)
+    C -> C : 9: xacDinhRole(user)
+    alt role = admin/root/director
+        C --> KH : 10: Chuyển hướng /admin
+    else role = warehouse
+        C --> KH : 10: Chuyển hướng /admin/orders
+    else role = manufacturer
+        C --> KH : 10: Chuyển hướng /admin/supplier-offers
+    else role = customer
+        C --> KH : 10: Chuyển hướng trang chủ
+    end
+else Thông tin không hợp lệ
+    C --> KH : 11: Thông báo lỗi, quay lại form
+end
+@enduml

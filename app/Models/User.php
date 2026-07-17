@@ -6,6 +6,9 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Title;
+use App\Models\Footer;
+use App\Models\Contact;
 
 /**
  * User — Tài khoản người dùng trong hệ thống.
@@ -68,6 +71,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'address',        // Địa chỉ mặc định
         'role',           // Vai trò: 'admin' | 'staff' | 'customer'
         'remember_token', // Token ghi nhớ đăng nhập
+        'is_active',      // Trạng thái tài khoản: true = hoạt động, false = bị tắt
     ];
 
     /**
@@ -163,5 +167,29 @@ class User extends Authenticatable implements MustVerifyEmail
         // 'idUser' là tên cột khóa ngoại ở bảng orders
         // 'id' là khóa chính của bảng users
         return $this->hasMany(Order::class, 'idUser', 'id');
+    }
+
+    /**
+     * Quan hệ: 1 admin có thể tạo nhiều slide banner (title).
+     */
+    public function titles()
+    {
+        return $this->hasMany(Title::class, 'created_by', 'id');
+    }
+
+    /**
+     * Quan hệ: 1 admin có thể tạo nhiều footer.
+     */
+    public function footers()
+    {
+        return $this->hasMany(Footer::class, 'created_by', 'id');
+    }
+
+    /**
+     * Quan hệ: 1 user (đã đăng nhập) có thể gửi nhiều liên hệ.
+     */
+    public function contacts()
+    {
+        return $this->hasMany(Contact::class, 'user_id', 'id');
     }
 }

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1100" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+
+    <!-- Start -->
+    <mxCell id="start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="30" y="320" width="30" height="30" as="geometry"/></mxCell>
+
+    <mxCell id="a1" value="Chọn sản phẩm trong giỏ" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="100" y="300" width="150" height="60" as="geometry"/></mxCell>
+    <mxCell id="a2" value="Hiển thị trang thanh toán" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="300" y="300" width="150" height="60" as="geometry"/></mxCell>
+    <mxCell id="a3" value="Nhập thông tin giao hàng" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="300" y="440" width="150" height="60" as="geometry"/></mxCell>
+    <mxCell id="a4" value="Chọn phương thức thanh toán" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="500" y="440" width="160" height="60" as="geometry"/></mxCell>
+    <mxCell id="a5" value="Nhấn Đặt hàng" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="710" y="440" width="130" height="60" as="geometry"/></mxCell>
+    <mxCell id="a6" value="Kiểm tra thông tin" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="890" y="440" width="140" height="60" as="geometry"/></mxCell>
+
+    <!-- Decision hợp lệ -->
+    <mxCell id="d1" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" vertex="1" parent="1"><mxGeometry x="1090" y="420" width="80" height="80" as="geometry"/></mxCell>
+
+    <!-- Tạo đơn hàng -->
+    <mxCell id="a7" value="Tạo đơn hàng" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1240" y="320" width="130" height="60" as="geometry"/></mxCell>
+    <mxCell id="a8" value="Lưu chi tiết đơn hàng" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1240" y="420" width="150" height="60" as="geometry"/></mxCell>
+    <mxCell id="a9" value="Xóa sản phẩm khỏi giỏ hàng" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1240" y="520" width="160" height="60" as="geometry"/></mxCell>
+
+    <!-- Decision phương thức -->
+    <mxCell id="d2" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" vertex="1" parent="1"><mxGeometry x="1470" y="420" width="80" height="80" as="geometry"/></mxCell>
+
+    <!-- ===== Nhánh Thanh toán qua PayOS (trên) ===== -->
+    <mxCell id="a10" value="Chuyển hướng sang trang PayOS" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1630" y="160" width="190" height="60" as="geometry"/></mxCell>
+    <mxCell id="a11" value="Khách thanh toán trên PayOS" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1630" y="250" width="190" height="60" as="geometry"/></mxCell>
+    <mxCell id="a12" value="PayOS gửi webhook xác nhận" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1630" y="340" width="190" height="60" as="geometry"/></mxCell>
+    <mxCell id="a13" value="Cập nhật trạng thái đơn hàng" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1630" y="430" width="190" height="60" as="geometry"/></mxCell>
+    <mxCell id="a13b" value="Gửi email xác nhận đơn hàng" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1630" y="520" width="190" height="60" as="geometry"/></mxCell>
+    <mxCell id="a13c" value="Chuyển hướng về trang thành công" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1630" y="610" width="190" height="60" as="geometry"/></mxCell>
+
+    <!-- End PayOS -->
+    <mxCell id="end1" value="" style="ellipse;aspect=fixed;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" vertex="1" parent="1"><mxGeometry x="1878" y="628" width="34" height="34" as="geometry"/></mxCell>
+    <mxCell id="end1b" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1884" y="634" width="22" height="22" as="geometry"/></mxCell>
+
+    <!-- ===== Nhánh COD (dưới) ===== -->
+    <mxCell id="a14" value="Gửi email xác nhận đơn hàng (kèm mã QR thanh toán)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1630" y="760" width="210" height="60" as="geometry"/></mxCell>
+    <mxCell id="a15" value="Chuyển hướng về trang chủ" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1630" y="850" width="180" height="60" as="geometry"/></mxCell>
+
+    <!-- End COD bình thường -->
+    <mxCell id="end2" value="" style="ellipse;aspect=fixed;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" vertex="1" parent="1"><mxGeometry x="1878" y="868" width="34" height="34" as="geometry"/></mxCell>
+    <mxCell id="end2b" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1884" y="874" width="22" height="22" as="geometry"/></mxCell>
+
+    <!-- ===== Nhánh COD → khách quét QR (tuỳ chọn, dashed) ===== -->
+    <mxCell id="a16" value="Khách quét mã QR trong email" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fontColor=#666666;" vertex="1" parent="1"><mxGeometry x="1630" y="980" width="200" height="60" as="geometry"/></mxCell>
+    <mxCell id="a17" value="PayOS gửi webhook xác nhận" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fontColor=#666666;" vertex="1" parent="1"><mxGeometry x="1880" y="980" width="190" height="60" as="geometry"/></mxCell>
+    <mxCell id="a18" value="Cập nhật trạng thái + phương thức thanh toán" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fontColor=#666666;" vertex="1" parent="1"><mxGeometry x="2130" y="980" width="210" height="60" as="geometry"/></mxCell>
+    <mxCell id="a19" value="Gửi email xác nhận đã thanh toán" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#999999;fontColor=#666666;" vertex="1" parent="1"><mxGeometry x="2130" y="1060" width="210" height="60" as="geometry"/></mxCell>
+
+    <!-- End COD quét QR -->
+    <mxCell id="end3" value="" style="ellipse;aspect=fixed;fillColor=#FFFFFF;strokeColor=#999999;strokeWidth=3;" vertex="1" parent="1"><mxGeometry x="2200" y="1150" width="34" height="34" as="geometry"/></mxCell>
+    <mxCell id="end3b" value="" style="ellipse;aspect=fixed;fillColor=#999999;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="2206" y="1156" width="22" height="22" as="geometry"/></mxCell>
+
+    <!-- Arrows chính -->
+    <mxCell id="e1" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="start" target="a1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a1" target="a2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a2" target="a3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e4" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a3" target="a4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e5" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a4" target="a5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e6" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a5" target="a6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e7" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a6" target="d1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- Không hợp lệ → quay lại -->
+    <mxCell id="e8" value="Không hợp lệ" style="endArrow=block;endFill=1;html=1;exitX=0.5;exitY=1;" edge="1" source="d1" target="a3" parent="1">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1130" y="640"/><mxPoint x="375" y="640"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- Hợp lệ → tạo đơn -->
+    <mxCell id="e9" value="Hợp lệ" style="endArrow=block;endFill=1;html=1;" edge="1" source="d1" target="a7" parent="1">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1130" y="350"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="e10" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a7" target="a8" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e11" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a8" target="a9" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e12" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a9" target="d2" parent="1">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1320" y="550"/><mxPoint x="1510" y="550"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- Nhánh PayOS -->
+    <mxCell id="e13" value="Thanh toán qua PayOS" style="endArrow=block;endFill=1;html=1;" edge="1" source="d2" target="a10" parent="1">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1510" y="190"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="e14" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a10" target="a11" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e15" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a11" target="a12" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e16" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a12" target="a13" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e16b" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a13" target="a13b" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e16c" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a13b" target="a13c" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e17" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a13c" target="end1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- Nhánh COD chính -->
+    <mxCell id="e18" value="COD (thanh toán khi nhận hàng)" style="endArrow=block;endFill=1;html=1;" edge="1" source="d2" target="a14" parent="1">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1510" y="790"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="e19" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a14" target="a15" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e20" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a15" target="end2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- Nhánh COD → khách quét QR (tuỳ chọn, dashed) -->
+    <mxCell id="e21" value="Khách quét QR trong mail (tuỳ chọn)" style="endArrow=block;endFill=1;html=1;dashed=1;strokeColor=#999999;fontColor=#666666;" edge="1" source="a14" target="a16" parent="1">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1735" y="820"/><mxPoint x="1735" y="1010"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="e22" value="" style="endArrow=block;endFill=1;html=1;dashed=1;strokeColor=#999999;" edge="1" source="a16" target="a17" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e23" value="" style="endArrow=block;endFill=1;html=1;dashed=1;strokeColor=#999999;" edge="1" source="a17" target="a18" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e24" value="" style="endArrow=block;endFill=1;html=1;dashed=1;strokeColor=#999999;" edge="1" source="a18" target="a19" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e25" value="" style="endArrow=block;endFill=1;html=1;dashed=1;strokeColor=#999999;" edge="1" source="a19" target="end3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <mxCell id="cap" value="Hình 3-x Sơ đồ hoạt động đặt hàng của khách hàng" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=13;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="800" y="1060" width="600" height="30" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

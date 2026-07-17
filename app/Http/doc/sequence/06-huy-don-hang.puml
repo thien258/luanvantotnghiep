@@ -1,0 +1,26 @@
+@startuml
+title Sơ đồ tuần tự - Hủy Đơn hàng
+
+actor "Khách hàng" as KH
+participant ":B_LichSu" as B
+participant ":C_Order" as C
+participant ":E_Order" as EO
+participant ":E_Cart" as EC
+
+KH -> B : 1: Vào trang lịch sử đơn hàng
+KH -> B : 2: Chọn đơn hàng cần hủy
+KH -> B : 3: Nhấn Hủy đơn hàng
+B -> C : 4: Hủy đơn hàng (id)
+C -> EO : 5: Tìm đơn hàng hợp lệ (id, userId, trạng thái = Đã đặt)
+EO --> C : 6: Trả về đơn hàng
+
+alt Đơn hàng hợp lệ (trạng thái = Đã đặt)
+    C -> EC : 7: Hoàn sản phẩm về giỏ hàng
+    EC --> C : 8: Trả về kết quả
+    C -> EO : 9: Xóa đơn hàng
+    EO --> C : 10: Trả về kết quả
+    C --> KH : 11: Hủy thành công, chuyển về giỏ hàng
+else Đơn đã xuất kho hoặc đang giao
+    C --> KH : 12: Không thể hủy đơn hàng này
+end
+@enduml

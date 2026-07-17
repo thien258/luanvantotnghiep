@@ -1,0 +1,42 @@
+@startuml
+title Sơ đồ tuần tự - Quản lý Danh mục
+
+actor "Admin" as A
+participant ":B_DanhMuc" as B
+participant ":C_Category" as C
+participant ":E_Category" as E
+
+== Thêm danh mục ==
+A -> B : 1: Nhấn Thêm danh mục
+B --> A : 2: formThem()
+A -> B : 3: Nhập tên và trạng thái
+A -> B : 4: Nhấn Lưu
+B -> C : 5: Lưu danh mục mới
+C -> C : 6: Kiểm tra dữ liệu
+alt Hợp lệ
+    C -> E : 7: Thêm danh mục vào CSDL
+    E --> C : 8: Trả về kết quả
+    C --> A : 9: Chuyển về danh sách
+else Không hợp lệ
+    C --> A : 10: Thông báo lỗi
+end
+
+== Chỉnh sửa danh mục ==
+A -> B : 1: Chọn danh mục và nhấn Sửa
+B -> C : 2: Tải trang chỉnh sửa
+C -> E : 3: Tìm danh mục theo id
+E --> C : 4: Trả về danh mục
+C --> A : 5: Hiển thị form chỉnh sửa
+A -> B : 6: Chỉnh sửa và nhấn Lưu
+B -> C : 7: Cập nhật danh mục (id, dữ liệu)
+C -> E : 8: Lưu thay đổi danh mục
+E --> C : 9: Trả về kết quả
+C --> A : 10: Chuyển về danh sách
+
+== Xóa danh mục ==
+A -> B : 1: Chọn danh mục và nhấn Xóa
+B -> C : 2: Xóa danh mục (id)
+C -> E : 3: Xóa danh mục khỏi CSDL
+E --> C : 4: Trả về kết quả
+C --> A : 5: Chuyển về danh sách
+@enduml

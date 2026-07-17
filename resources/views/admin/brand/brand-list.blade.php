@@ -50,7 +50,7 @@
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li>
+                            {{-- <li>
                                 <a class="dropdown-item text-danger" href="#" onclick="event.preventDefault(); if(confirm('Bạn có chắc chắn muốn xóa thương hiệu: {{ $object->name }}?')) { document.getElementById('brand-delete-{{ $object->id }}').submit(); }">
                                     <i class="far fa-trash-alt me-2"></i> Xóa
                                 </a>
@@ -58,7 +58,7 @@
                                     {{ csrf_field() }}
                                     {{ method_field('delete') }}
                                 </form>
-                            </li>
+                            </li> --}}
                         </ul>
                     </div>
                 </td>

@@ -1,0 +1,45 @@
+    @startuml
+    title Sơ đồ tuần tự - Quản lý Yêu cầu Thu mua
+
+    actor "Admin" as A
+    actor "Nhà sản xuất" as NSX
+    participant ":B_YeuCau" as B
+    participant ":C_Procurement" as C
+    participant ":E_ProcRequest" as EP
+    participant ":E_SupplierOffer" as ES
+
+    == Tạo yêu cầu thu mua ==
+    A -> B : 1: Chọn sản phẩm, nhấn Tạo yêu cầu
+    A -> B : 2: Nhập số lượng gợi ý, hạn chót
+    A -> B : 3: Nhấn Đăng yêu cầu
+    B -> C : 4: Tạo yêu cầu thu mua (ds sản phẩm, số lượng gợi ý, hạn chót)
+    C -> C : 5: Kiểm tra dữ liệu
+
+    alt Có sản phẩm được chọn
+        C -> EP : 6: Tạo yêu cầu thu mua (mã, danh sách SP)
+        EP --> C : 7: Trả về yêu cầu
+        C --> A : 8: Chuyển đến trang chi tiết yêu cầu
+    else Không chọn sản phẩm
+        C --> A : 9: Thông báo lỗi
+    end
+
+    == Gửi báo giá (NSX) ==
+    NSX -> B : 1: Xem chi tiết yêu cầu
+    B -> C : 2: show(id)
+    C -> EP : 3: findRequest(id)
+    EP --> C : 4: return(request)
+    C --> NSX : 5: Hiển thị danh sách sản phẩm cần
+
+    NSX -> B : 6: Tải file mẫu báo giá
+    NSX -> B : 7: Upload file báo giá đã điền
+    B -> C : 8: uploadOffer(file, manufacturer_id)
+    C -> C : 9: readFile(file)
+
+    alt File có dữ liệu
+        C -> ES : 10: createOffer(code, items)
+        ES --> C : 11: return
+        C --> NSX : 12: Đã gửi báo giá thành công
+    else File không có dữ liệu
+        C --> NSX : 13: Thông báo lỗi
+    end
+    @enduml

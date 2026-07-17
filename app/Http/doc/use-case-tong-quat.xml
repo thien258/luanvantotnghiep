@@ -1,0 +1,70 @@
+<mxGraphModel dx="1422" dy="762" grid="0" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+
+    <!-- Khung System -->
+    <mxCell id="sys" value="System" style="swimlane;startSize=25;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;fontColor=#FF0000;" vertex="1" parent="1">
+      <mxGeometry x="320" y="30" width="220" height="730" as="geometry"/>
+    </mxCell>
+
+    <!-- Use cases bên trong System -->
+    <mxCell id="uc1"  value="Quản lý tài khoản"   style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="40"  width="150" height="45" as="geometry"/></mxCell>
+    <mxCell id="uc2"  value="Quản lý danh mục"    style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="100" width="150" height="45" as="geometry"/></mxCell>
+    <mxCell id="uc3"  value="Quản lý sản phẩm"    style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="160" width="150" height="45" as="geometry"/></mxCell>
+    <mxCell id="uc4"  value="Quản lý nhập hàng"   style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="220" width="150" height="45" as="geometry"/></mxCell>
+    <mxCell id="uc5"  value="Quản lý đơn hàng"    style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="280" width="150" height="45" as="geometry"/></mxCell>
+    <mxCell id="uc6"  value="Quản lý giỏ hàng"    style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="340" width="150" height="45" as="geometry"/></mxCell>
+    <mxCell id="uc7"  value="Quản lý bình luận"   style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="400" width="150" height="45" as="geometry"/></mxCell>
+    <mxCell id="uc8"  value="Quản lý khuyến mãi"  style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="460" width="150" height="45" as="geometry"/></mxCell>
+    <mxCell id="uc9"  value="Quản lý người dùng"  style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="520" width="150" height="45" as="geometry"/></mxCell>
+    <mxCell id="uc10" value="Quản lý doanh thu"   style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="580" width="150" height="45" as="geometry"/></mxCell>
+    <mxCell id="uc11" value="Quản lý đổi trả"     style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="640" width="150" height="45" as="geometry"/></mxCell>
+    <mxCell id="uc12" value="Quản lý báo giá NSX" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="sys"><mxGeometry x="35" y="700" width="150" height="45" as="geometry"/></mxCell>
+
+    <!-- Actor: Khách hàng (bên trái) -->
+    <mxCell id="kh" value="Khách hàng" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="90" y="370" width="40" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Actor: Admin (bên phải trên) -->
+    <mxCell id="admin" value="Quản trị viên" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="720" y="230" width="40" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Actor: Nhà sản xuất (bên phải giữa) -->
+    <mxCell id="nsx" value="Nhà sản xuất" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="720" y="490" width="40" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Actor: Giám đốc (bên phải dưới) -->
+    <mxCell id="gd" value="Giám đốc" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="720" y="650" width="40" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Khách hàng → use cases -->
+    <mxCell edge="1" source="kh" target="uc1"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="kh" target="uc5"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="kh" target="uc6"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="kh" target="uc7"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="kh" target="uc11" parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- Admin → use cases -->
+    <mxCell edge="1" source="admin" target="uc1"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="admin" target="uc2"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="admin" target="uc3"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="admin" target="uc4"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="admin" target="uc5"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="admin" target="uc7"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="admin" target="uc8"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="admin" target="uc9"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="admin" target="uc11" parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- Nhà sản xuất → use cases -->
+    <mxCell edge="1" source="nsx" target="uc4"  parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell edge="1" source="nsx" target="uc12" parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- Giám đốc → use cases -->
+    <mxCell edge="1" source="gd" target="uc10" parent="1" style="endArrow=none;"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+  </root>
+</mxGraphModel>

@@ -1,0 +1,24 @@
+@startuml
+title Sơ đồ hoạt động đăng ký của khách hàng
+skinparam conditionStyle diamond
+
+|Khách hàng|
+start
+:Truy cập trang đăng ký;
+:formDangKy();
+
+repeat
+  :Nhập thông tin;
+  :Nhấn đăng ký;
+
+|Hệ thống|
+  :createUser();
+  :kiemTraThongTin();
+
+repeat while (Hợp lệ?) is (Không hợp lệ)
+-> Hợp lệ;
+
+:saveUser();
+stop
+
+@enduml

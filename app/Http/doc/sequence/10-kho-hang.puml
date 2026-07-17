@@ -1,0 +1,49 @@
+@startuml
+title Sơ đồ tuần tự - Quản lý Kho hàng
+
+actor "NV Kho" as NV
+actor "Admin" as A
+participant ":B_KhoHang" as B
+participant ":C_Warehouse" as C
+participant ":E_WarehouseImport" as EW
+participant ":E_Product" as EP
+participant ":E_Receipt" as ER
+participant ":E_StockLog" as ES
+
+NV -> B : 1: Nhấn Upload file nhập kho
+B --> NV : 2: formUpload()
+NV -> B : 3: Chọn file, nhập nhà cung cấp, ghi chú
+NV -> B : 4: Nhấn Gửi
+B -> C : 5: importUpload(file, supplier, note)
+C -> C : 6: kiemTraFile()
+
+alt File hợp lệ
+    C -> EW : 7: createImport(status=pending)
+    EW --> C : 8: return
+    C --> NV : 9: Đã gửi, chờ admin duyệt
+else File không hợp lệ
+    C --> NV : 10: Thông báo lỗi
+end
+
+A -> B : 11: Chọn file chờ duyệt
+B -> C : 12: importShow(import_id)
+C --> A : 13: Preview sản phẩm trong file
+
+A -> B : 14: Tick chọn sản phẩm, nhấn Duyệt
+B -> C : 15: importApprove(selected)
+
+alt Có sản phẩm được chọn
+    C -> ER : 16: createReceipt(code, supplier)
+    ER --> C : 17: return(receipt)
+
+    loop Từng sản phẩm
+        C -> EP : 18: incrementQuantity(qty)
+        C -> ES : 19: createImportLog(receipt, product, qty)
+    end
+
+    C -> EW : 20: updateStatus(approved)
+    C --> A : 21: Duyệt thành công
+else Không chọn sản phẩm
+    C --> A : 22: Thông báo lỗi
+end
+@enduml

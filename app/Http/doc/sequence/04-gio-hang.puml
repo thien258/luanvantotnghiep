@@ -1,0 +1,31 @@
+@startuml
+title Sơ đồ tuần tự - Quản lý Giỏ hàng
+
+actor "Khách hàng" as KH
+participant ":B_GioHang" as B
+participant ":C_Cart" as C
+participant ":E_Cart" as EC
+participant ":E_Product" as EP
+
+KH -> B : 1: Chọn sản phẩm và nhấn Thêm vào giỏ
+B -> C : 2: Thêm vào giỏ hàng (product_id, số lượng)
+C -> EP : 3: Tìm sản phẩm theo id
+EP --> C : 4: Trả về sản phẩm
+C -> C : 5: Kiểm tra tồn kho
+
+alt Tồn kho đủ
+    C -> EC : 6: Tìm sản phẩm trong giỏ
+    EC --> C : 7: Trả về kết quả
+
+    alt Sản phẩm chưa có trong giỏ
+        C -> EC : 8: Tạo mục giỏ hàng mới
+    else Sản phẩm đã có trong giỏ
+        C -> EC : 8: Tăng số lượng
+    end
+
+    EC --> C : 9: Trả về kết quả
+    C --> KH : 10: Đã thêm vào giỏ hàng
+else Tồn kho không đủ
+    C --> KH : 11: Thông báo lỗi không đủ hàng
+end
+@enduml

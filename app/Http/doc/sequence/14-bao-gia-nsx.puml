@@ -1,0 +1,44 @@
+@startuml
+title Sơ đồ tuần tự - Quản lý Báo giá Nhà sản xuất
+
+actor "Admin" as A
+participant ":B_BaoGia" as B
+participant ":C_SupplierOffer" as C
+participant ":E_SupplierOffer" as ESO
+participant ":E_SupplierOfferItem" as ESOI
+participant ":E_Product" as EP
+
+== Upload file báo giá ==
+A -> B : 1: Chọn nhà sản xuất và upload file
+B -> C : 2: upload(manufacturer_id, file)
+C -> C : 3: validate(file, manufacturer_id)
+
+alt File hợp lệ và có NSX
+    C -> C : 4: readFile(file)
+    C -> ESO : 5: createOffer(code, manufacturer_id, status=đã nộp)
+    ESO --> C : 6: return(offer)
+
+    loop Từng dòng sản phẩm trong file
+        C -> EP : 7: findProduct(title)
+        EP --> C : 8: return(product/null)
+        C -> ESOI : 9: createItem(offer_id, product_id, unit_price)
+    end
+
+    C --> A : 10: Chuyển đến trang chi tiết báo giá
+else File không hợp lệ hoặc chưa chọn NSX
+    C --> A : 11: Thông báo lỗi
+end
+
+== Xem chi tiết và đặt hàng ==
+A -> B : 1: Chọn báo giá cần xem
+B -> C : 2: show(offer_id)
+C -> ESO : 3: findOffer(offer_id)
+ESO --> C : 4: return(offer + items)
+C --> A : 5: Hiển thị bảng sản phẩm chào giá
+
+A -> B : 6: Tick chọn sản phẩm, điền số lượng
+A -> B : 7: Nhấn Đặt hàng
+B -> C : 8: [POST] purchase-orders.store(offer_id, items)
+note right: Chuyển sang C_PurchaseOrder xử lý
+C --> A : 9: Tạo đơn đặt hàng thành công
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+title Sơ đồ tuần tự - Cập nhật Profile
+
+actor "Khách hàng" as KH
+participant ":B_Profile" as B
+participant ":C_Profile" as C
+participant ":E_User" as E
+
+KH -> B : 1: Vào trang quản lý tài khoản
+B -> C : 2: Tải trang thông tin tài khoản
+C -> E : 3: Tìm người dùng theo id
+E --> C : 4: Trả về thông tin người dùng
+C --> KH : 5: Hiển thị thông tin hiện tại
+
+KH -> B : 6: Chỉnh sửa thông tin
+KH -> B : 7: Nhấn Lưu thay đổi
+B -> C : 8: Gửi dữ liệu cập nhật
+C -> C : 9: Kiểm tra dữ liệu
+
+alt Thông tin hợp lệ
+    C -> E : 10: Cập nhật thông tin người dùng
+    E --> C : 11: Trả về kết quả
+    C --> KH : 12: Cập nhật thành công
+else Thông tin không hợp lệ
+    C --> KH : 13: Thông báo lỗi, quay lại form
+end
+@enduml

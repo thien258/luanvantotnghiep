@@ -12,7 +12,7 @@
            
                 <th scope="col">status</th>
                 <th scope="col">Edit</th>
-                <th scope="col">Delete</th>
+                <!-- <th scope="col">Delete</th> -->
 
             </tr>
         </thead>
@@ -37,12 +37,12 @@
       </td>
                
                 <td><a href=" {{ route('admin.concentration.edit',['concentration'=>$object->id]) }}  "><i class="fa-solid fa-pen-to-square text-warning"></i></a></td>
-                <td><a href="{{route('admin.concentration.destroy',['concentration'=>$object->id])}}" title="Delete {{$object->name}}" onclick="event.preventDefault();window.confirm('Bạn đã chắc chắn xóa '+ '{{$object->name}}' +' chưa?') ?document.getElementById('concentration-delete-{{ $object->id }}').submit() :0;" class="btn btn-danger"><i class="far fa-trash-alt"></i>
+                {{-- <td><a href="{{route('admin.concentration.destroy',['concentration'=>$object->id])}}" title="Delete {{$object->name}}" onclick="event.preventDefault();window.confirm('Bạn đã chắc chắn xóa '+ '{{$object->name}}' +' chưa?') ?document.getElementById('concentration-delete-{{ $object->id }}').submit() :0;" class="btn btn-danger"><i class="far fa-trash-alt"></i>
                         <form action="{{ route('admin.concentration.destroy', ['concentration' => $object->id]) }}" method="post" id="concentration-delete-{{ $object->id }}">
                             {{ csrf_field() }}
                             {{ method_field('delete') }}
                         </form>
-                    </a></td>
+                    </a></td> --}}
             </tr>
             @empty
             <tr>

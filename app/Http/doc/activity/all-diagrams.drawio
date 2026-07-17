@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<mxfile>
+  <diagram name="01-Dang-ky" id="p1">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="500" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="p1_title" value="01 - Dang Ky Tai Khoan" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="30" width="400" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="40" y="220" width="30" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_n1" value="Truy cap trang dang ky" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="110" y="210" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_n2" value="formDangKy()" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="310" y="210" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_n3" value="Nhap thong tin" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="490" y="210" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_n4" value="Nhan dang ky" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="210" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_n5" value="createUser()" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="850" y="210" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_n6" value="kiemTraThongTin()" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="210" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_d1" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="200" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_n7" value="saveUser()" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1390" y="210" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_end_outer" value="" style="ellipse;aspect=fixed;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="1568" y="218" width="34" height="34" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_end_inner" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1574" y="224" width="22" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_e1" style="endArrow=block;endFill=1;html=1;" edge="1" source="p1_start" target="p1_n1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p1_e2" style="endArrow=block;endFill=1;html=1;" edge="1" source="p1_n1" target="p1_n2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p1_e3" style="endArrow=block;endFill=1;html=1;" edge="1" source="p1_n2" target="p1_n3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p1_e4" style="endArrow=block;endFill=1;html=1;" edge="1" source="p1_n3" target="p1_n4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p1_e5" style="endArrow=block;endFill=1;html=1;" edge="1" source="p1_n4" target="p1_n5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p1_e6" style="endArrow=block;endFill=1;html=1;" edge="1" source="p1_n5" target="p1_n6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p1_e7" style="endArrow=block;endFill=1;html=1;" edge="1" source="p1_n6" target="p1_d1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p1_e8" value="Hop le" style="endArrow=block;endFill=1;html=1;" edge="1" source="p1_d1" target="p1_n7" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p1_e9" value="Khong hop le" style="endArrow=block;endFill=1;html=1;" edge="1" source="p1_d1" target="p1_n3" parent="1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1290" y="120"/><mxPoint x="555" y="120"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="p1_e10" style="endArrow=block;endFill=1;html=1;" edge="1" source="p1_n7" target="p1_end_outer" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="02-Dang-nhap" id="p2">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="600" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="p2_title" value="02 - Dang Nhap" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="20" width="400" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="40" y="220" width="30" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_n1" value="Chon Dang nhap" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="110" y="210" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_n2" value="Hien thi form" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="210" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_n3" value="Nhap email + mat khau" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="460" y="210" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_d1" value="Hop le?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="650" y="200" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_n4" value="Thong bao loi" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="650" y="360" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_d2" value="Tai khoan ton tai?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="780" y="200" width="100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_d3" value="Xac dinh role" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="930" y="200" width="100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_r1" value="/admin (root)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="80" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_r2" value="/admin" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="160" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_r3" value="/admin/orders" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="240" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_r4" value="/admin/supplier-offers" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="320" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_r5" value="Trang chu /" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="400" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_end_outer" value="" style="ellipse;aspect=fixed;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="1268" y="223" width="34" height="34" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_end_inner" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1274" y="229" width="22" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_e1" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_start" target="p2_n1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e2" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_n1" target="p2_n2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e3" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_n2" target="p2_n3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e4" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_n3" target="p2_d1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e5" value="Khong" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_d1" target="p2_n4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e6" value="Co" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_d1" target="p2_d2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e7" value="Ton tai" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_d2" target="p2_d3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e8" value="Khong ton tai" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_d2" target="p2_n4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e9" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_n4" target="p2_n3" parent="1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="715" y="440"/><mxPoint x="530" y="440"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="p2_e10" value="root" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_d3" target="p2_r1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e11" value="admin" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_d3" target="p2_r2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e12" value="shipper" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_d3" target="p2_r3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e13" value="manufacturer" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_d3" target="p2_r4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e14" value="user" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_d3" target="p2_r5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e15" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_r1" target="p2_end_outer" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e16" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_r2" target="p2_end_outer" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e17" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_r3" target="p2_end_outer" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e18" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_r4" target="p2_end_outer" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2_e19" style="endArrow=block;endFill=1;html=1;" edge="1" source="p2_r5" target="p2_end_outer" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="03-Quen-mat-khau" id="p3">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="600" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="p3_title" value="03 - Quen Mat Khau" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="20" width="400" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="30" y="215" width="30" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_n1" value="Nhan Quen mat khau" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="205" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_n2" value="Nhap email" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="270" y="205" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_d1" value="Email ton tai?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="430" y="195" width="100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_n3" value="Thong bao loi" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="360" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_n4" value="Gui link reset" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="205" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_n5" value="Khach mo email, nhan link" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="205" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_d2" value="Link hieu luc?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="890" y="195" width="100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_n6" value="Thong bao het han" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="890" y="360" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_n7" value="Form mat khau moi" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="205" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_n8" value="Nhap mat khau + xac nhan" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="205" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_d3" value="Validate" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="1360" y="195" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_n9" value="Cap nhat DB" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="360" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_n10" value="Chuyen trang dang nhap" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1390" y="360" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_end1_outer" value="" style="ellipse;aspect=fixed;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="868" y="468" width="34" height="34" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_end1_inner" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="874" y="474" width="22" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_end2_outer" value="" style="ellipse;aspect=fixed;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="1558" y="368" width="34" height="34" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_end2_inner" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1564" y="374" width="22" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_e1" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_start" target="p3_n1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e2" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_n1" target="p3_n2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e3" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_n2" target="p3_d1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e4" value="Khong" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_d1" target="p3_n3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e5" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_n3" target="p3_n2" parent="1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="490" y="440"/><mxPoint x="330" y="440"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="p3_e6" value="Co" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_d1" target="p3_n4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e7" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_n4" target="p3_n5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e8" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_n5" target="p3_d2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e9" value="Het han" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_d2" target="p3_n6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e10" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_n6" target="p3_end1_outer" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e11" value="Con hieu luc" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_d2" target="p3_n7" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e12" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_n7" target="p3_n8" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e13" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_n8" target="p3_d3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e14" value="Khong hop le" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_d3" target="p3_n8" parent="1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1400" y="140"/><mxPoint x="1250" y="140"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="p3_e15" value="Hop le" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_d3" target="p3_n9" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e16" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_n9" target="p3_n10" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3_e17" style="endArrow=block;endFill=1;html=1;" edge="1" source="p3_n10" target="p3_end2_outer" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>

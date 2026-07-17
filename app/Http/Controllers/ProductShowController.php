@@ -46,7 +46,16 @@ class ProductShowController extends Controller
         $all_concentrations = Concentration::where('status', '1')->get();
         $all_brands         = Brand::where('status', '1')->get();
 
-        $query = Product::where('status', 1);
+        $query = Product::where('status', 1)
+            ->whereHas('category', function ($q) {
+                $q->where('status', 1); // chỉ lấy SP thuộc danh mục đang active
+            })
+            ->whereHas('brand', function ($q) {
+                $q->where('status', 1); // chỉ lấy SP thuộc brand đang active
+            })
+            ->whereHas('concentration', function ($q) {
+                $q->where('status', 1); // chỉ lấy SP thuộc nồng độ đang active
+            });
 
         // ── Filter nồng độ ──────────────────────────────────────────
         if ($request->has('concentrations') && is_array($request->concentrations)) {

@@ -1,28 +1,6 @@
 @extends('layout/admin')
 @section('body')
 
-<style>
-    .import-row-approved {
-        background-color: #d1e7dd !important;
-        border-left: 4px solid #198754 !important;
-    }
-
-    .import-row-skipped {
-        background-color: #f8f9fa;
-        opacity: 0.65;
-    }
-
-    .import-row-skipped td {
-        text-decoration: line-through;
-        text-decoration-color: rgba(0, 0, 0, 0.25);
-    }
-
-    .import-row-skipped td:first-child,
-    .import-row-skipped td:nth-child(2) {
-        text-decoration: none;
-    }
-</style>
-
 <div class="container-fluid pt-4 px-4">
     <div class="bg-light rounded p-4">
 
@@ -58,11 +36,12 @@
                         <i class="fa fa-list me-1"></i>Danh sách sản phẩm trong file — chỉnh sửa rồi duyệt
                     </span>
                     <div class="d-flex align-items-center gap-3">
-                        {{-- % tăng chung — áp cho tất cả sản phẩm 1 lần --}}
-                        <div class="input-group input-group-sm" style="width:180px;">
+                        {{-- % tăng chung — áp cho tất cả sản phẩm 1 lần, phải > 0 --}}
+                        <div class="input-group input-group-sm" style="width:200px;">
                             <span class="input-group-text rounded-0 text-muted" style="font-size:0.75rem;">% tăng tất cả</span>
-                            <input type="number" id="globalMarkup" value="30" min="0" max="1000" step="1"
-                                class="form-control form-control-sm rounded-0 text-center">
+                            <input type="number" id="globalMarkup" value="30" min="1" max="1000" step="1"
+                                class="form-control form-control-sm rounded-0 text-center"
+                                title="Phần trăm markup phải lớn hơn 0">
                             <span class="input-group-text rounded-0 px-1" style="font-size:0.75rem;">%</span>
                         </div>
                         <button type="button" class="btn btn-dark btn-sm rounded-0" id="applyGlobalMarkup">
@@ -287,7 +266,9 @@
                     $imported = $importedCount > 0 && $approvedByTitle->has($key);
                     $data = $imported ? $approvedByTitle->get($key) : $p;
                     @endphp
-                    <tr class="import-result-row {{ $importedCount === 0 ? '' : ($imported ? 'import-row-approved' : 'import-row-skipped') }}"
+                    <tr class="import-result-row {{ $importedCount === 0 ? '' : ($imported ? 'table-success' : 'table-secondary') }}"
+                        @if($importedCount > 0 && $imported) style="border-left: 4px solid #198754;" @endif
+                        @if($importedCount > 0 && !$imported) style="opacity: 0.65;" @endif
                         data-imported="{{ $imported ? '1' : '0' }}">
                         <td class="text-center">
                             @if($importedCount === 0)
@@ -302,14 +283,20 @@
                             </span>
                             @endif
                         </td>
-                        <td class="fw-bold {{ $imported ? 'text-success' : 'text-muted' }}">{{ $p['title'] }}</td>
-                        <td class="text-center {{ $imported ? 'fw-bold' : 'text-muted' }}">{{ $data['quantity'] ?? 0 }}</td>
-                        <td class="text-center {{ $imported ? 'text-danger fw-bold' : 'text-muted' }}">
+                        <td class="fw-bold {{ $imported ? 'text-success' : 'text-muted' }}"
+                            @if(!$imported && $importedCount > 0) style="text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25);" @endif>{{ $p['title'] }}</td>
+                        <td class="text-center {{ $imported ? 'fw-bold' : 'text-muted' }}"
+                            @if(!$imported && $importedCount > 0) style="text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25);" @endif>{{ $data['quantity'] ?? 0 }}</td>
+                        <td class="text-center {{ $imported ? 'text-danger fw-bold' : 'text-muted' }}"
+                            @if(!$imported && $importedCount > 0) style="text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25);" @endif>
                             {{ number_format($data['price'] ?? $data['unit_price'] ?? 0) }}đ
                         </td>
-                        <td class="{{ $imported ? '' : 'text-muted' }}">{{ $p['volume'] }}</td>
-                        <td class="{{ $imported ? '' : 'text-muted' }}">{{ $p['category'] }}</td>
-                        <td class="{{ $imported ? '' : 'text-muted' }}">{{ $p['brand'] }}</td>
+                        <td class="{{ $imported ? '' : 'text-muted' }}"
+                            @if(!$imported && $importedCount > 0) style="text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25);" @endif>{{ $p['volume'] }}</td>
+                        <td class="{{ $imported ? '' : 'text-muted' }}"
+                            @if(!$imported && $importedCount > 0) style="text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25);" @endif>{{ $p['category'] }}</td>
+                        <td class="{{ $imported ? '' : 'text-muted' }}"
+                            @if(!$imported && $importedCount > 0) style="text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25);" @endif>{{ $p['brand'] }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -353,57 +340,5 @@
 @endsection
 
 @section('script')
-<script>
-    document.getElementById('selectAll')?.addEventListener('change', function() {
-        document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = this.checked);
-        updateSelectedCount();
-    });
-
-    function updateSelectedCount() {
-        const total = document.querySelectorAll('.product-checkbox').length;
-        const selected = document.querySelectorAll('.product-checkbox:checked').length;
-        const el = document.getElementById('selectedCount');
-        if (el) el.textContent = selected;
-    }
-
-    document.querySelectorAll('.product-checkbox').forEach(cb => {
-        cb.addEventListener('change', updateSelectedCount);
-    });
-
-    updateSelectedCount();
-
-    // Tính giá bán = giá nhập × (1 + % / 100)
-    function calcSellPrice(index, markup) {
-        const cost = parseFloat(document.querySelector(`.cost-input[data-index="${index}"]`)?.value) || 0;
-        const sellEl = document.querySelector(`.sell-input[data-index="${index}"]`);
-        if (sellEl) sellEl.value = Math.round(cost * (1 + markup / 100));
-    }
-
-    // Nút "Áp dụng" — áp % chung cho tất cả dòng 1 lần
-    document.getElementById('applyGlobalMarkup')?.addEventListener('click', function() {
-        const globalPct = parseFloat(document.getElementById('globalMarkup')?.value) || 0;
-        document.querySelectorAll('.cost-input').forEach(el => {
-            calcSellPrice(el.dataset.index, globalPct);
-        });
-    });
-
-    function confirmApprove() {
-        const selected = document.querySelectorAll('.product-checkbox:checked').length;
-        if (selected === 0) {
-            alert('Vui lòng chọn ít nhất 1 sản phẩm để duyệt.');
-            return false;
-        }
-        return confirm(`Xác nhận duyệt và nhập kho ${selected} sản phẩm đã chọn?`);
-    }
-
-    document.getElementById('showImportedOnly')?.addEventListener('change', function() {
-        document.querySelectorAll('.import-result-row').forEach(row => {
-            if (this.checked) {
-                row.style.display = row.dataset.imported === '1' ? '' : 'none';
-            } else {
-                row.style.display = '';
-            }
-        });
-    });
-</script>
+<script src="{{ asset('js/admin/import-show.js') }}"></script>
 @endsection

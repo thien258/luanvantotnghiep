@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="600" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+
+    <!-- Start -->
+    <mxCell id="start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="40" y="260" width="30" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Truy cập trang đăng ký -->
+    <mxCell id="a1" value="Truy cập trang đăng ký" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="110" y="230" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- formDangKy() -->
+    <mxCell id="a2" value="formDangKy()" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="110" y="360" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Nhập thông tin -->
+    <mxCell id="a3" value="Nhập thông tin" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="310" y="360" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Nhấn đăng ký -->
+    <mxCell id="a4" value="Nhấn đăng ký" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="310" y="480" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- createUser() -->
+    <mxCell id="a5" value="createUser()" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="510" y="480" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- kiemTraThongTin() -->
+    <mxCell id="a6" value="kiemTraThongTin()" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="710" y="480" width="160" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Decision: Hợp lệ? -->
+    <mxCell id="d1" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" vertex="1" parent="1">
+      <mxGeometry x="940" y="460" width="80" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- saveUser() -->
+    <mxCell id="a7" value="saveUser()" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="1090" y="480" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- End -->
+    <mxCell id="end" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;strokeWidth=3;fillColor=#FFFFFF;" vertex="1" parent="1">
+      <mxGeometry x="1300" y="488" width="34" height="34" as="geometry"/>
+    </mxCell>
+    <mxCell id="end2" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="1306" y="494" width="22" height="22" as="geometry"/>
+    </mxCell>
+
+    <!-- Arrows -->
+    <!-- start -> a1 -->
+    <mxCell id="e1" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="start" target="a1" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- a1 -> a2 (xuống) -->
+    <mxCell id="e2" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a1" target="a2" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- a2 -> a3 (phải) -->
+    <mxCell id="e3" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a2" target="a3" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- a3 -> a4 (xuống) -->
+    <mxCell id="e4" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a3" target="a4" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- a4 -> a5 -->
+    <mxCell id="e5" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a4" target="a5" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- a5 -> a6 -->
+    <mxCell id="e6" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a5" target="a6" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- a6 -> d1 -->
+    <mxCell id="e7" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a6" target="d1" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- d1 -> a7 (Hợp lệ) -->
+    <mxCell id="e8" value="Hợp lệ" style="endArrow=block;endFill=1;html=1;" edge="1" source="d1" target="a7" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- d1 -> a3 (Không hợp lệ - quay lại) -->
+    <mxCell id="e9" value="Không hợp lệ" style="endArrow=block;endFill=1;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="d1" target="a3" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="980" y="360"/>
+          <mxPoint x="380" y="360"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- a7 -> end -->
+    <mxCell id="e10" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a7" target="end" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Label: Hợp lệ trên mũi tên d1->a3 -->
+
+    <!-- Caption -->
+    <mxCell id="cap" value="Hình 3-x Sơ đồ hoạt động đăng ký của khách hàng" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=13;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="400" y="580" width="600" height="30" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

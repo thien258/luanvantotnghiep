@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 /**
  * @property int $idTitle
@@ -30,8 +31,18 @@ class Title extends Model
         protected $table ='title';
     public $timestamps = false; 
     protected $primaryKey = 'idTitle';
-    protected $fillable = ['title','image','button','descrip','idHeader'];
+    protected $fillable = ['title','image','button','descrip','idHeader','created_by'];
+
     public function header(){
         return $this->belongsTo('App\Models\Header','idHeader','id');
+    }
+
+    /**
+     * Admin đã tạo banner/slide này.
+     * nullable → trả về null nếu user đã bị xóa.
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by', 'id');
     }
 }

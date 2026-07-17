@@ -73,34 +73,39 @@ class UserController extends Controller
     }
 
     /**
-     * Xóa user và tất cả dữ liệu liên quan.
+     * Toggle trạng thái hoạt động của user (is_active).
+     * Không xóa dữ liệu — chỉ tắt/bật tài khoản.
      *
-     * Thứ tự xóa (phải xóa FK trước để tránh lỗi constraint):
-     *   1. Xóa order_details của từng đơn hàng
-     *   2. Xóa các đơn hàng của user
-     *   3. Xóa user
+     * Phân quyền:
+     *   - Không thể tự tắt chính mình
+     *   - Director: chỉ được toggle customer, warehouse, manufacturer
+     *   - Admin: được toggle tất cả trừ director, root
      */
-    public function destroy($id)
+    public function toggleStatus(User $user)
     {
-        $user = User::find($id);
+        $operator = Auth::user();
 
-        if ($user) {
-            // Bước 1: Duyệt từng đơn hàng, xóa chi tiết trước (tránh lỗi FK constraint)
-            foreach ($user->orders as $order) {
-                // Xóa hết chi tiết của đơn hàng này trước
-                // (Đảm bảo Model Order đã có relationship 'details' hoặc 'orderDetails')
-                $order->details()->delete();
-            }
-
-            // Bước 2: Sau khi chi tiết đã xóa, xóa các đơn hàng
-            $user->orders()->delete();
-
-            // Bước 3: Cuối cùng xóa user
-            $user->delete();
-
-            return redirect()->route('admin.user.index');
+        // Không tự tắt chính mình
+        if ($user->id === $operator->id) {
+            return redirect()->back()->with('error', 'Bạn không thể tắt tài khoản của chính mình.');
         }
 
-        return back();
+        // Danh sách role mà operator được phép toggle
+        $allowedTargets = match ($operator->role) {
+            'director' => ['customer', 'warehouse', 'manufacturer'],
+            'admin'    => ['customer', 'warehouse', 'manufacturer', 'admin'],
+            'root'     => ['customer', 'warehouse', 'manufacturer', 'admin', 'director'],
+            default    => [],
+        };
+
+        if (!in_array($user->role, $allowedTargets)) {
+            return redirect()->back()->with('error', 'Bạn không có quyền thay đổi trạng thái tài khoản này.');
+        }
+
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        $status = $user->is_active ? 'kích hoạt' : 'vô hiệu hóa';
+        return redirect()->back()->with('success', "Đã {$status} tài khoản {$user->name}.");
     }
 }

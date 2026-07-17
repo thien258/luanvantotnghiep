@@ -44,9 +44,15 @@ class HomeController extends Controller
         // Lấy các nồng độ đang active để hiển thị filter
         $concentrations = Concentration::where("status", '1')->get();
 
-        // Query sản phẩm đang bán, chỉ hiện SP thuộc danh mục active
+        // Query sản phẩm đang bán, chỉ hiện SP thuộc danh mục, brand, concentration active
         $query = Product::where('status', 1)
             ->whereHas('category', function ($q) {
+                $q->where('status', 1);
+            })
+            ->whereHas('brand', function ($q) {
+                $q->where('status', 1);
+            })
+            ->whereHas('concentration', function ($q) {
                 $q->where('status', 1);
             });
 
@@ -133,7 +139,13 @@ class HomeController extends Controller
         $all_brands        = Brand::where('status', '1')->get();
 
         // Query SP theo danh mục
-        $query = Product::where('idCategory', $id)->where('status', '1');
+        $query = Product::where('idCategory', $id)->where('status', '1')
+            ->whereHas('brand', function ($q) {
+                $q->where('status', 1);
+            })
+            ->whereHas('concentration', function ($q) {
+                $q->where('status', 1);
+            });
 
         // Filter nồng độ
         if ($request->has('concentrations') && is_array($request->concentrations)) {
@@ -186,7 +198,13 @@ class HomeController extends Controller
         $all_concentrations = Concentration::where('status', '1')->get();
         $categories         = Category::where('status', '1')->get();
 
-        $query = Product::where('idBrand', $id)->where('status', '1');
+        $query = Product::where('idBrand', $id)->where('status', '1')
+            ->whereHas('category', function ($q) {
+                $q->where('status', 1);
+            })
+            ->whereHas('concentration', function ($q) {
+                $q->where('status', 1);
+            });
 
         // Filter nồng độ
         if ($request->has('concentrations') && is_array($request->concentrations)) {
@@ -255,6 +273,9 @@ class HomeController extends Controller
 
         $products = Product::where('title', 'LIKE', "%{$keyword}%")
             ->where('status', 1)
+            ->whereHas('category', function ($q) { $q->where('status', 1); })
+            ->whereHas('brand', function ($q) { $q->where('status', 1); })
+            ->whereHas('concentration', function ($q) { $q->where('status', 1); })
             ->select('id', 'title', 'image', 'price')
             ->take(3)
             ->get();
@@ -274,7 +295,16 @@ class HomeController extends Controller
         $title              = Title::all();
         $footers            = Footer::all();
 
-        $query = Product::where('title', 'LIKE', "%{$keyword}%")->where('status', 1);
+        $query = Product::where('title', 'LIKE', "%{$keyword}%")->where('status', 1)
+            ->whereHas('category', function ($q) {
+                $q->where('status', 1);
+            })
+            ->whereHas('brand', function ($q) {
+                $q->where('status', 1);
+            })
+            ->whereHas('concentration', function ($q) {
+                $q->where('status', 1);
+            });
 
         if ($request->has('brands') && is_array($request->brands)) {
             $query->whereIn('idBrand', $request->brands);
@@ -344,6 +374,15 @@ class HomeController extends Controller
         $query = Product::where('status', '1')
             ->whereHas('festivals', function ($q) use ($id) {
                 $q->where('festivals.id', $id);
+            })
+            ->whereHas('category', function ($q) {
+                $q->where('status', 1);
+            })
+            ->whereHas('brand', function ($q) {
+                $q->where('status', 1);
+            })
+            ->whereHas('concentration', function ($q) {
+                $q->where('status', 1);
             });
 
         if ($request->has('concentrations') && is_array($request->concentrations)) {

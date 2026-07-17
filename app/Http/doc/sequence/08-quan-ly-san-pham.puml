@@ -1,0 +1,47 @@
+@startuml
+title Sơ đồ tuần tự - Quản lý Sản phẩm (qua nhập kho)
+
+actor "NV Kho" as NV
+actor "Admin" as A
+participant ":B_NhapKho" as B
+participant ":C_Warehouse" as C
+participant ":E_WarehouseImport" as EW
+participant ":E_Product" as EP
+
+NV -> B : 1: Upload file Excel/CSV
+B -> C : 2: importUpload(file)
+C -> C : 3: kiemTraFile(file)
+
+alt File hợp lệ
+    C -> EW : 4: createImport(file, status=pending)
+    EW --> C : 5: return
+    C --> NV : 6: Đã gửi, chờ admin duyệt
+else File sai định dạng hoặc > 5MB
+    C --> NV : 7: Thông báo lỗi
+end
+
+A -> B : 8: Mở file và xem preview
+B -> C : 9: importShow(import_id)
+C -> C : 10: parseFile(file)
+C --> A : 11: Hiển thị bảng preview sản phẩm
+
+A -> B : 12: Tick chọn sản phẩm, điều chỉnh qty/giá
+A -> B : 13: Nhấn Duyệt nhập kho
+B -> C : 14: importApprove(selected_products)
+
+alt Có sản phẩm được chọn
+    loop Từng sản phẩm được chọn
+        C -> EP : 15: findProduct(title)
+        EP --> C : 16: return
+        alt Sản phẩm đã tồn tại
+            C -> EP : 17: incrementQuantity(qty)
+        else Sản phẩm chưa tồn tại
+            C -> EP : 18: createProduct(data)
+        end
+    end
+    C -> EW : 19: updateStatus(approved)
+    C --> A : 20: Duyệt thành công
+else Không chọn sản phẩm nào
+    C --> A : 21: Thông báo lỗi
+end
+@enduml

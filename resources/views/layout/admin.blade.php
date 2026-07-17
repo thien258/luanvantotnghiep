@@ -228,6 +228,16 @@
             </li>
             @endif
 
+            {{-- User: director cũng thấy để tắt/bật tài khoản --}}
+            @if($role === 'director')
+            <li class="nav-item {{ request()->routeIs('admin.user.index') ? 'active font-weight-bold' : '' }}">
+                <a class="nav-link text-dark" href="{{ route('admin.user.index') }}">
+                    <i class="fa-solid fa-user text-dark mr-3"></i>
+                    <span>User</span>
+                </a>
+            </li>
+            @endif
+
             {{-- Activity Log: chỉ director xem, root không thấy --}}
             @if($role === 'director')
             <li class="nav-item {{ request()->routeIs('admin.activity-log.index') ? 'active font-weight-bold' : '' }}">
