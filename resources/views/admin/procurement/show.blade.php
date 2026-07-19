@@ -80,18 +80,30 @@
             <div class="form-row align-items-end">
                 <div class="form-group col-md-4 mb-2">
                     <label class="small font-weight-bold">Nhà sản xuất <span class="text-danger">*</span></label>
-                    @php $myManufacturer = auth()->user()->manufacturer; @endphp
-                    <input type="hidden" name="manufacturer_id" value="{{ $myManufacturer?->id }}">
+                    @php $myManufacturer = auth()->user(); @endphp
+                    <input type="hidden" name="manufacturer_id" value="{{ $myManufacturer->id }}">
                     <input type="text" class="form-control form-control-sm rounded-0 bg-light"
-                           value="{{ $myManufacturer?->name ?? '—' }}" readonly>
+                           value="{{ $myManufacturer->name ?? '—' }}" readonly>
                 </div>
                 <div class="form-group col-md-4 mb-2">
                     <label class="small font-weight-bold">
                         File Excel / CSV <span class="text-danger">*</span>
                         <span class="text-muted font-weight-normal">(cột: title | price | note)</span>
                     </label>
-                    <input type="file" name="file" class="form-control form-control-sm rounded-0"
+                    <input type="file" name="file" id="offerFileInput" class="form-control form-control-sm rounded-0"
                            accept=".xlsx,.xls,.csv" required>
+                    <div id="offerValidationErrors" style="display:none; position:fixed; bottom:24px; right:24px; z-index:9999; max-width:400px;">
+                        <div style="background:#fff; border-left:4px solid #dc3545; border-radius:4px; box-shadow:0 4px 16px rgba(0,0,0,0.15); padding:14px 16px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <span style="font-weight:700; color:#dc3545; font-size:0.85rem;">
+                                    <i class="fa fa-exclamation-circle me-1"></i> File có lỗi
+                                </span>
+                                <button type="button" onclick="document.getElementById('offerValidationErrors').style.display='none'" 
+                                        style="background:none;border:none;cursor:pointer;color:#999;font-size:1rem;padding:0;line-height:1;">&times;</button>
+                            </div>
+                            <ul id="offerErrorList" style="margin:0;padding-left:18px;font-size:0.8rem;color:#555;"></ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group col-md-3 mb-2">
                     <label class="small font-weight-bold">Ghi chú</label>
@@ -226,4 +238,73 @@
     </div>
 </div>
 
+@endsection
+
+@section('script')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const offerFileInput = document.getElementById('offerFileInput');
+    const offerErrors    = document.getElementById('offerValidationErrors');
+    const submitBtn      = document.querySelector('form[action*="upload-offer"] button[type="submit"]');
+
+    if (!offerFileInput) return;
+
+    offerFileInput.addEventListener('change', function () {
+        const file = this.files[0];
+        offerErrors.style.display = 'none';
+        const errList = document.getElementById('offerErrorList');
+        if (errList) errList.innerHTML = '';
+        if (submitBtn) submitBtn.disabled = false;
+
+        if (!file || !file.name.endsWith('.csv')) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const lines  = e.target.result.split('\n');
+            const errors = [];
+
+            // Dòng đầu là header (title, image, ...) — dữ liệu từ dòng 2
+            const dataStart = 1;
+
+            for (let i = dataStart; i < lines.length; i++) {
+                const line = lines[i].trim().replace(/\r/g, '');
+                if (!line) continue;
+
+                // Parse CSV
+                const cols = [];
+                let inQuote = false, current = '';
+                for (let c of line) {
+                    if (c === '"') { inQuote = !inQuote; }
+                    else if (c === ',' && !inQuote) { cols.push(current); current = ''; }
+                    else { current += c; }
+                }
+                cols.push(current);
+
+                const lineNum   = i + 1;
+                const title     = cols[0]?.trim();
+                const unitPrice = cols[3]?.trim();
+                const quantity  = cols[5]?.trim();
+
+                if (!title)
+                    errors.push(`Dòng ${lineNum}: Tên sản phẩm (title) không được để trống.`);
+                if (!unitPrice || isNaN(unitPrice) || parseFloat(unitPrice) <= 0)
+                    errors.push(`Dòng ${lineNum}: Giá báo (unit_price) không được để trống và phải lớn hơn 0.`);
+                if (!quantity || isNaN(quantity) || parseInt(quantity) < 0)
+                    errors.push(`Dòng ${lineNum}: Số lượng (quantity) không được để trống và phải là số nguyên không âm.`);
+
+                if (errors.length >= 10) { errors.push('... (còn nhiều lỗi, vui lòng kiểm tra lại file)'); break; }
+            }
+
+            if (errors.length > 0) {
+                let html = '';
+                errors.forEach(e => html += `<li style="margin-bottom:4px;">${e}</li>`);
+                document.getElementById('offerErrorList').innerHTML = html;
+                offerErrors.style.display = 'block';
+                if (submitBtn) submitBtn.disabled = true;
+            }
+        };
+        reader.readAsText(file, 'UTF-8');
+    });
+});
+</script>
 @endsection

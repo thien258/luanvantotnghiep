@@ -38,19 +38,23 @@ class BrandController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        $brand=Brand::create([
-            'name'=>$request->name,
-           'image' => $request->image??'',
-            'descrip' => $request->descrip,
-            'status'=>$request->status,
-            
+        $request->validate([
+            'name'   => 'required|string|max:255',
+            'descrip'=> 'required|string',
+            'status' => 'required|in:0,1',
         ]);
-        if($brand)          
-              return redirect()->route('admin.brand.index');
-        else{
+
+        $brand = Brand::create([
+            'name'   => $request->name,
+            'image'  => $request->image ?? '',
+            'descrip'=> $request->descrip,
+            'status' => $request->status,
+        ]);
+
+        if ($brand)
+            return redirect()->route('admin.brand.index');
+        else
             return back();
-        }
     }
 
     /**
@@ -76,19 +80,24 @@ class BrandController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name'   => 'required|string|max:255',
+            'descrip'=> 'required|string',
+            'status' => 'required|in:0,1',
+        ]);
+
         $brand = Brand::find($id);
         $brand->update([
-            'name'=>$request->name,
-            'image'=>$request->image,
-            'descrip'=>$request->descrip,
-            'status'=>$request->status,
+            'name'   => $request->name,
+            'image'  => $request->image ?? '',
+            'descrip'=> $request->descrip,
+            'status' => $request->status,
         ]);
-        if ($brand)          
-              return redirect()->route('admin.brand.index');
-        else {
+
+        if ($brand)
+            return redirect()->route('admin.brand.index');
+        else
             return back();
-        }
     }
 
     /**

@@ -52,7 +52,7 @@ class OrderAdminController extends Controller
         // Query cơ bản: bỏ đơn status=0 (chờ PayOS chưa thanh toán)
         // Sắp xếp: ưu tiên đơn chờ xử lý (1) lên đầu, rồi theo thanh toán
         $query = Order::where('status', '!=', 0)
-            ->orderByRaw("FIELD(status, 1, 3, 4, 5, 6) ASC")
+            ->orderByRaw("FIELD(status, 1, 3, 5, 4, 6, -1) ASC")
             ->orderByRaw("FIELD(payment_method, 'BANK TRANSFER', 'COD') ASC")
             ->orderBy('created_at', 'ASC');
 

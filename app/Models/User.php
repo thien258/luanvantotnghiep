@@ -150,12 +150,13 @@ class User extends Authenticatable implements MustVerifyEmail
     // =========================================================================
 
     /**
-     * Quan hệ: 1 user (NSX) có thể gắn với 1 hồ sơ ManuFacturer.
-     * Dùng khi tài khoản đăng nhập của nhà sản xuất cần lấy thông tin công ty.
+     * Quan hệ: 1 user (NSX) có thể gắn với nhiều sản phẩm (danh bạ NSX).
+     * Many-to-many qua bảng manufacturers_product.
+     * Dùng khi sync SP vào danh bạ NSX sau khi tạo PurchaseOrder.
      */
-    public function manufacturer()
+    public function manufacturerProducts()
     {
-        return $this->hasOne(ManuFacturer::class, 'user_id');
+        return $this->belongsToMany(Product::class, 'manufacturers_product', 'manufacturer_id', 'product_id');
     }
 
     /**

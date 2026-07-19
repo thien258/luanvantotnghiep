@@ -73,12 +73,11 @@ class PurchaseOrder extends Model
     ];
 
     /**
-     * Nhà sản xuất nhận đơn đặt hàng này.
-     * Dùng để hiển thị tên, SĐT NSX trong trang chi tiết đơn.
+     * Nhà sản xuất nhận đơn — trỏ thẳng vào User (sau khi gộp bảng manufacturers).
      */
     public function manufacturer()
     {
-        return $this->belongsTo(ManuFacturer::class, 'manufacturer_id', 'id');
+        return $this->belongsTo(\App\Models\User::class, 'manufacturer_id', 'id');
     }
 
     /**

@@ -65,44 +65,42 @@
                                 <th class="text-center">Tỉ lệ bán</th>
                                 <th class="text-center">Ngày nhập</th>
                                 <th class="text-center">Festival</th>
-                                <th class="text-center">Đề xuất</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($slowProducts as $sp)
-                            <tr>
-                                <td><span class="fw-bold text-dark">{{ $sp->title }}</span></td>
-                                <td class="text-center fw-bold text-secondary">{{ $sp->total_import }}</td>
-                                <td class="text-center fw-bold text-danger">{{ $sp->total_sold }}</td>
-                                <td class="text-center">
-                                    <span class="badge bg-danger rounded-0" style="font-size:0.65rem;">{{ $sp->sale_rate }}%</span>
-                                </td>
-                                <td class="text-center" style="font-size:0.75rem;">
-                                    @if($sp->last_import_at)
-                                        {{ $sp->last_import_at->format('d/m/Y') }}
-                                        <br><span class="text-muted">{{ $sp->days_since }} ngày trước</span>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-0 px-2 py-1" style="font-size:0.65rem;">
-                                        <i class="fa fa-bolt me-1"></i> CẦN GIẢM GIÁ SALE
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    @forelse($sp->festivals as $fes)
-                                        <span class="badge bg-info text-dark rounded-0 mb-1" style="font-size:0.65rem;">
-                                            🎉 {{ $fes->name }}
-                                        </span>
-                                    @empty
-                                        <span class="text-muted" style="font-size:0.75rem;">—</span>
-                                    @endforelse
-                                </td>
-                            </tr>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($slowProducts as $sp)
+                                            <tr>
+                                                <td><span class="fw-bold text-dark">{{ $sp->title }}</span></td>
+                                                <td class="text-center fw-bold text-secondary">{{ $sp->total_import }}</td>
+                                                <td class="text-center fw-bold text-danger">{{ $sp->total_sold }}</td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-danger rounded-0" style="font-size:0.65rem;">{{ $sp->sale_rate }}%</span>
+                                                </td>
+                                                <td class="text-center" style="font-size:0.75rem;">
+                                                    @if($sp->last_import_at)
+                                                        {{ $sp->last_import_at->format('d/m/Y') }}
+                                                        <br><span class="text-muted">{{ $sp->days_since }} ngày trước</span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @if($sp->festivals->isNotEmpty())
+                                                        @foreach($sp->festivals as $fes)
+                                                            <span class="badge bg-success text-white rounded-0 mb-1" style="font-size:0.65rem;">
+                                                                🎉 {{ $fes->name }} @if($fes->discount)(-{{ $fes->discount }}%)@endif
+                                                            </span>
+                                                        @endforeach
+                                                    @else
+                                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-0 px-2 py-1" style="font-size:0.65rem;">
+                                                            <i class="fa fa-bolt me-1"></i> CẦN GIẢM GIÁ SALE
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                            </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-3">Không có sản phẩm bán chậm (tất cả SP nhập đã bán > 30% sau 30 ngày).</td>
+                                <td colspan="6" class="text-center text-muted py-3">Không có sản phẩm bán chậm (tất cả SP nhập đã bán > 30% sau 30 ngày).</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -254,7 +252,7 @@
         </div>
     </div>
 </div>
-{{-- MODAL: Phân SP bán chậm vào Festival --}}
+{{-- MODAL 2-BƯỚC: Phân SP bán chậm vào Festival --}}
 <div class="modal fade" id="modalAttachFestivalSlow" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content rounded-0">
@@ -262,71 +260,98 @@
                 <h6 class="modal-title mb-0"><i class="fa fa-tag me-2"></i>Phân sản phẩm bán chậm vào Festival</h6>
                 <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
-            <form action="{{ route('admin.product.warehouse.attach-festival') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="row">
-                        {{-- Cột trái: SP bán chậm --}}
-                        <div class="col-md-7">
-                            <p class="fw-bold small text-uppercase text-muted mb-2">Chọn sản phẩm bán chậm</p>
-                            <div style="max-height:350px; overflow-y:auto;">
-                                <table class="table table-sm table-bordered small mb-0">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th width="5%">✓</th>
-                                            <th>Sản phẩm</th>
-                                            <th class="text-center">Tỉ lệ bán</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($slowProducts as $sp)
-                                        <tr>
-                                            <td class="text-center">
-                                                <input type="checkbox" name="product_ids[]" value="{{ $sp->id }}">
-                                            </td>
-                                            <td class="fw-bold">{{ $sp->title }}</td>
-                                            <td class="text-center">
-                                                <span class="badge bg-danger rounded-0">{{ $sp->sale_rate }}%</span>
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+            <div class="modal-body">
+
+                {{-- BƯỚC 1: Chọn festival --}}
+                <div id="slow-step1">
+                    <p class="fw-bold small text-uppercase text-muted mb-3">Bước 1 — Chọn chương trình khuyến mãi</p>
+                    @forelse($festivals as $fes)
+                    <div class="border rounded-0 p-3 mb-2 d-flex justify-content-between align-items-center festival-card"
+                         style="cursor:pointer;"
+                         data-id="{{ $fes->id }}"
+                         data-name="{{ $fes->name }}"
+                         data-discount="{{ $fes->discount }}"
+                         data-target="slow">
+                        <div>
+                            <span class="fw-bold">{{ $fes->name }}</span>
+                            <span class="badge bg-danger ms-2">-{{ $fes->discount }}%</span>
+                            <br>
+                            <small class="text-muted">{{ $fes->start_date->format('d/m/Y') }} → {{ $fes->end_date->format('d/m/Y') }}</small>
                         </div>
-                        {{-- Cột phải: Festival --}}
-                        <div class="col-md-5">
-                            <p class="fw-bold small text-uppercase text-muted mb-2">Chọn Festival</p>
-                            @forelse($festivals as $fes)
-                            <div class="form-check border rounded-0 p-2 mb-2">
-                                <input class="form-check-input" type="radio"
-                                    name="festival_id" value="{{ $fes->id }}" id="slow_fes_{{ $fes->id }}">
-                                <label class="form-check-label w-100" for="slow_fes_{{ $fes->id }}">
-                                    <span class="fw-bold">{{ $fes->name }}</span>
-                                    <span class="badge bg-danger ms-1">-{{ $fes->discount }}%</span>
-                                    <br>
-                                    <small class="text-muted">
-                                        {{ $fes->start_date->format('d/m/Y') }} → {{ $fes->end_date->format('d/m/Y') }}
-                                    </small>
-                                </label>
-                            </div>
-                            @empty
-                            <div class="alert alert-warning rounded-0 small">Không có festival đang active.</div>
-                            @endforelse
-                        </div>
+                        <i class="fa fa-chevron-right text-muted"></i>
                     </div>
+                    @empty
+                    <div class="alert alert-warning rounded-0 small">Không có festival đang active.</div>
+                    @endforelse
                 </div>
-                <div class="modal-footer py-2">
-                    <button type="button" class="btn btn-secondary btn-sm rounded-0" data-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-success btn-sm rounded-0">
-                        <i class="fa fa-check me-1"></i> Xác nhận thêm vào Festival
-                    </button>
+
+                {{-- BƯỚC 2: Chọn SP --}}
+                <div id="slow-step2" style="display:none;">
+                    <div class="d-flex align-items-center mb-3 gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0" onclick="slowBackToStep1()">
+                            <i class="fa fa-arrow-left me-1"></i> Quay lại
+                        </button>
+                        <span class="fw-bold small">Festival đã chọn: <span id="slow-fes-name" class="text-success"></span></span>
+                    </div>
+                    <form action="{{ route('admin.product.warehouse.attach-festival') }}" method="POST" id="slowFestivalForm">
+                        @csrf
+                        <input type="hidden" name="festival_id" id="slow-festival-id-input">
+                        <p class="fw-bold small text-uppercase text-muted mb-2">Bước 2 — Chọn sản phẩm cần thêm vào</p>
+                        <div style="max-height:350px; overflow-y:auto;">
+                            <table class="table table-sm table-bordered small mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th width="5%">✓</th>
+                                        <th>Sản phẩm</th>
+                                        <th class="text-center">Tỉ lệ bán</th>
+                                        <th class="text-center">Festival hiện tại</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($slowProducts as $sp)
+                                    @php
+                                        $spFestivalIds = $sp->festivals->pluck('id')->toArray();
+                                    @endphp
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" name="product_ids[]" value="{{ $sp->id }}"
+                                                   class="slow-product-cb"
+                                                   data-festival-ids="{{ implode(',', $spFestivalIds) }}">
+                                        </td>
+                                        <td class="fw-bold">{{ $sp->title }}</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-danger rounded-0">{{ $sp->sale_rate }}%</span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if($sp->festivals->isNotEmpty())
+                                                @foreach($sp->festivals as $fes)
+                                                    <span class="badge bg-success rounded-0 mb-1" style="font-size:0.6rem;">
+                                                        🎉 {{ $fes->name }}
+                                                    </span>
+                                                @endforeach
+                                            @else
+                                                <span class="text-muted" style="font-size:0.75rem;">—</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary btn-sm rounded-0" data-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-success btn-sm rounded-0">
+                                <i class="fa fa-check me-1"></i> Xác nhận thêm vào Festival
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+
+            </div>
         </div>
     </div>
 </div>
-{{-- MODAL: Phân SP sắp hết hạn vào Festival --}}
+{{-- MODAL 2-BƯỚC: Phân SP sắp hết hạn vào Festival --}}
 <div class="modal fade" id="modalAttachFestival" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content rounded-0">
@@ -334,69 +359,147 @@
                 <h6 class="modal-title mb-0"><i class="fa fa-tag me-2"></i>Phân sản phẩm vào Festival</h6>
                 <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
-            <form action="{{ route('admin.product.warehouse.attach-festival') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="row">
-                        {{-- Cột trái: Danh sách SP sắp hết hạn --}}
-                        <div class="col-md-7">
-                            <p class="fw-bold small text-uppercase text-muted mb-2">Chọn sản phẩm cần đưa vào sale</p>
-                            <div style="max-height:350px; overflow-y:auto;">
-                                <table class="table table-sm table-bordered small mb-0">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th width="5%">✓</th>
-                                            <th>Sản phẩm</th>
-                                            <th class="text-center">Còn lại</th>
-                                            <th class="text-center">HSD</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($expiring as $item)
-                                        <tr class="{{ $item->days_left <= 365 ? 'table-danger' : 'table-warning' }}">
-                                            <td class="text-center">
-                                                <input type="checkbox" name="product_ids[]"
-                                                    value="{{ $item->product->id }}">
-                                            </td>
-                                            <td class="fw-bold">{{ $item->product->title }}</td>
-                                            <td class="text-center">{{ $item->qty_left }}</td>
-                                            <td class="text-center">{{ \Carbon\Carbon::parse($item->expiry_date)->format('d/m/Y') }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+            <div class="modal-body">
+
+                {{-- BƯỚC 1: Chọn festival --}}
+                <div id="exp-step1">
+                    <p class="fw-bold small text-uppercase text-muted mb-3">Bước 1 — Chọn chương trình khuyến mãi</p>
+                    @forelse($festivals as $fes)
+                    <div class="border rounded-0 p-3 mb-2 d-flex justify-content-between align-items-center festival-card"
+                         style="cursor:pointer;"
+                         data-id="{{ $fes->id }}"
+                         data-name="{{ $fes->name }}"
+                         data-discount="{{ $fes->discount }}"
+                         data-target="exp">
+                        <div>
+                            <span class="fw-bold">{{ $fes->name }}</span>
+                            <span class="badge bg-danger ms-2">-{{ $fes->discount }}%</span>
+                            <br>
+                            <small class="text-muted">{{ $fes->start_date->format('d/m/Y') }} → {{ $fes->end_date->format('d/m/Y') }}</small>
                         </div>
-                        {{-- Cột phải: Danh sách Festival --}}
-                        <div class="col-md-5">
-                            <p class="fw-bold small text-uppercase text-muted mb-2">Chọn Festival</p>
-                            @forelse($festivals as $fes)
-                            <div class="form-check border rounded-0 p-2 mb-2">
-                                <input class="form-check-input" type="radio"
-                                    name="festival_id" value="{{ $fes->id }}" id="fes_{{ $fes->id }}">
-                                <label class="form-check-label w-100" for="fes_{{ $fes->id }}">
-                                    <span class="fw-bold">{{ $fes->name }}</span>
-                                    <span class="badge bg-danger ms-1">-{{ $fes->discount }}%</span>
-                                    <br>
-                                    <small class="text-muted">
-                                        {{ $fes->start_date->format('d/m/Y') }} → {{ $fes->end_date->format('d/m/Y') }}
-                                    </small>
-                                </label>
-                            </div>
-                            @empty
-                            <div class="alert alert-warning rounded-0 small">Không có festival đang active.</div>
-                            @endforelse
-                        </div>
+                        <i class="fa fa-chevron-right text-muted"></i>
                     </div>
+                    @empty
+                    <div class="alert alert-warning rounded-0 small">Không có festival đang active.</div>
+                    @endforelse
                 </div>
-                <div class="modal-footer py-2">
-                    <button type="button" class="btn btn-secondary btn-sm rounded-0" data-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-success btn-sm rounded-0">
-                        <i class="fa fa-check me-1"></i> Xác nhận thêm vào Festival
-                    </button>
+
+                {{-- BƯỚC 2: Chọn SP --}}
+                <div id="exp-step2" style="display:none;">
+                    <div class="d-flex align-items-center mb-3 gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0" onclick="expBackToStep1()">
+                            <i class="fa fa-arrow-left me-1"></i> Quay lại
+                        </button>
+                        <span class="fw-bold small">Festival đã chọn: <span id="exp-fes-name" class="text-success"></span></span>
+                    </div>
+                    <form action="{{ route('admin.product.warehouse.attach-festival') }}" method="POST" id="expFestivalForm">
+                        @csrf
+                        <input type="hidden" name="festival_id" id="exp-festival-id-input">
+                        <p class="fw-bold small text-uppercase text-muted mb-2">Bước 2 — Chọn sản phẩm cần thêm vào</p>
+                        <div style="max-height:350px; overflow-y:auto;">
+                            <table class="table table-sm table-bordered small mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th width="5%">✓</th>
+                                        <th>Sản phẩm</th>
+                                        <th class="text-center">Còn lại</th>
+                                        <th class="text-center">HSD</th>
+                                        <th class="text-center">Festival hiện tại</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($expiring as $item)
+                                    @php
+                                        $itemFestivalIds = $item->product->festivals->pluck('id')->toArray();
+                                    @endphp
+                                    <tr class="{{ $item->days_left <= 365 ? 'table-danger' : 'table-warning' }}">
+                                        <td class="text-center">
+                                            <input type="checkbox" name="product_ids[]" value="{{ $item->product->id }}"
+                                                   class="exp-product-cb"
+                                                   data-festival-ids="{{ implode(',', $itemFestivalIds) }}">
+                                        </td>
+                                        <td class="fw-bold">{{ $item->product->title }}</td>
+                                        <td class="text-center">{{ $item->qty_left }}</td>
+                                        <td class="text-center">{{ \Carbon\Carbon::parse($item->expiry_date)->format('d/m/Y') }}</td>
+                                        <td class="text-center">
+                                            @if($item->product->festivals->isNotEmpty())
+                                                @foreach($item->product->festivals as $fes)
+                                                    <span class="badge bg-success rounded-0 mb-1" style="font-size:0.6rem;">
+                                                        🎉 {{ $fes->name }}
+                                                    </span>
+                                                @endforeach
+                                            @else
+                                                <span class="text-muted" style="font-size:0.75rem;">—</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary btn-sm rounded-0" data-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-success btn-sm rounded-0">
+                                <i class="fa fa-check me-1"></i> Xác nhận thêm vào Festival
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Xử lý click vào card festival (cả 2 modal)
+    document.querySelectorAll('.festival-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+            var id       = this.dataset.id;
+            var name     = this.dataset.name;
+            var discount = this.dataset.discount;
+            var target   = this.dataset.target; // 'slow' hoặc 'exp'
+
+            if (target === 'slow') {
+                document.getElementById('slow-festival-id-input').value = id;
+                document.getElementById('slow-fes-name').textContent = name + ' (-' + discount + '%)';
+                document.getElementById('slow-step1').style.display = 'none';
+                document.getElementById('slow-step2').style.display = 'block';
+                // Auto-check SP đã thuộc festival này
+                document.querySelectorAll('.slow-product-cb').forEach(function (cb) {
+                    var ids = cb.dataset.festivalIds ? cb.dataset.festivalIds.split(',').map(Number) : [];
+                    cb.checked = ids.includes(Number(id));
+                });
+            } else {
+                document.getElementById('exp-festival-id-input').value = id;
+                document.getElementById('exp-fes-name').textContent = name + ' (-' + discount + '%)';
+                document.getElementById('exp-step1').style.display = 'none';
+                document.getElementById('exp-step2').style.display = 'block';
+                // Auto-check SP đã thuộc festival này
+                document.querySelectorAll('.exp-product-cb').forEach(function (cb) {
+                    var ids = cb.dataset.festivalIds ? cb.dataset.festivalIds.split(',').map(Number) : [];
+                    cb.checked = ids.includes(Number(id));
+                });
+            }
+        });
+    });
+
+});
+
+function slowBackToStep1() {
+    document.getElementById('slow-step1').style.display = 'block';
+    document.getElementById('slow-step2').style.display = 'none';
+    document.querySelectorAll('.slow-product-cb').forEach(function (cb) { cb.checked = false; });
+}
+function expBackToStep1() {
+    document.getElementById('exp-step1').style.display = 'block';
+    document.getElementById('exp-step2').style.display = 'none';
+    document.querySelectorAll('.exp-product-cb').forEach(function (cb) { cb.checked = false; });
+}
+
+$('#modalAttachFestivalSlow').on('hidden.bs.modal', function () { slowBackToStep1(); });
+$('#modalAttachFestival').on('hidden.bs.modal', function () { expBackToStep1(); });
+</script>
 @endsection

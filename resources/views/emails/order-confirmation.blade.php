@@ -158,6 +158,10 @@
                                         💳 Thanh toán ngay
                                     </a>
                                 </div>
+                                <p style="font-size:11px;color:#e65100;margin:12px 0 0;text-align:center;">
+                                    ⚠️ Mã QR và link thanh toán chỉ dùng <strong>1 lần</strong>. Nếu bạn đã bấm vào nhưng chưa thanh toán hoặc bấm Hủy, mã này sẽ không còn hiệu lực.<br>
+                                    Để thanh toán lại, vui lòng đăng nhập → <strong>Lịch sử đơn hàng</strong> → chọn đơn này → bấm <strong>"Thanh toán online"</strong>.
+                                </p>
                                 @else
                                 <p style="font-size:12px;color:#999;margin:0;">
                                     ⚠️ Không thể tạo link thanh toán tự động. Vui lòng liên hệ shop.

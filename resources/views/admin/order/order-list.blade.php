@@ -14,6 +14,7 @@
                     <option value="4" {{ $status == '4' ? 'selected' : '' }}>Hoàn Tất</option>
                     <option value="5" {{ $status == '5' ? 'selected' : '' }}>Hoàn Hàng</option>
                     <option value="6" {{ $status == '6' ? 'selected' : '' }}>Hàng Hỏng</option>
+                    <option value="-1" {{ $status == '-1' ? 'selected' : '' }}>Đã Hủy</option>
                 </select>
             </form>
         </div>
@@ -76,6 +77,8 @@
                             <span class="badge bg-secondary text-white w-100" style="font-size:0.8rem; padding:6px 8px;">Hoàn Hàng</span>
                             @elseif($order->status == 6)
                             <span class="badge bg-danger text-white w-100" style="font-size:0.8rem; padding:6px 8px;">Hàng Hỏng</span>
+                            @elseif($order->status == -1)
+                            <span class="badge bg-dark text-white w-100" style="font-size:0.8rem; padding:6px 8px;">Đã Hủy</span>
                             @else
                             <span class="badge bg-secondary text-white w-100" style="font-size:0.8rem; padding:6px 8px;">Không xác định</span>
                             @endif

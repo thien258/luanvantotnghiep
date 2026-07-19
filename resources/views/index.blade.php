@@ -1,6 +1,13 @@
 @extends('layout/home')
 @section('body')
 
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show rounded-0 mb-0 text-center" role="alert" style="font-size:0.9rem;">
+    <i class="fa-solid fa-circle-check me-2"></i> {{ session('success') }}
+    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+</div>
+@endif
+
 <!-- Banner giữ nguyên -->
 <section class="hero-banner mb-5">
     @forelse($title as $banner)

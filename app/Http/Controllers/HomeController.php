@@ -11,7 +11,6 @@ use App\Models\Title;
 use App\Models\Concentration;
 use App\Models\Festival;
 use App\Models\Product;
-use App\Models\ManuFacturer;
 use Illuminate\Support\Facades\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 

@@ -66,12 +66,11 @@ class SupplierOffer extends Model
     ];
 
     /**
-     * NSX đã tạo ra báo giá này.
-     * Dùng để hiển thị tên, SĐT NSX khi admin xem danh sách báo giá.
+     * NSX đã tạo ra báo giá này — trỏ thẳng vào User (sau khi gộp bảng manufacturers).
      */
     public function manufacturer()
     {
-        return $this->belongsTo(ManuFacturer::class, "manufacturer_id", "id");
+        return $this->belongsTo(\App\Models\User::class, 'manufacturer_id', 'id');
     }
 
     /**

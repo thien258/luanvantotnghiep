@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SupplierOffer;
 use App\Models\SupplierOfferItem;
-use App\Models\ManuFacturer;
+use App\Models\User;
 use App\Models\Product;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -46,19 +46,17 @@ class SupplierOfferController extends Controller
 
         // manufacturer chỉ thấy báo giá của mình
         if ($user->role === 'manufacturer') {
-            $manufacturer = $user->manufacturer;
-            if (!$manufacturer) {
-                // Tài khoản chưa được liên kết với NSX nào
+            if (!$user->id) {
                 return view('admin.supplier-offer.index', [
                     'offers'        => collect(),
                     'manufacturers' => collect(),
                 ]);
             }
-            $query->where('manufacturer_id', $manufacturer->id);
+            $query->where('manufacturer_id', $user->id);
         }
 
         $offers = $query->paginate(15);
-        $manufacturers = ManuFacturer::orderBy('name')->get();
+        $manufacturers = User::where('role', 'manufacturer')->orderBy('name')->get();
 
         return view('admin.supplier-offer.index', compact('offers', 'manufacturers'));
     }
@@ -70,7 +68,7 @@ class SupplierOfferController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'manufacturer_id' => 'required|exists:manufacturers,id',
+            'manufacturer_id' => 'required|exists:users,id',
             'file'            => 'required|file|mimes:xlsx,xls,csv|max:5120',
         ], [
             'manufacturer_id.required' => 'Vui lòng chọn nhà sản xuất.',
@@ -149,8 +147,7 @@ class SupplierOfferController extends Controller
 
         // manufacturer chỉ xem offer của mình
         if (auth()->user()->role === 'manufacturer') {
-            $manufacturer = auth()->user()->manufacturer;
-            if (!$manufacturer || $offer->manufacturer_id !== $manufacturer->id) {
+            if ($offer->manufacturer_id !== auth()->id()) {
                 abort(403, 'Bạn không có quyền xem báo giá này.');
             }
         }

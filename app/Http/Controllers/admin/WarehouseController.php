@@ -85,7 +85,7 @@ class WarehouseController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $manufacturers = \App\Models\ManuFacturer::orderBy('name')->get();
+        $manufacturers = \App\Models\User::where('role', 'manufacturer')->orderBy('name')->get();
 
         return view('admin.product.import-list', compact('imports', 'manufacturers'));
     }
@@ -109,7 +109,14 @@ class WarehouseController extends Controller
         ]);
 
         $file = $request->file('excel_file');
-        $path = $file->store('warehouse_imports', 'local'); // lưu private
+
+        // Validate nội dung file trước khi lưu
+        $errors = $this->validateImportFileContent($file);
+        if (!empty($errors)) {
+            return back()->withErrors(['excel_file' => $errors])->withInput();
+        }
+
+        $path = $file->store('warehouse_imports', 'local');
 
         WarehouseImport::create([
             'file_path'     => $path, // đường dẫn file trong storage
@@ -371,6 +378,105 @@ class WarehouseController extends Controller
     }
 
     /**
+     * Validate nội dung file CSV/Excel trước khi lưu.
+     * Trả về mảng lỗi (rỗng = hợp lệ).
+     */
+    private function validateImportFileContent($file): array
+    {
+        $errors = [];
+        $ext    = strtolower($file->getClientOriginalExtension());
+
+        // Các cột bắt buộc (theo thứ tự trong file)
+        $requiredHeaders = ['title', 'image', 'decription', 'unit_price', 'sl_order', 'quantity', 'volume', 'category', 'brand', 'concentration'];
+
+        try {
+            $rows = [];
+
+            if ($ext === 'csv') {
+                $content = file_get_contents($file->getRealPath());
+                $enc     = mb_detect_encoding($content, ['UTF-8', 'GBK', 'ISO-8859-1'], true);
+                if ($enc && $enc !== 'UTF-8') {
+                    $content = mb_convert_encoding($content, 'UTF-8', $enc);
+                }
+                $stream = fopen('php://memory', 'r+');
+                fwrite($stream, $content);
+                rewind($stream);
+
+                // Bỏ dòng metadata # supplier nếu có
+                $firstRow = fgetcsv($stream, 0, ',');
+                if ($firstRow && !empty($firstRow[0])) {
+                    $firstRow[0] = ltrim($firstRow[0], "\xEF\xBB\xBF");
+                }
+                if ($firstRow && str_starts_with(trim($firstRow[0]), '# supplier')) {
+                    $firstRow = fgetcsv($stream, 0, ','); // đọc header thật
+                }
+                $header = array_map(fn($h) => strtolower(trim($h)), $firstRow ?? []);
+
+                while (($data = fgetcsv($stream, 0, ',')) !== false) {
+                    if (!empty($data[0])) $rows[] = $data;
+                }
+                fclose($stream);
+            } else {
+                $importer = new \App\Imports\RawArrayImport();
+                Excel::import($importer, $file->getRealPath());
+                $sheet = $importer->data;
+                if (!empty($sheet)) {
+                    $headerRow = array_shift($sheet);
+                    $header    = array_map(fn($h) => strtolower(trim((string)$h)), array_values($headerRow));
+                    $rows      = array_values($sheet);
+                }
+            }
+
+            // Kiểm tra header
+            foreach ($requiredHeaders as $col) {
+                if (!in_array($col, $header ?? [])) {
+                    $errors[] = "Thiếu cột bắt buộc: \"{$col}\". File phải có đúng thứ tự cột: " . implode(', ', $requiredHeaders);
+                    return $errors; // dừng sớm nếu header sai
+                }
+            }
+
+            if (empty($rows)) {
+                $errors[] = 'File không có dữ liệu sản phẩm nào.';
+                return $errors;
+            }
+
+            // Kiểm tra từng dòng
+            foreach ($rows as $i => $row) {
+                $lineNum = $i + 2; // dòng 1 = header, dòng 2 = data đầu tiên
+                $title      = trim((string)($row[0] ?? ''));
+                $unitPrice  = trim((string)($row[3] ?? ''));
+                $quantity   = trim((string)($row[5] ?? ''));
+                $expiry     = trim((string)($row[10] ?? ''));
+
+                if (empty($title)) {
+                    $errors[] = "Dòng {$lineNum}: Tên sản phẩm (title) không được để trống.";
+                }
+                if ($unitPrice !== '' && (!is_numeric($unitPrice) || (float)$unitPrice < 0)) {
+                    $errors[] = "Dòng {$lineNum}: Giá nhập (unit_price) phải là số không âm.";
+                }
+                if ($quantity !== '' && (!is_numeric($quantity) || (int)$quantity < 0)) {
+                    $errors[] = "Dòng {$lineNum}: Số lượng (quantity) phải là số nguyên không âm.";
+                }
+                if ($expiry === '') {
+                    $errors[] = "Dòng {$lineNum}: HSD (expiry_date) không được để trống, phải nhập đúng định dạng YYYY-MM-DD (ví dụ: 2026-09-15).";
+                } elseif (!\DateTime::createFromFormat('Y-m-d', $expiry)) {
+                    $errors[] = "Dòng {$lineNum}: HSD (expiry_date) phải đúng định dạng YYYY-MM-DD (ví dụ: 2026-09-15).";
+                }
+
+                // Dừng sau 10 lỗi để tránh spam
+                if (count($errors) >= 10) {
+                    $errors[] = '... (còn nhiều lỗi khác, vui lòng kiểm tra lại file)';
+                    break;
+                }
+            }
+        } catch (\Exception $e) {
+            $errors[] = 'Không thể đọc file: ' . $e->getMessage();
+        }
+
+        return $errors;
+    }
+
+    /**
      * Đọc file CSV/Excel và trả về mảng preview sản phẩm.
      */
     private function parseImportFile(WarehouseImport $import): array
@@ -395,7 +501,7 @@ class WarehouseController extends Controller
             fwrite($stream, $fileContent);
             rewind($stream);
 
-            $headerLine = fgetcsv($stream, 1000, ',');
+            $headerLine = fgetcsv($stream, 0, ',');
 
             // Bỏ BOM UTF-8 nếu có ở đầu dòng
             if (!empty($headerLine[0])) {
@@ -404,22 +510,22 @@ class WarehouseController extends Controller
 
             // Nếu dòng đầu là metadata "# supplier,...", bỏ qua và đọc header thật
             if (!empty($headerLine[0]) && str_starts_with(trim($headerLine[0]), '# supplier')) {
-                $headerLine = fgetcsv($stream, 1000, ',');
+                $headerLine = fgetcsv($stream, 0, ',');
             }
 
             $delimiter = (count($headerLine) <= 1) ? ';' : ',';
             if ($delimiter === ';') {
                 rewind($stream);
-                $firstLine = fgetcsv($stream, 1000, ';');
+                $firstLine = fgetcsv($stream, 0, ';');
                 if (!empty($firstLine[0])) {
                     $firstLine[0] = ltrim($firstLine[0], "\xEF\xBB\xBF");
                 }
                 if (!empty($firstLine[0]) && str_starts_with(trim($firstLine[0]), '# supplier')) {
-                    fgetcsv($stream, 1000, ';');
+                    fgetcsv($stream, 0, ';');
                 }
             }
 
-            while (($data = fgetcsv($stream, 1000, $delimiter)) !== false) {
+            while (($data = fgetcsv($stream, 0, $delimiter)) !== false) {
                 if (!empty($data[0])) {
                     $productsPreview[] = $this->mapRow($data);
                 }

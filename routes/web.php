@@ -115,6 +115,9 @@ Route::middleware('auth')->group(function () {
     // Khách xác nhận đã chuyển khoản thủ công
     Route::post('/order/{id}/confirm-paid', [OrderController::class, 'confirmPaid'])->name('order.confirmPaid');
 
+    // Tạo lại link PayOS cho đơn COD
+    Route::post('/order/{id}/repay', [OrderController::class, 'repay'])->name('order.repay');
+
     // Khách hủy đơn (chỉ được hủy khi status=1, chưa xuất kho)
     Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder'])->name('order.cancel');
 

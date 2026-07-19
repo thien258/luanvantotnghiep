@@ -5,92 +5,72 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\ManuFacturer;
 use Illuminate\Support\Facades\Auth;
 
 /**
  * UserController — Quản lý người dùng trong trang admin.
  *
  * Chức năng:
- *   - index()   : Danh sách tất cả users, phân trang 20 dòng
- *   - update()  : Đổi role của user (admin/warehouse/manufacturer/customer)
- *   - destroy() : Xóa user kèm toàn bộ đơn hàng và chi tiết đơn hàng liên quan
+ *   - index()        : Danh sách tất cả users, phân trang 20 dòng
+ *   - update()       : Đổi role của user
+ *   - toggleStatus() : Tắt/bật tài khoản (không xóa data)
  *
- * Lưu ý: Admin không thể tự đổi role của chính mình (tránh vô tình tự lock ra khỏi admin).
+ * Lưu ý: Admin không thể tự đổi role của chính mình.
  */
 class UserController extends Controller
 {
-    // Liệt kê toàn bộ user, phân trang 20 dòng/trang
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::paginate(20);
-        return view('admin.user.user-list', compact('users'));
+        $email = $request->input('email');
+        $users = User::when($email, fn($q) => $q->where('email', 'like', "%{$email}%"))
+                     ->paginate(20)
+                     ->withQueryString();
+        return view('admin.user.user-list', compact('users', 'email'));
     }
 
-    /**
-     * Đổi role của user được chọn.
-     *
-     * Bảo mật:
-     *   - Không cho admin tự đổi role của chính mình
-     *   - Validate role phải nằm trong danh sách hợp lệ
-     */
     public function update(User $user, Request $request)
     {
-        // Chặn admin tự đổi role của chính mình
-        if ($user->id === Auth::id()) {
-            return redirect()->back();
+        $operator = Auth::user();
+
+        if ($user->id === $operator->id) {
+            return redirect()->back()->with('error', 'Bạn không thể đổi role của chính mình.');
         }
 
         $newRole = $request->input('role');
 
-        // Chỉ chấp nhận các role hợp lệ
-        $validRoles = ['admin', 'warehouse', 'manufacturer', 'customer', 'director', 'root'];
-        if (!in_array($newRole, $validRoles)) {
-            return redirect()->back()->with('error', 'Role không hợp lệ.');
+        // Xác định role nào operator được phép gán
+        $allowedRoles = match ($operator->role) {
+            'root'     => ['admin', 'warehouse', 'manufacturer', 'customer', 'director', 'root'],
+            'admin'    => ['warehouse', 'manufacturer', 'customer', 'admin'],   // không được gán director, root
+            'director' => ['admin'],                                          // chỉ được gán admin
+            default    => [],
+        };
+
+        if (!in_array($newRole, $allowedRoles)) {
+            return redirect()->back()->with('error', 'Bạn không có quyền gán role này.');
         }
 
         $user->role = $newRole;
         $user->save();
-
-        // Khi set role = manufacturer → tự tạo record trong bảng manufacturers nếu chưa có
-        if ($newRole === 'manufacturer') {
-            ManuFacturer::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'name'    => $user->name,
-                    'phone'   => $user->phone ?? '',
-                    'address' => $user->address ?? '',
-                ]
-            );
-        }
-
-        // Khi bỏ role manufacturer → hủy liên kết (xóa user_id, giữ record NSX)
-        if ($newRole !== 'manufacturer') {
-            ManuFacturer::where('user_id', $user->id)->update(['user_id' => null]);
-        }
 
         return redirect()->back()->with('success', "Đã đổi quyền {$user->name} thành {$newRole}.");
     }
 
     /**
      * Toggle trạng thái hoạt động của user (is_active).
-     * Không xóa dữ liệu — chỉ tắt/bật tài khoản.
      *
      * Phân quyền:
-     *   - Không thể tự tắt chính mình
-     *   - Director: chỉ được toggle customer, warehouse, manufacturer
-     *   - Admin: được toggle tất cả trừ director, root
+     *   - Director: chỉ toggle customer, warehouse, manufacturer
+     *   - Admin: toggle tất cả trừ director, root
      */
     public function toggleStatus(User $user)
     {
         $operator = Auth::user();
 
-        // Không tự tắt chính mình
         if ($user->id === $operator->id) {
             return redirect()->back()->with('error', 'Bạn không thể tắt tài khoản của chính mình.');
         }
 
-        // Danh sách role mà operator được phép toggle
         $allowedTargets = match ($operator->role) {
             'director' => ['customer', 'warehouse', 'manufacturer'],
             'admin'    => ['customer', 'warehouse', 'manufacturer', 'admin'],

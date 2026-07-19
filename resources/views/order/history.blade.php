@@ -60,7 +60,7 @@
                                     Xem chi tiết
                                 </a>
 
-                                @if($order->status == 4)
+                                @if($order->status == 4 && $order->updated_at->diffInDays(now()) <= 3)
                                 <button type="button" 
                                         class="btn btn-outline-secondary btn-sm rounded-0 text-uppercase fw-semibold btn-trigger-return" 
                                         data-bs-toggle="modal" 
@@ -70,12 +70,23 @@
                                     Hoàn hàng
                                 </button>
                                 @endif 
+
+                                @if($order->status == 1)
+                                <button type="button"
+                                        class="btn btn-outline-danger btn-sm rounded-0 text-uppercase fw-semibold btn-trigger-cancel"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#cancelOrderModal"
+                                        data-order-id="{{ $order->id }}"
+                                        style="font-size: 0.65rem; letter-spacing: 1px; padding: 6px 12px; white-space: nowrap;">
+                                    Hủy đơn
+                                </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">Bạn chưa đặt đơn hàng nào tại Atelier Scent.</td>
+                        <td colspan="6" class="text-center py-5 text-muted">Bạn chưa đặt đơn hàng nào tại Aroma.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -96,7 +107,7 @@
             <form id="returnOrderForm" action="" method="POST">
                 @csrf
                 <div class="modal-body py-4">
-                    <p class="text-muted small mb-3">Vui lòng cho Atelier Scent biết lý do bạn muốn hoàn trả đơn hàng <strong id="modal-order-text">#DH</strong> này để chúng tôi hỗ trợ xử lý sớm nhất.</p>
+                    <p class="text-muted small mb-3">Vui lòng cho Aroma biết lý do bạn muốn hoàn trả đơn hàng <strong id="modal-order-text">#DH</strong> này để chúng tôi hỗ trợ xử lý sớm nhất.</p>
                     
                     <div class="mb-3">
                         <label for="return_reason" class="form-label text-uppercase small fw-bold text-secondary" style="font-size: 0.7rem; letter-spacing: 0.5px;">Lý do hoàn hàng <span class="text-danger">*</span></label>
@@ -115,9 +126,54 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Config từ Blade — không thể tách vì dùng route()
-    window.returnRouteTemplate = "{{ route('order.customer-return', ':id') }}";
+document.addEventListener('DOMContentLoaded', function () {
+    var returnBase = "{{ url('order/history/return') }}";
+    var cancelBase = "{{ url('order') }}";
+
+    // Hoàn hàng modal
+    document.querySelectorAll('.btn-trigger-return').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = this.dataset.orderId;
+            document.getElementById('modal-order-text').textContent = '#DH' + id;
+            document.getElementById('returnOrderForm').action = returnBase + '/' + id;
+        });
+    });
+
+    // Hủy đơn modal
+    document.querySelectorAll('.btn-trigger-cancel').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = this.dataset.orderId;
+            document.getElementById('cancel-order-text').textContent = '#DH' + id;
+            document.getElementById('cancelOrderForm').action = cancelBase + '/' + id + '/cancel';
+        });
+    });
+});
 </script>
-<script src="{{ asset('js/order-history.js') }}"></script>
+
+{{-- Modal hủy đơn hàng --}}
+<div class="modal fade" id="cancelOrderModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-0 border-dark">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark text-uppercase" style="font-family: 'Playfair Display', serif; font-size: 1.1rem; letter-spacing: 1px;">Hủy đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="cancelOrderForm" action="" method="POST">
+                @csrf
+                <div class="modal-body py-4">
+                    <p class="text-muted small mb-3">Bạn đang yêu cầu hủy đơn hàng <strong id="cancel-order-text">#DH</strong>. Vui lòng cho biết lý do.</p>
+                    <div class="mb-3">
+                        <label class="form-label text-uppercase small fw-bold text-secondary" style="font-size: 0.7rem; letter-spacing: 0.5px;">Lý do hủy <span class="text-danger">*</span></label>
+                        <textarea class="form-control rounded-0 border-secondary-subtle" name="reason" rows="3" placeholder="Ví dụ: Đặt nhầm sản phẩm, muốn thay đổi địa chỉ..." required minlength="5"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-sm btn-light rounded-0 text-uppercase fw-semibold" data-bs-dismiss="modal" style="font-size:0.7rem; padding: 8px 16px;">Quay lại</button>
+                    <button type="submit" class="btn btn-sm btn-danger rounded-0 text-uppercase fw-semibold" style="font-size:0.7rem; padding: 8px 16px; letter-spacing: 0.5px;">Xác nhận hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @endsection

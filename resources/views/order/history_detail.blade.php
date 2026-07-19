@@ -30,6 +30,8 @@
                                 Yêu cầu hoàn hàng
                             @elseif($order->status == 6)
                                 Hàng hỏng
+                            @elseif($order->status == -1)
+                                Đã hủy
                             @else
                                 Không xác định
                             @endif
@@ -192,4 +194,23 @@
             </div>
         </div>
     </div>
+
+    {{-- Nút thanh toán online cho đơn COD --}}
+    @if($order->payment_method === 'COD' && $order->status == 1)
+    <div class="container mt-3" style="max-width: 900px;">
+        <div class="border border-dark p-4 bg-white d-flex align-items-center justify-content-between gap-3">
+            <div>
+                <p class="fw-bold mb-1">Muốn được ưu tiên xử lý?</p>
+                <p class="text-muted small mb-0">Thanh toán online ngay để đơn được xử lý trước các đơn COD.</p>
+            </div>
+            <form action="{{ route('order.repay', $order->id) }}" method="POST" class="flex-shrink-0">
+                @csrf
+                <button type="submit" class="btn btn-dark rounded-0 px-4 py-2 text-uppercase fw-semibold small" style="letter-spacing:1px;">
+                    💳 Thanh toán online
+                </button>
+            </form>
+        </div>
+    </div>
+    @endif
+
     @endsection

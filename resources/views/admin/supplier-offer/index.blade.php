@@ -34,10 +34,10 @@
             <div class="form-row align-items-end">
                 <div class="form-group col-md-4 mb-2">
                     <label class="small font-weight-bold">Nhà sản xuất <span class="text-danger">*</span></label>
-                    @php $myManufacturer = auth()->user()->manufacturer; @endphp
-                    <input type="hidden" name="manufacturer_id" value="{{ $myManufacturer?->id }}">
+                    @php $myManufacturer = auth()->user(); @endphp
+                    <input type="hidden" name="manufacturer_id" value="{{ $myManufacturer->id }}">
                     <input type="text" class="form-control form-control-sm rounded-0 bg-light"
-                           value="{{ $myManufacturer?->name ?? '—' }}" readonly>
+                           value="{{ $myManufacturer->name ?? '—' }}" readonly>
                 </div>
                 <div class="form-group col-md-4 mb-2">
                     <label class="small font-weight-bold">

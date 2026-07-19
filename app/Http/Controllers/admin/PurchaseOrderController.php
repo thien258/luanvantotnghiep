@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\ManuFacturer;
 use App\Models\ProcurementRequest;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\SupplierOffer;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -48,12 +48,7 @@ class PurchaseOrderController extends Controller
 
         // manufacturer chỉ thấy đơn của mình
         if ($user->role === 'manufacturer') {
-            $manufacturer = $user->manufacturer;
-            if ($manufacturer) {
-                $query->where('manufacturer_id', $manufacturer->id);
-            } else {
-                $query->whereRaw('1=0'); // không có NSX liên kết → không thấy gì
-            }
+            $query->where('manufacturer_id', $user->id);
         }
 
         // Sắp xếp: đang giao lên đầu, đã nhận/hủy xuống cuối
@@ -139,8 +134,9 @@ class PurchaseOrderController extends Controller
                 ->toArray();
 
             if (!empty($productIds)) {
-                $manufacturer = ManuFacturer::find($offer->manufacturer_id);
-                $manufacturer?->products()->syncWithoutDetaching($productIds);
+                // Dùng User trực tiếp thay vì ManuFacturer
+                $mfrUser = User::find($offer->manufacturer_id);
+                $mfrUser?->manufacturerProducts()->syncWithoutDetaching($productIds);
             }
 
             // Bước 4: Đánh dấu báo giá đã được chấp nhận

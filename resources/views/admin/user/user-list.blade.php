@@ -3,6 +3,18 @@
 
 <h2>Danh sách người dùng</h2>
 
+<form method="GET" action="{{ route('admin.user.index') }}" class="mb-3 d-flex gap-2" style="max-width:400px;">
+    <input type="text" name="email" value="{{ $email ?? '' }}"
+           class="form-control form-control-sm rounded-0"
+           placeholder="Tìm theo email...">
+    <button type="submit" class="btn btn-sm btn-dark rounded-0">
+        <i class="fa fa-search"></i>
+    </button>
+    @if(!empty($email))
+    <a href="{{ route('admin.user.index') }}" class="btn btn-sm btn-outline-secondary rounded-0">✕</a>
+    @endif
+</form>
+
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         {{ session('success') }}
@@ -28,8 +40,15 @@
         default    => [],
     };
 
-    // Director không được đổi role — chỉ toggle
-    $canChangeRole = in_array($operatorRole, ['admin', 'root']);
+    // Role nào operator được phép gán (dùng trong dropdown)
+    $allowedRoles = match ($operatorRole) {
+        'root'     => ['customer', 'warehouse', 'manufacturer', 'admin', 'director', 'root'],
+        'admin'    => ['customer', 'warehouse', 'manufacturer', 'admin'],   // không được gán director, root
+        'director' => ['admin'],                                         // chỉ được gán admin
+        default    => [],
+    };
+
+    $canChangeRole = count($allowedRoles) > 0;
 @endphp
 
 <table class="table table-bordered table-hover small">
@@ -75,7 +94,7 @@
                     <span class="badge badge-secondary px-2 py-1">Tài khoản của bạn</span>
 
                 @else
-                    {{-- Đổi role: chỉ admin/root --}}
+                    {{-- Đổi role: tuỳ quyền operator --}}
                     @if($canChangeRole)
                     <form action="{{ route('admin.user.update', $user->id) }}" method="POST" class="mb-0">
                         @csrf
@@ -84,12 +103,24 @@
                                 class="form-control form-control-sm d-inline-block"
                                 style="width:auto;"
                                 onchange="this.form.submit()">
+                            @if(in_array('customer', $allowedRoles))
                             <option value="customer"     {{ $user->role === 'customer'     ? 'selected' : '' }}>Customer</option>
+                            @endif
+                            @if(in_array('warehouse', $allowedRoles))
                             <option value="warehouse"    {{ $user->role === 'warehouse'    ? 'selected' : '' }}>Nhân viên kho</option>
+                            @endif
+                            @if(in_array('manufacturer', $allowedRoles))
                             <option value="manufacturer" {{ $user->role === 'manufacturer' ? 'selected' : '' }}>Nhà sản xuất</option>
-                            <option value="director"     {{ $user->role === 'director'     ? 'selected' : '' }}>Giám đốc</option>
+                            @endif
+                            @if(in_array('admin', $allowedRoles))
                             <option value="admin"        {{ $user->role === 'admin'        ? 'selected' : '' }}>Admin</option>
+                            @endif
+                            @if(in_array('director', $allowedRoles))
+                            <option value="director"     {{ $user->role === 'director'     ? 'selected' : '' }}>Giám đốc</option>
+                            @endif
+                            @if(in_array('root', $allowedRoles))
                             <option value="root"         {{ $user->role === 'root'         ? 'selected' : '' }}>Root</option>
+                            @endif
                         </select>
                     </form>
                     @endif

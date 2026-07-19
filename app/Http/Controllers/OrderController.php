@@ -196,7 +196,7 @@ class OrderController extends Controller
             }
 
             return redirect()->route('welcome')
-                ->with('success', 'Đặt hàng thành công! Đơn hàng sẽ được giao trong 3-5 ngày.');
+                ->with('success', 'Đặt hàng COD thành công! Để được giao hàng sớm và ưu tiên hơn, vui lòng chuyển khoản qua link trong email vừa gửi.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('placeOrder exception: ' . $e->getMessage());
@@ -273,6 +273,27 @@ class OrderController extends Controller
     }
 
     // =========================================================================
+    // REPAY — Tạo lại link PayOS cho đơn COD
+    // =========================================================================
+
+    public function repay($id)
+    {
+        $order = Order::where('id', $id)
+            ->where('idUser', Auth::id())
+            ->where('payment_method', 'COD')
+            ->where('status', 1)
+            ->firstOrFail();
+
+        $checkoutUrl = $this->createPayOSLink($order);
+
+        if ($checkoutUrl) {
+            return redirect($checkoutUrl);
+        }
+
+        return redirect()->back()->with('error', 'Không thể tạo link thanh toán. Vui lòng thử lại sau.');
+    }
+
+    // =========================================================================
     // CONFIRM PAID — Khách xác nhận đã chuyển khoản (manual)
     // =========================================================================
 
@@ -289,8 +310,15 @@ class OrderController extends Controller
     // CANCEL ORDER — Khách hủy đơn (chỉ hủy được khi status=1)
     // =========================================================================
 
-    public function cancelOrder($id)
+    public function cancelOrder(Request $request, $id)
     {
+        $request->validate([
+            'reason' => 'required|string|min:5|max:500',
+        ], [
+            'reason.required' => 'Vui lòng nhập lý do hủy.',
+            'reason.min'      => 'Lý do hủy phải có ít nhất 5 ký tự.',
+        ]);
+
         // Chỉ cho hủy đơn status=1 (chưa xuất kho)
         $order = Order::where('id', $id)
             ->where('idUser', Auth::id())
@@ -300,23 +328,27 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
+            // Đổi status thành -1 (đã hủy), lưu lý do vào note
+            $order->status = -1;
+            $order->note   = ($order->note ? $order->note . ' | ' : '') . 'Lý do hủy: ' . trim($request->input('reason'));
+            $order->save();
+
+            // Hoàn sản phẩm về giỏ hàng
             foreach ($order->details as $detail) {
-                // Hoàn sản phẩm về giỏ hàng để khách đặt lại
-                // KHÔNG cộng lại tồn kho vì chưa trừ (trừ khi xuất kho)
                 Cart::create([
                     'idUser'     => Auth::id(),
                     'product_id' => $detail->idProduct,
                     'quantity'   => $detail->quantity,
                 ]);
             }
-            $order->delete(); // xóa đơn hoàn toàn
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('cancelOrder error: ' . $e->getMessage());
         }
 
-        return redirect()->route('carts.index')
-            ->with('status', 'Đã hủy đơn hàng. Sản phẩm đã được hoàn lại vào giỏ hàng.');
+        return redirect()->route('order.history')
+            ->with('success', 'Đã hủy đơn hàng thành công. Sản phẩm đã được hoàn lại vào giỏ hàng.');
     }
 
     // =========================================================================
@@ -366,8 +398,8 @@ class OrderController extends Controller
 
         $order = Order::findOrFail($id);
 
-        // Chỉ cho hoàn khi đơn đã giao thành công (status=4)
-        if ($order->status == 4) {
+        // Chỉ cho hoàn khi đơn đã giao thành công (status=4) và trong vòng 3 ngày
+        if ($order->status == 4 && $order->updated_at->diffInDays(now()) <= 3) {
             $order->status = 5; // Chuyển sang "Yêu cầu hoàn hàng"
 
             // Nối thêm lý do vào ghi chú, giữ nguyên ghi chú cũ của khách
@@ -402,7 +434,10 @@ class OrderController extends Controller
         $amount      = intval($order->total_price);
         $description = 'AROMA DH' . $order->id; // max 25 ký tự theo PayOS
         $returnUrl   = route('payos.success');
-        $cancelUrl   = route('order.payos-cancel', ['id' => $order->id]);
+        // COD: cancelUrl về trang chủ → bấm "Hủy" trên PayOS chỉ về home, không xóa đơn
+        $cancelUrl   = $order->payment_method === 'COD'
+            ? route('welcome')
+            : route('order.payos-cancel', ['id' => $order->id]);
 
         // Chuỗi ký theo đúng thứ tự alphabet của PayOS
         $signatureString = "amount={$amount}&cancelUrl={$cancelUrl}&description={$description}&orderCode={$orderCode}&returnUrl={$returnUrl}";
@@ -441,11 +476,22 @@ class OrderController extends Controller
     public function payosCancel($id)
     {
         $order = Order::where('id', $id)
-            ->where('status', 0) // chỉ hủy đơn chưa thanh toán
             ->with('details')
             ->first();
 
-        if ($order) {
+        if (!$order) {
+            return redirect()->route('carts.index')
+                ->with('status', 'Đã hủy thanh toán.');
+        }
+
+        // Đơn COD → khách hủy thanh toán nâng cấp, đơn vẫn giữ nguyên, có thể thanh toán lại sau
+        if ($order->payment_method === 'COD') {
+            return redirect()->route('order.history')
+                ->with('status', 'Bạn đã hủy thanh toán. Đơn COD vẫn còn hiệu lực, bạn có thể thanh toán online lại sau.');
+        }
+
+        // Đơn BANK TRANSFER chưa thanh toán (status=0) → xóa đơn, hoàn giỏ hàng
+        if ($order->status == 0) {
             DB::beginTransaction();
             try {
                 foreach ($order->details as $detail) {
@@ -462,10 +508,12 @@ class OrderController extends Controller
                 DB::rollBack();
                 Log::error('payosCancel error: ' . $e->getMessage());
             }
+
+            return redirect()->route('carts.index')
+                ->with('status', 'Đã hủy thanh toán. Sản phẩm đã được hoàn lại vào giỏ hàng.');
         }
 
-        return redirect()->route('carts.index')
-            ->with('status', 'Đã hủy thanh toán. Sản phẩm đã được hoàn lại vào giỏ hàng.');
+        return redirect()->route('order.history');
     }
 
     /**
@@ -527,6 +575,14 @@ class OrderController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Trang thông báo sau khi đặt hàng COD thành công.
+     */
+    public function codSuccess()
+    {
+        return view('order.cod_success_page');
     }
 
     /**

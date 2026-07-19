@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\admin\SaleSpeedHelper;
 use App\Models\ProcurementRequest;
 use App\Models\ProcurementRequestItem;
-use App\Models\ManuFacturer;
+use App\Models\User;
 use App\Models\Product;
 use App\Models\SupplierOffer;
 use App\Models\SupplierOfferItem;
@@ -45,7 +45,7 @@ class ProcurementController extends Controller
         // Nếu là manufacturer, truyền manufacturer_id để blade lọc đúng số báo giá
         $myManufacturerId = null;
         if ($user->role === 'manufacturer') {
-            $myManufacturerId = $user->manufacturer?->id;
+            $myManufacturerId = $user->id;
         }
 
         return view('admin.procurement.index', compact('requests', 'myManufacturerId'));
@@ -112,15 +112,10 @@ class ProcurementController extends Controller
 
         // manufacturer chỉ thấy báo giá của mình trong danh sách offers
         if (auth()->user()->role === 'manufacturer') {
-            $manufacturer = auth()->user()->manufacturer;
-            if ($manufacturer) {
-                $procRequest->setRelation(
-                    'offers',
-                    $procRequest->offers->where('manufacturer_id', $manufacturer->id)
-                );
-            } else {
-                $procRequest->setRelation('offers', collect());
-            }
+            $procRequest->setRelation(
+                'offers',
+                $procRequest->offers->where('manufacturer_id', auth()->id())
+            );
         }
 
         // Tính trạng thái bán nhanh/chậm cho các SP trong yêu cầu
@@ -211,7 +206,7 @@ class ProcurementController extends Controller
         $procRequest = ProcurementRequest::findOrFail($id);
 
         $request->validate([
-            'manufacturer_id' => 'required|exists:manufacturers,id',
+            'manufacturer_id' => 'required|exists:users,id',
             'file'            => 'required|file|mimes:xlsx,xls,csv|max:5120',
         ], [
             'manufacturer_id.required' => 'Vui lòng chọn nhà sản xuất.',
