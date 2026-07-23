@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="750" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+
+    <mxCell id="start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="30" y="305" width="30" height="30" as="geometry"/></mxCell>
+    <mxCell id="a1" value="Truy cập trang&#xa;đăng nhập" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="100" y="290" width="140" height="50" as="geometry"/></mxCell>
+    <mxCell id="a2" value="Hiển thị form&#xa;đăng nhập" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="100" y="390" width="140" height="50" as="geometry"/></mxCell>
+    <mxCell id="a3" value="Nhập email&#xa;+ mật khẩu" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="290" y="390" width="140" height="50" as="geometry"/></mxCell>
+    <mxCell id="a4" value="Nhấn Đăng nhập" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="290" y="480" width="150" height="50" as="geometry"/></mxCell>
+    <mxCell id="a5" value="kiemTraThongTin()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="490" y="480" width="160" height="50" as="geometry"/></mxCell>
+    <mxCell id="d1" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="720" y="460" width="80" height="80" as="geometry"/></mxCell>
+    <mxCell id="a6" value="xacThucTaiKhoan()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="870" y="330" width="160" height="50" as="geometry"/></mxCell>
+    <mxCell id="d2" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1100" y="310" width="80" height="80" as="geometry"/></mxCell>
+    <mxCell id="a7" value="Báo lỗi: Tài khoản&#xa;không tồn tại" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1250" y="200" width="160" height="50" as="geometry"/></mxCell>
+    <mxCell id="a8" value="kiemTraIsActive()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1250" y="330" width="160" height="50" as="geometry"/></mxCell>
+    <mxCell id="d3" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1480" y="310" width="80" height="80" as="geometry"/></mxCell>
+    <mxCell id="a9" value="Báo: Tài khoản&#xa;bị vô hiệu hóa" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1630" y="220" width="150" height="50" as="geometry"/></mxCell>
+    <mxCell id="a10" value="xacDinhRole()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1630" y="330" width="140" height="50" as="geometry"/></mxCell>
+    <mxCell id="d4" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1840" y="310" width="80" height="80" as="geometry"/></mxCell>
+    <mxCell id="r1" value="Chuyển /admin&#xa;(root/admin/director)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1990" y="160" width="170" height="50" as="geometry"/></mxCell>
+    <mxCell id="r2" value="Chuyển /admin/orders&#xa;(warehouse)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1990" y="260" width="180" height="50" as="geometry"/></mxCell>
+    <mxCell id="r3" value="Chuyển /admin/supplier-offers&#xa;(manufacturer)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1990" y="355" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="r4" value="Chuyển trang chủ /&#xa;(customer)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1990" y="455" width="160" height="50" as="geometry"/></mxCell>
+
+    <mxCell id="end" value="" style="ellipse;aspect=fixed;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" vertex="1" parent="1"><mxGeometry x="2240" y="358" width="34" height="34" as="geometry"/></mxCell>
+    <mxCell id="end2" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="2246" y="364" width="22" height="22" as="geometry"/></mxCell>
+
+    <mxCell id="e1" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="start" target="a1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a1" target="a2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a2" target="a3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e4" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a3" target="a4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e5" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a4" target="a5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e6" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a5" target="d1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e7" value="Hợp lệ" style="endArrow=block;endFill=1;html=1;" edge="1" source="d1" target="a6" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="760" y="355"/></Array></mxGeometry></mxCell>
+    <mxCell id="e8" value="Không hợp lệ" style="endArrow=block;endFill=1;html=1;" edge="1" source="d1" target="a3" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="760" y="420"/><mxPoint x="360" y="420"/></Array></mxGeometry></mxCell>
+    <mxCell id="e9" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a6" target="d2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e10" value="Không tồn tại" style="endArrow=block;endFill=1;html=1;" edge="1" source="d2" target="a7" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1140" y="225"/></Array></mxGeometry></mxCell>
+    <mxCell id="e10b" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a7" target="a3" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1330" y="150"/><mxPoint x="360" y="150"/></Array></mxGeometry></mxCell>
+    <mxCell id="e11" value="Tồn tại" style="endArrow=block;endFill=1;html=1;" edge="1" source="d2" target="a8" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e12" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a8" target="d3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e13" value="false" style="endArrow=block;endFill=1;html=1;" edge="1" source="d3" target="a9" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1520" y="245"/></Array></mxGeometry></mxCell>
+    <mxCell id="e14" value="true" style="endArrow=block;endFill=1;html=1;" edge="1" source="d3" target="a10" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e15" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a10" target="d4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e16" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="d4" target="r1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1880" y="185"/></Array></mxGeometry></mxCell>
+    <mxCell id="e17" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="d4" target="r2" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1880" y="285"/></Array></mxGeometry></mxCell>
+    <mxCell id="e18" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="d4" target="r3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e19" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="d4" target="r4" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1880" y="480"/></Array></mxGeometry></mxCell>
+    <mxCell id="ea1" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="r1" target="end" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="2160" y="185"/><mxPoint x="2257" y="185"/></Array></mxGeometry></mxCell>
+    <mxCell id="ea2" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="r2" target="end" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="2170" y="285"/><mxPoint x="2257" y="285"/></Array></mxGeometry></mxCell>
+    <mxCell id="ea3" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="r3" target="end" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="2190" y="380"/><mxPoint x="2257" y="380"/></Array></mxGeometry></mxCell>
+    <mxCell id="ea4" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="r4" target="end" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="2150" y="480"/><mxPoint x="2257" y="480"/></Array></mxGeometry></mxCell>
+
+    <mxCell id="cap" value="Hình 2-x: Sơ đồ hoạt động Đăng nhập" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=12;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="700" y="590" width="600" height="30" as="geometry"/></mxCell>
+    <mxCell id="desc" value="Mô tả:&#xa;+ Bước 1: Người dùng truy cập trang đăng nhập, hệ thống hiển thị form. Người dùng nhập email + mật khẩu rồi nhấn Đăng nhập.&#xa;+ Bước 2: Hệ thống gọi kiemTraThongTin() — không hợp lệ thì yêu cầu nhập lại.&#xa;+ Bước 3: Hệ thống gọi xacThucTaiKhoan() — không tồn tại thì báo lỗi, yêu cầu nhập lại.&#xa;+ Bước 4: Hệ thống gọi kiemTraIsActive() — is_active=false thì báo tài khoản bị vô hiệu hóa.&#xa;+ Bước 5 (Hoàn tất): Gọi xacDinhRole() và redirect đến trang tương ứng:&#xa;    o root/admin/director → /admin  |  warehouse → /admin/orders&#xa;    o manufacturer → /admin/supplier-offers  |  customer → /" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=12;fontStyle=0;verticalAlign=top;" vertex="1" parent="1"><mxGeometry x="30" y="640" width="1200" height="170" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

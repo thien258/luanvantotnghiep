@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1800" pageHeight="700" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+    <mxCell id="n0" value="Khách hàng" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="20" y="300" width="110" height="40" as="geometry"/></mxCell>
+    <mxCell id="n1" value="Tick SP + Checkout&#xa;lưu cart_ids session" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="175" y="295" width="150" height="50" as="geometry"/></mxCell>
+    <mxCell id="n2" value="Nhập thông tin&#xa;giao hàng + chọn&#xa;phương thức" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="375" y="290" width="150" height="60" as="geometry"/></mxCell>
+    <mxCell id="d1" value="Validate?" style="rhombus;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="580" y="280" width="110" height="80" as="geometry"/></mxCell>
+    <mxCell id="n_err" value="Báo lỗi" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="590" y="200" width="100" height="40" as="geometry"/></mxCell>
+    <mxCell id="n3" value="Tạo Order + OrderDetail&#xa;Xóa cart + session" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="750" y="295" width="170" height="50" as="geometry"/></mxCell>
+    <mxCell id="d2" value="Phương thức?" style="rhombus;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="980" y="280" width="130" height="80" as="geometry"/></mxCell>
+
+    <!-- COD branch -->
+    <mxCell id="nc1" value="status=1&#xa;Gửi email + link PayOS" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1180" y="130" width="160" height="50" as="geometry"/></mxCell>
+    <mxCell id="d_cod" value="Dùng link?" style="rhombus;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1400" y="110" width="110" height="80" as="geometry"/></mxCell>
+    <mxCell id="nc2" value="Hủy PayOS →&#xa;về trang chủ&#xa;Đơn COD vẫn còn" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1570" y="60" width="160" height="60" as="geometry"/></mxCell>
+    <mxCell id="nc3" value="Thanh toán OK →&#xa;Webhook: method→&#xa;BANK TRANSFER" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1570" y="160" width="160" height="60" as="geometry"/></mxCell>
+    <mxCell id="nc4" value="Không dùng →&#xa;Đơn COD tiếp tục" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1570" y="270" width="150" height="50" as="geometry"/></mxCell>
+
+    <!-- BANK branch -->
+    <mxCell id="nb1" value="status=0&#xa;Gọi API PayOS&#xa;Redirect QR" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1180" y="390" width="150" height="60" as="geometry"/></mxCell>
+    <mxCell id="d_bank" value="Kết quả?" style="rhombus;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1390" y="385" width="120" height="80" as="geometry"/></mxCell>
+    <mxCell id="nb2" value="Thanh toán OK →&#xa;Webhook: status 0→1&#xa;Gửi email" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1570" y="360" width="160" height="60" as="geometry"/></mxCell>
+    <mxCell id="nb3" value="Hủy → payosCancel&#xa;Xóa Order, hoàn giỏ" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1570" y="460" width="160" height="50" as="geometry"/></mxCell>
+    <mxCell id="nb4" value="Fallback VietQR" style="rounded=1;arcSize=50;fillColor=#f5f5f5;strokeColor=#a9a9c8;fontColor=#333333;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1570" y="545" width="140" height="40" as="geometry"/></mxCell>
+
+    <mxCell id="lb_cod" value="COD" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="1120" y="140" width="50" height="30" as="geometry"/></mxCell>
+    <mxCell id="lb_bank" value="BANK TRANSFER" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="1105" y="400" width="70" height="30" as="geometry"/></mxCell>
+
+    <mxCell id="e1" value="" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;" edge="1" source="n0" target="n1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" value="" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;" edge="1" source="n1" target="n2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" value="" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;" edge="1" source="n2" target="d1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_err" value="Không hợp lệ" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;fontSize=11;" edge="1" source="d1" target="n_err" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_errb" value="" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;" edge="1" source="n_err" target="n2" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="640" y="170"/><mxPoint x="450" y="170"/></Array></mxGeometry></mxCell>
+    <mxCell id="e4" value="Hợp lệ" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;fontSize=11;" edge="1" source="d1" target="n3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e5" value="" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;" edge="1" source="n3" target="d2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_cod" value="" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;" edge="1" source="d2" target="nc1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1045" y="155"/></Array></mxGeometry></mxCell>
+    <mxCell id="e_bank" value="" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;" edge="1" source="d2" target="nb1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1045" y="420"/></Array></mxGeometry></mxCell>
+    <mxCell id="e_c1" value="" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;" edge="1" source="nc1" target="d_cod" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_c2" value="Hủy" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;fontSize=11;" edge="1" source="d_cod" target="nc2" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1455" y="90"/></Array></mxGeometry></mxCell>
+    <mxCell id="e_c3" value="OK" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;fontSize=11;" edge="1" source="d_cod" target="nc3" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1455" y="190"/></Array></mxGeometry></mxCell>
+    <mxCell id="e_c4" value="Không dùng" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;fontSize=11;" edge="1" source="d_cod" target="nc4" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1455" y="295"/></Array></mxGeometry></mxCell>
+    <mxCell id="e_b1" value="" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;" edge="1" source="nb1" target="d_bank" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_b2" value="OK" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;fontSize=11;" edge="1" source="d_bank" target="nb2" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1450" y="390"/></Array></mxGeometry></mxCell>
+    <mxCell id="e_b3" value="Hủy" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;fontSize=11;" edge="1" source="d_bank" target="nb3" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1450" y="485"/></Array></mxGeometry></mxCell>
+    <mxCell id="e_b4" value="Chưa cấu hình" style="endArrow=open;endSize=8;html=1;strokeColor=#a9a9c8;fontSize=11;" edge="1" source="d_bank" target="nb4" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1450" y="565"/></Array></mxGeometry></mxCell>
+    <mxCell id="cap" value="Hình: Sơ đồ hoạt động Đặt hàng (COD &amp; BANK TRANSFER)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=13;fontStyle=2;fontColor=#333333;" vertex="1" parent="1"><mxGeometry x="500" y="640" width="600" height="30" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

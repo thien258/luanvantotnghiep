@@ -1,28 +1,40 @@
 @startuml
-title Sơ đồ tuần tự - Quản lý Đơn hàng (Admin)
+title Sơ đồ tuần tự - Xử lý Đơn hàng (Nhân viên kho)
 
-actor "NV Kho" as NV
-participant ":B_DonHang" as B
-participant ":C_OrderAdmin" as C
-participant ":E_Order" as EO
-participant ":E_StockLog" as ES
-participant ":E_Product" as EP
+actor "Nhân viên kho" as NV
+participant "Trang đơn hàng" as B
+participant "Hệ thống" as C
+participant "Đơn hàng" as EO
+participant "Chi tiết đơn" as ED
+participant "Lịch sử kho" as ES
+participant "Sản phẩm" as EP
 
-NV -> B : 1: Chọn đơn hàng đã thanh toán
-NV -> B : 2: Nhấn Xuất kho - Giao shipper
-B -> C : 3: updateStatus(id, action=export_warehouse)
-C -> EO : 4: findOrderDetails(id)
-EO --> C : 5: return(details)
+NV -> B : 1: Mở danh sách đơn hàng, chọn đơn đã thanh toán
+NV -> B : 2: Nhấn nút "Xuất kho - Giao shipper"
+B -> C : 3: Gửi yêu cầu xuất kho cho đơn hàng
+C -> C : 4: Kiểm tra đơn có đang ở trạng thái "chờ xuất kho" không
 
-loop Từng sản phẩm trong đơn
-    C -> ES : 6: getBatchTotals(product_id) [FIFO]
-    ES --> C : 7: return(batches)
-    C -> ES : 8: createExportLog(batch, qty)
-    C -> EP : 9: decrementQuantity(qty)
-    EP --> C : 10: return
+alt Đơn không hợp lệ (đã xuất kho rồi hoặc sai trạng thái)
+    C --> NV : 5: Thông báo lỗi, không thực hiện
+else Đơn hợp lệ
+    C -> ED : 5: Lấy danh sách sản phẩm trong đơn hàng
+    ED --> C : 6: Trả về danh sách sản phẩm
+
+    note over C, ES
+        Xuất kho theo nguyên tắc FIFO:
+        lô hàng nào gần hết hạn sử dụng nhất thì xuất trước,
+        lô không có hạn sử dụng thì xuất sau cùng.
+        Nếu hàng nhập thủ công (không có lô HSD), ghi xuất riêng phần còn lại.
+    end note
+
+    C -> ES : 7: Xem các lô hàng đã nhập và số đã xuất từng lô (gom theo hạn sử dụng)
+    ES --> C : 8: Trả về danh sách lô và số tồn còn lại từng lô
+    C -> ES : 9: Ghi nhận xuất kho lần lượt từng lô theo thứ tự HSD gần nhất
+    C -> EP : 10: Trừ số lượng tồn kho của từng sản phẩm
+    EP --> C : 11: Xác nhận đã trừ
+
+    C -> EO : 12: Cập nhật trạng thái đơn hàng → "Đang giao"
+    EO --> C : 13: Xác nhận
+    C --> NV : 14: Thông báo xuất kho thành công, đơn đã chuyển cho shipper
 end
-
-C -> EO : 11: updateStatus(id, status=3)
-EO --> C : 12: return
-C --> NV : 13: Đã xuất kho, chuyển giao shipper
 @enduml

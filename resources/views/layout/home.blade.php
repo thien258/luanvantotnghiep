@@ -40,8 +40,8 @@
 						<div class="collapse navbar-collapse offset" id="navbarSupportedContent">
 							<div class="navbar-collapse-inner">
 								<ul class="nav navbar-nav menu_nav ml-auto mr-auto align-items-lg-center">
-									<li class="nav-item active"><a class="nav-link" href="{{ route('welcome') }}">Home</a></li>
-									<li class="nav-item active"><a class="nav-link" href="{{ route('show_products') }}">Products</a></li>
+									<li class="nav-item active"><a class="nav-link" style="color: #000 !important;" href="{{ route('welcome') }}">Home</a></li>
+									<li class="nav-item active"><a class="nav-link" style="color: #000 !important;" href="{{ route('show_products') }}">Products</a></li>
 
 									<li class="nav-item submenu dropdown">
 										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Category</a>

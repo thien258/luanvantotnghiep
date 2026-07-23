@@ -7,36 +7,31 @@ participant ":C_Category" as C
 participant ":E_Category" as E
 
 == Thêm danh mục ==
-A -> B : 1: Nhấn Thêm danh mục
-B --> A : 2: formThem()
-A -> B : 3: Nhập tên và trạng thái
+A -> B : 1: Nhấn Add (Thêm danh mục)
+B --> A : 2: Hiển thị form thêm danh mục
+A -> B : 3: Nhập tên và trạng thái (hiện/ẩn)
 A -> B : 4: Nhấn Lưu
-B -> C : 5: Lưu danh mục mới
-C -> C : 6: Kiểm tra dữ liệu
-alt Hợp lệ
-    C -> E : 7: Thêm danh mục vào CSDL
-    E --> C : 8: Trả về kết quả
-    C --> A : 9: Chuyển về danh sách
-else Không hợp lệ
-    C --> A : 10: Thông báo lỗi
-end
+B -> C : 5: store(name, status)
+C -> E : 6: Thêm danh mục vào CSDL
+E --> C : 7: Trả về kết quả
+C --> A : 8: Chuyển về danh sách danh mục
 
-== Chỉnh sửa danh mục ==
-A -> B : 1: Chọn danh mục và nhấn Sửa
-B -> C : 2: Tải trang chỉnh sửa
+== Chỉnh sửa danh mục (bao gồm đổi trạng thái hiện/ẩn) ==
+A -> B : 1: Chọn danh mục, nhấn Chỉnh sửa
+B -> C : 2: edit(id)
 C -> E : 3: Tìm danh mục theo id
 E --> C : 4: Trả về danh mục
-C --> A : 5: Hiển thị form chỉnh sửa
-A -> B : 6: Chỉnh sửa và nhấn Lưu
-B -> C : 7: Cập nhật danh mục (id, dữ liệu)
-C -> E : 8: Lưu thay đổi danh mục
-E --> C : 9: Trả về kết quả
-C --> A : 10: Chuyển về danh sách
+C --> A : 5: Hiển thị form chỉnh sửa (tên, trạng thái)
+A -> B : 6: Chỉnh sửa tên và/hoặc đổi trạng thái (1=hiện, 0=ẩn)
+A -> B : 7: Nhấn Lưu
+B -> C : 8: update(id, name, status)
+C -> E : 9: Lưu thay đổi danh mục
+E --> C : 10: Trả về kết quả
+C --> A : 11: Chuyển về danh sách danh mục
 
-== Xóa danh mục ==
-A -> B : 1: Chọn danh mục và nhấn Xóa
-B -> C : 2: Xóa danh mục (id)
-C -> E : 3: Xóa danh mục khỏi CSDL
-E --> C : 4: Trả về kết quả
-C --> A : 5: Chuyển về danh sách
+note over B, E
+    Không có chức năng Xóa danh mục trên giao diện.
+    Nút Xóa đã bị vô hiệu hóa (comment out trong view).
+    Để ẩn danh mục khỏi hiển thị, admin đổi status = 0.
+end note
 @enduml

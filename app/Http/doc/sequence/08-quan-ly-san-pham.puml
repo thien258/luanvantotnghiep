@@ -1,47 +1,41 @@
 @startuml
 title Sơ đồ tuần tự - Quản lý Sản phẩm (qua nhập kho)
 
-actor "NV Kho" as NV
+actor "Nhân viên kho" as NV
 actor "Admin" as A
-participant ":B_NhapKho" as B
-participant ":C_Warehouse" as C
-participant ":E_WarehouseImport" as EW
-participant ":E_Product" as EP
+participant "Trang nhập kho" as B
+participant "Hệ thống" as C
+participant "Danh sách file chờ duyệt" as EW
+participant "Sản phẩm" as EP
 
 NV -> B : 1: Upload file Excel/CSV
-B -> C : 2: importUpload(file)
-C -> C : 3: kiemTraFile(file)
+B -> C : 2: Gửi file lên hệ thống
+C -> C : 3: Kiểm tra file (định dạng, kích thước, nội dung)
 
-alt File hợp lệ
-    C -> EW : 4: createImport(file, status=pending)
-    EW --> C : 5: return
-    C --> NV : 6: Đã gửi, chờ admin duyệt
-else File sai định dạng hoặc > 5MB
-    C --> NV : 7: Thông báo lỗi
+alt File không hợp lệ hoặc vượt quá 5MB
+    C --> NV : 4: Thông báo lỗi
+else File hợp lệ
+    C -> EW : 4: Lưu file vào danh sách chờ duyệt (trạng thái: chờ)
+    EW --> C : 5: Xác nhận
+    C --> NV : 6: Thông báo đã gửi, chờ admin duyệt
 end
 
-A -> B : 8: Mở file và xem preview
-B -> C : 9: importShow(import_id)
-C -> C : 10: parseFile(file)
-C --> A : 11: Hiển thị bảng preview sản phẩm
+A -> B : 7: Mở file và xem trước danh sách sản phẩm
+B -> C : 8: Đọc nội dung file và hiển thị
+C --> A : 9: Hiển thị bảng sản phẩm trong file
 
-A -> B : 12: Tick chọn sản phẩm, điều chỉnh qty/giá
-A -> B : 13: Nhấn Duyệt nhập kho
-B -> C : 14: importApprove(selected_products)
+A -> B : 10: Tick chọn sản phẩm, điều chỉnh số lượng/giá nếu cần
+A -> B : 11: Nhấn Duyệt nhập kho
 
-alt Có sản phẩm được chọn
-    loop Từng sản phẩm được chọn
-        C -> EP : 15: findProduct(title)
-        EP --> C : 16: return
-        alt Sản phẩm đã tồn tại
-            C -> EP : 17: incrementQuantity(qty)
-        else Sản phẩm chưa tồn tại
-            C -> EP : 18: createProduct(data)
-        end
+alt Không có sản phẩm nào được chọn
+    C --> A : 12: Thông báo lỗi
+else Có sản phẩm được chọn
+    alt Sản phẩm đã có trong hệ thống
+        C -> EP : 12: Cộng thêm số lượng tồn kho
+    else Sản phẩm chưa có trong hệ thống
+        C -> EP : 12: Tạo mới sản phẩm và ghi số lượng ban đầu
     end
-    C -> EW : 19: updateStatus(approved)
-    C --> A : 20: Duyệt thành công
-else Không chọn sản phẩm nào
-    C --> A : 21: Thông báo lỗi
+    C -> EW : 13: Đánh dấu file đã duyệt
+    C --> A : 14: Duyệt thành công, chuyển về danh sách file
 end
 @enduml

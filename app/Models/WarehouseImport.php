@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  *   → Tải file CSV từ đơn đặt hàng → Upload lên trang Nhập Kho
  *   → Hệ thống tạo bản ghi WarehouseImport (status = pending)
  *   → Admin xem lại, duyệt từng dòng SP (approved_items)
- *   → Sau khi approve → cộng tồn kho vào bảng product_variants
+ *   → Sau khi approve → cộng tồn kho vào bảng products
  *
  * Trạng thái (status):
  *   pending  — file đã upload, chờ admin xét duyệt

@@ -1,44 +1,56 @@
 @startuml
 title Sơ đồ tuần tự - Quản lý Báo giá Nhà sản xuất
 
+actor "Nhà sản xuất" as NSX
 actor "Admin" as A
-participant ":B_BaoGia" as B
-participant ":C_SupplierOffer" as C
-participant ":E_SupplierOffer" as ESO
-participant ":E_SupplierOfferItem" as ESOI
-participant ":E_Product" as EP
+participant "Trang báo giá" as B
+participant "Hệ thống" as C
+participant "Báo giá" as ESO
 
-== Upload file báo giá ==
-A -> B : 1: Chọn nhà sản xuất và upload file
-B -> C : 2: upload(manufacturer_id, file)
-C -> C : 3: validate(file, manufacturer_id)
+== Nhà sản xuất tự upload file báo giá ==
 
-alt File hợp lệ và có NSX
-    C -> C : 4: readFile(file)
-    C -> ESO : 5: createOffer(code, manufacturer_id, status=đã nộp)
-    ESO --> C : 6: return(offer)
+NSX -> B : 1: Đăng nhập, vào trang Báo giá
+B --> NSX : 2: Hiển thị form upload và danh sách báo giá đã gửi của mình
 
-    loop Từng dòng sản phẩm trong file
-        C -> EP : 7: findProduct(title)
-        EP --> C : 8: return(product/null)
-        C -> ESOI : 9: createItem(offer_id, product_id, unit_price)
-    end
+NSX -> B : 3: Chọn file Excel/CSV (danh sách sản phẩm + giá chào)
+NSX -> B : 4: Điền ghi chú (nếu có), nhấn Upload
+B -> C : 5: Gửi file lên hệ thống
+C -> C : 6: Kiểm tra file có dữ liệu không, định dạng có hợp lệ không
 
-    C --> A : 10: Chuyển đến trang chi tiết báo giá
-else File không hợp lệ hoặc chưa chọn NSX
-    C --> A : 11: Thông báo lỗi
+alt File không có dữ liệu hoặc sai định dạng
+    C --> NSX : 7: Thông báo lỗi
+else File hợp lệ
+    C -> C : 7: Đọc nội dung file (danh sách sản phẩm + giá chào)
+    C -> ESO : 8: Tạo bản ghi báo giá mới (mã tự sinh, tên NSX, trạng thái: chờ duyệt)
+    ESO --> C : 9: Trả về báo giá vừa tạo
+    C -> ESO : 10: Lưu toàn bộ dòng chi tiết báo giá (tên sản phẩm, giá chào, ghi chú)
+
+    C --> NSX : 13: Chuyển sang trang chi tiết báo giá vừa gửi
 end
 
-== Xem chi tiết và đặt hàng ==
-A -> B : 1: Chọn báo giá cần xem
-B -> C : 2: show(offer_id)
-C -> ESO : 3: findOffer(offer_id)
-ESO --> C : 4: return(offer + items)
-C --> A : 5: Hiển thị bảng sản phẩm chào giá
+== Admin xem báo giá và quyết định đặt hàng ==
 
-A -> B : 6: Tick chọn sản phẩm, điền số lượng
-A -> B : 7: Nhấn Đặt hàng
-B -> C : 8: [POST] purchase-orders.store(offer_id, items)
-note right: Chuyển sang C_PurchaseOrder xử lý
-C --> A : 9: Tạo đơn đặt hàng thành công
+A -> B : 1: Vào trang danh sách báo giá
+B --> A : 2: Hiển thị tất cả báo giá từ các nhà sản xuất
+
+A -> B : 3: Nhấn "Xem & Đặt hàng" trên một báo giá
+B -> C : 4: Lấy chi tiết báo giá
+C -> ESO : 5: Truy vấn báo giá kèm danh sách sản phẩm chào giá
+ESO --> C : 6: Trả về báo giá + danh sách sản phẩm
+C --> A : 7: Hiển thị bảng sản phẩm, giá chào, dung tích, thương hiệu...
+
+alt Admin muốn từ chối báo giá
+    A -> B : 8: Nhấn Từ chối
+    B -> C : 9: Cập nhật trạng thái
+    C -> ESO : 10: Đổi trạng thái báo giá → Từ chối
+    C --> A : 11: Quay về danh sách báo giá
+else Admin muốn đặt hàng
+    A -> B : 8: Tick chọn sản phẩm muốn đặt, điền số lượng từng loại
+    A -> B : 9: Nhấn Đặt hàng các SP đã chọn
+    note over A, B
+        Phần tạo đơn đặt hàng từ báo giá
+        được mô tả chi tiết trong
+        sơ đồ "13-don-dat-hang-nsx"
+    end note
+end
 @enduml

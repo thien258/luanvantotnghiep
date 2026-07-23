@@ -1,49 +1,49 @@
 @startuml
 title Sơ đồ tuần tự - Quản lý Kho hàng
 
-actor "NV Kho" as NV
+actor "Nhân viên kho" as NV
 actor "Admin" as A
-participant ":B_KhoHang" as B
-participant ":C_Warehouse" as C
-participant ":E_WarehouseImport" as EW
-participant ":E_Product" as EP
-participant ":E_Receipt" as ER
-participant ":E_StockLog" as ES
+participant "Trang kho hàng" as B
+participant "Hệ thống" as C
+participant "Danh sách file chờ duyệt" as EW
+participant "Sản phẩm" as EP
+participant "Phiếu nhập kho" as ER
+participant "Lịch sử kho" as ES
 
-NV -> B : 1: Nhấn Upload file nhập kho
-B --> NV : 2: formUpload()
-NV -> B : 3: Chọn file, nhập nhà cung cấp, ghi chú
+== Nhân viên kho upload file hàng về ==
+
+NV -> B : 1: Nhấn nút Upload file nhập kho
+B --> NV : 2: Hiển thị form upload
+NV -> B : 3: Chọn file (CSV/Excel), điền tên nhà cung cấp và ghi chú
 NV -> B : 4: Nhấn Gửi
-B -> C : 5: importUpload(file, supplier, note)
-C -> C : 6: kiemTraFile()
+B -> C : 5: Gửi file lên hệ thống
+C -> C : 6: Kiểm tra file (định dạng, kích thước, nội dung các cột bắt buộc, hạn sử dụng)
 
-alt File hợp lệ
-    C -> EW : 7: createImport(status=pending)
-    EW --> C : 8: return
-    C --> NV : 9: Đã gửi, chờ admin duyệt
-else File không hợp lệ
-    C --> NV : 10: Thông báo lỗi
+alt File không hợp lệ
+    C --> NV : 7: Thông báo lỗi cụ thể, yêu cầu kiểm tra lại file
+else File hợp lệ
+    C -> EW : 7: Lưu file vào danh sách chờ duyệt (trạng thái: chờ)
+    EW --> C : 8: Xác nhận đã lưu
+    C --> NV : 9: Thông báo đã gửi file, chờ admin duyệt
 end
 
-A -> B : 11: Chọn file chờ duyệt
-B -> C : 12: importShow(import_id)
-C --> A : 13: Preview sản phẩm trong file
+== Admin xem và duyệt file nhập kho ==
 
-A -> B : 14: Tick chọn sản phẩm, nhấn Duyệt
-B -> C : 15: importApprove(selected)
+A -> B : 10: Mở danh sách file chờ duyệt, chọn file cần xem
+B -> C : 11: Đọc nội dung file và hiển thị
+C --> A : 12: Hiển thị bảng preview danh sách sản phẩm trong file
 
-alt Có sản phẩm được chọn
-    C -> ER : 16: createReceipt(code, supplier)
-    ER --> C : 17: return(receipt)
+A -> B : 13: Tick chọn những sản phẩm cần nhập, điều chỉnh số lượng/giá nếu cần
+A -> B : 14: Nhấn nút Duyệt nhập kho
 
-    loop Từng sản phẩm
-        C -> EP : 18: incrementQuantity(qty)
-        C -> ES : 19: createImportLog(receipt, product, qty)
-    end
+note over C, A
+    Nếu không chọn sản phẩm nào, hệ thống báo lỗi và dừng lại.
+end note
 
-    C -> EW : 20: updateStatus(approved)
-    C --> A : 21: Duyệt thành công
-else Không chọn sản phẩm
-    C --> A : 22: Thông báo lỗi
-end
+C -> ER : 15: Tạo phiếu nhập kho (mã phiếu, nhà cung cấp)
+ER --> C : 16: Trả về phiếu nhập
+C -> EP : 17: Cộng tồn kho cho sản phẩm đã có, hoặc tạo mới nếu chưa có trong hệ thống
+C -> ES : 18: Ghi lịch sử nhập kho (sản phẩm, số lượng, hạn sử dụng, mã phiếu)
+C -> EW : 19: Đánh dấu file đã duyệt, lưu lại danh sách sản phẩm thực tế nhập
+C --> A : 20: Thông báo duyệt thành công, chuyển về danh sách file
 @enduml

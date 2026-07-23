@@ -5,57 +5,86 @@ actor "Khách hàng" as KH
 participant ":B_DatHang" as B
 participant ":C_Order" as C
 participant ":E_Order" as EO
+participant ":E_OrderDetail" as EOD
 participant ":E_Cart" as EC
 participant ":PayOS" as P
 participant ":Mail" as M
 
-KH -> B : 1: Chọn sản phẩm và nhấn Tiến hành đặt hàng
-B -> C : 2: checkout(cart_ids)
-C -> C : 3: Lưu cart_ids vào session
-C --> KH : 4: Hiển thị trang thanh toán
+== Bước 1: Chọn sản phẩm và đến trang thanh toán ==
 
-KH -> B : 5: Nhập thông tin giao hàng
+KH -> B : 1: Chọn sản phẩm trong giỏ, nhấn Tiến hành đặt hàng
+B -> C : 2: checkout(cart_ids)
+
+alt cart_ids rỗng
+    C --> KH : 3: Redirect về giỏ hàng với thông báo lỗi
+else cart_ids hợp lệ
+    C -> C : 3: Lưu cart_ids vào session
+    C --> KH : 4: Redirect sang trang nhập thông tin thanh toán
+end
+
+== Bước 2: Nhập thông tin và đặt hàng ==
+
+KH -> B : 5: Nhập thông tin giao hàng (họ tên, SĐT, địa chỉ, ghi chú)
 KH -> B : 6: Chọn phương thức thanh toán (COD / Chuyển khoản)
 KH -> B : 7: Nhấn Đặt hàng
 B -> C : 8: placeOrder(data)
-C -> C : 9: Kiểm tra dữ liệu
+C -> C : 9: Kiểm tra dữ liệu (validate fullname, phone, address, payment_method)
 
-alt [Thông tin không hợp lệ]
+alt Thông tin không hợp lệ
     C --> KH : 10: Thông báo lỗi, quay lại form
+else Thông tin hợp lệ
+    C -> C : 11: Tính tổng tiền (giá sau discount festival × số lượng)
 
-else [Thông tin hợp lệ]
-    C -> EO : 11: Tạo đơn hàng
-    EO --> C : 12: return(order)
-    C -> EO : 13: Lưu chi tiết đơn hàng
-    C -> EC : 14: Xóa sản phẩm đã đặt khỏi giỏ
-    EC --> C : 15: return
+ 
 
-    alt [Phương thức = Chuyển khoản]
-        C -> P : 16: Tạo link thanh toán PayOS
-        P --> C : 17: return(checkoutUrl)
-        C --> KH : 18: Chuyển hướng sang trang PayOS
-        KH -> P : 19: Thanh toán trên PayOS
-        P --> KH : 20: Chuyển hướng về trang thành công
-        P -> C : 21: Webhook xác nhận thanh toán (chạy song song)
-        C -> EO : 22: Cập nhật trạng thái đơn hàng
-        EO --> C : 23: return
-        C -> M : 24: Gửi email xác nhận đơn hàng
-        M --> KH : 25: Email xác nhận
+    alt Phương thức = Chuyển khoản (BANK TRANSFER)
+        C -> EO : 12: Tạo đơn hàng (status = 0 — chờ PayOS xác nhận)
+    else Phương thức = COD
+        C -> EO : 12: Tạo đơn hàng (status = 1 — đã đặt, chờ xuất kho)
+    end
+    EO --> C : 13: return(order)
 
-    else [Phương thức = COD]
-        C -> P : 16: Tạo link PayOS (lấy mã QR nhúng vào mail)
-        P --> C : 17: return(payosUrl)
-        C -> M : 18: Gửi email xác nhận đơn hàng (kèm mã QR)
-        M --> KH : 19: Email xác nhận (có mã QR chuyển khoản)
-        C --> KH : 20: Chuyển hướng về trang chủ
+   
+        C -> EOD : 14: Tạo chi tiết đơn hàng (snapshot giá tại thời điểm mua)
+        note right: Tồn kho KHÔNG trừ ở đây\n(chỉ trừ khi NV kho bấm Xuất kho)
+   
 
-        opt [Khách quét mã QR trong email để chuyển khoản - tuỳ chọn]
-            KH -> P : 21: Quét mã QR, thanh toán trên PayOS
-            P -> C : 22: Webhook xác nhận (đơn COD đã chuyển khoản)
-            C -> EO : 23: Cập nhật trạng thái + đổi phương thức sang Chuyển khoản
-            EO --> C : 24: return
-            C -> M : 25: Gửi email xác nhận đã thanh toán
-            M --> KH : 26: Email xác nhận thanh toán
+    C -> EC : 15: Xóa các cart items đã đặt (theo cart_ids)
+    EC --> C : 16: return
+    C -> C : 17: Xóa session checkout_cart_ids
+
+    alt Phương thức = Chuyển khoản (BANK TRANSFER)
+        alt PayOS đã cấu hình (env có PAYOS_CLIENT_ID, API_KEY, CHECKSUM_KEY)
+            C -> P : 18: createPayOSLink(order)
+            P --> C : 19: return(checkoutUrl)
+            C --> KH : 20: Redirect sang trang PayOS (QR chuyển khoản)
+            KH -> P : 21: Thanh toán trên PayOS
+            P --> KH : 22: Redirect về /payos/success (trang thông báo thành công)
+            P -> C : 23: Webhook POST xác nhận thanh toán (chạy song song)
+            C -> EO : 24: Cập nhật status: 0 → 1
+            EO --> C : 25: return
+            C -> M : 26: Gửi email xác nhận đơn hàng
+            M --> KH : 27: Email xác nhận đặt hàng
+        else PayOS chưa cấu hình (fallback)
+            C --> KH : 18: Redirect sang trang QR VietQR (/order/payment/{id})
+        end
+
+    else Phương thức = COD
+        alt PayOS đã cấu hình
+            C -> P : 18: createPayOSLink(order) — lấy link QR nhúng vào email
+            P --> C : 19: return(payosUrl / null nếu thất bại)
+        end
+        C -> M : 20: Gửi email xác nhận đơn hàng (kèm payosUrl nếu có)
+        M --> KH : 21: Email xác nhận (có mã QR chuyển khoản nếu PayOS cấu hình)
+        C --> KH : 22: Redirect về trang chủ với thông báo đặt hàng thành công
+
+        opt Khách quét mã QR trong email để chuyển khoản (tuỳ chọn)
+            KH -> P : 23: Quét mã QR, thanh toán trên PayOS
+            P -> C : 24: Webhook POST xác nhận (đơn COD đã chuyển khoản)
+            C -> EO : 25: Cập nhật status = 1, đổi payment_method → BANK TRANSFER
+            EO --> C : 26: return
+            C -> M : 27: Gửi email xác nhận đã thanh toán chuyển khoản
+            M --> KH : 28: Email xác nhận thanh toán
         end
     end
 end

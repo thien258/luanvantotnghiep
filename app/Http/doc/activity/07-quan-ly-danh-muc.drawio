@@ -20,9 +20,9 @@
       <mxCell id="a9" value="Kiểm tra dữ liệu" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="870" y="240" width="120" height="60" as="geometry"/></mxCell>
       <mxCell id="d2" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" vertex="1" parent="1"><mxGeometry x="1050" y="220" width="80" height="80" as="geometry"/></mxCell>
       <mxCell id="a10" value="Cập nhật danh mục" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1190" y="240" width="140" height="60" as="geometry"/></mxCell>
-      <!-- Xóa -->
-      <mxCell id="a11" value="Chọn danh mục và nhấn Xóa" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="480" y="400" width="150" height="60" as="geometry"/></mxCell>
-      <mxCell id="a12" value="Xóa danh mục" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="680" y="400" width="140" height="60" as="geometry"/></mxCell>
+      <!-- Tắt/Bật trạng thái -->
+      <mxCell id="a11" value="Chọn danh mục,&#xa;nhấn Tắt/Bật trạng thái" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="480" y="400" width="170" height="60" as="geometry"/></mxCell>
+      <mxCell id="a12" value="Đảo trạng thái&#xa;(status: 0 ↔ 1)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="700" y="400" width="160" height="60" as="geometry"/></mxCell>
       <mxCell id="e1" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="start" target="a1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
       <mxCell id="e2" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a1" target="a2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
       <mxCell id="e3" value="Thêm" style="endArrow=block;endFill=1;html=1;" edge="1" source="a2" target="a3" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="355" y="110"/></Array></mxGeometry></mxCell>
@@ -37,7 +37,7 @@
       <mxCell id="e12" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a9" target="d2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
       <mxCell id="e13" value="Hợp lệ" style="endArrow=block;endFill=1;html=1;" edge="1" source="d2" target="a10" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
       <mxCell id="e14" value="Không hợp lệ" style="endArrow=block;endFill=1;html=1;exitX=0.5;exitY=1;" edge="1" source="d2" target="a8" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1090" y="340"/><mxPoint x="750" y="340"/></Array></mxGeometry></mxCell>
-      <mxCell id="e15" value="Xóa" style="endArrow=block;endFill=1;html=1;" edge="1" source="a2" target="a11" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="355" y="430"/></Array></mxGeometry></mxCell>
+      <mxCell id="e15" value="Tắt/Bật" style="endArrow=block;endFill=1;html=1;" edge="1" source="a2" target="a11" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="355" y="430"/></Array></mxGeometry></mxCell>
       <mxCell id="e16" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a11" target="a12" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
       <!-- Mũi tên đến kết thúc -->
       <mxCell id="e17" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="a6" target="end" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>

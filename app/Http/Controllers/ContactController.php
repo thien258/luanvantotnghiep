@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Contact;
+use Illuminate\Support\Facades\Auth;
 
 
 class ContactController extends Controller
@@ -33,10 +34,10 @@ class ContactController extends Controller
         ]);
 
          Contact::create([
-           'name' => $request->name,
-            'email' => $request->email,
-            'message' => $request->message,
-
+           'name'    => $request->name,
+           'email'   => $request->email,
+           'message' => $request->message,
+           'user_id' => Auth::id(), // null nếu khách vãng lai chưa đăng nhập
         ]);
       
             return back();

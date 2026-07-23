@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1400" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+
+    <!-- TITLE -->
+    <mxCell id="title" value="MÔ HÌNH DỮ LIỆU MỨC Ý NIỆM (Conceptual Model) — Sơ đồ ERD (Entity Relationship Diagram)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="400" y="15" width="1400" height="35" as="geometry"/></mxCell>
+    <mxCell id="note" value="Chỉ quan tâm: Thực thể và mối quan hệ • Không quan tâm kiểu dữ liệu, cách lưu trữ • Dễ hiểu với người dùng, dùng trong giai đoạn phân tích hệ thống" style="text;html=1;strokeColor=#000000;fillColor=#f5f5f5;align=left;fontSize=10;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="30" y="55" width="600" height="30" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: NGƯỜI DÙNG ==================== -->
+    <mxCell id="e_user" value="NGƯỜI DÙNG" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="140" width="160" height="40" as="geometry"/></mxCell>
+    <mxCell id="u_attrs" value="• Mã người dùng&#xa;• Họ tên&#xa;• Email&#xa;• Số điện thoại&#xa;• Địa chỉ&#xa;• Mật khẩu&#xa;• Vai trò (role)&#xa;• Trạng thái tài khoản" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="80" y="180" width="160" height="130" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: SẢN PHẨM ==================== -->
+    <mxCell id="e_prod" value="SẢN PHẨM" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="620" y="140" width="160" height="40" as="geometry"/></mxCell>
+    <mxCell id="p_attrs" value="• Mã sản phẩm&#xa;• Tên sản phẩm&#xa;• Mô tả&#xa;• Dung tích&#xa;• Giá bán&#xa;• Số lượng tồn&#xa;• Hình ảnh&#xa;• Trạng thái" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="620" y="180" width="160" height="130" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: DANH MỤC ==================== -->
+    <mxCell id="e_cat" value="DANH MỤC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="900" y="80" width="150" height="40" as="geometry"/></mxCell>
+    <mxCell id="cat_attrs" value="• Mã danh mục&#xa;• Tên danh mục&#xa;• Trạng thái" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="900" y="120" width="150" height="60" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: THƯƠNG HIỆU ==================== -->
+    <mxCell id="e_brand" value="THƯƠNG HIỆU" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="900" y="240" width="150" height="40" as="geometry"/></mxCell>
+    <mxCell id="brand_attrs" value="• Mã thương hiệu&#xa;• Tên&#xa;• Hình ảnh&#xa;• Mô tả&#xa;• Trạng thái" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="900" y="280" width="150" height="85" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: NỒNG ĐỘ ==================== -->
+    <mxCell id="e_conc" value="NỒNG ĐỘ" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="900" y="400" width="150" height="40" as="geometry"/></mxCell>
+    <mxCell id="conc_attrs" value="• Mã nồng độ&#xa;• Tên nồng độ&#xa;• Trạng thái" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="900" y="440" width="150" height="60" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: KHUYẾN MÃI ==================== -->
+    <mxCell id="e_fest" value="KHUYẾN MÃI" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1100" y="240" width="150" height="40" as="geometry"/></mxCell>
+    <mxCell id="fest_attrs" value="• Mã khuyến mãi&#xa;• Tên&#xa;• % giảm giá&#xa;• Trạng thái&#xa;• Ngày bắt đầu&#xa;• Ngày kết thúc" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="1100" y="280" width="150" height="95" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: ĐƠN HÀNG ==================== -->
+    <mxCell id="e_order" value="ĐƠN HÀNG" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="350" y="80" width="150" height="40" as="geometry"/></mxCell>
+    <mxCell id="ord_attrs" value="• Mã đơn hàng&#xa;• Tên người nhận&#xa;• Số điện thoại&#xa;• Địa chỉ giao&#xa;• Phương thức TT&#xa;• Tổng tiền&#xa;• Trạng thái&#xa;• Ghi chú&#xa;• Mã theo dõi" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="350" y="120" width="150" height="145" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: GIỎ HÀNG ==================== -->
+    <mxCell id="e_cart" value="GIỎ HÀNG" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="350" y="340" width="150" height="40" as="geometry"/></mxCell>
+    <mxCell id="cart_attrs" value="• Mã giỏ hàng&#xa;• Số lượng" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="350" y="380" width="150" height="45" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: PHIẾU NHẬP KHO ==================== -->
+    <mxCell id="e_wh" value="PHIẾU NHẬP KHO" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="620" y="520" width="160" height="40" as="geometry"/></mxCell>
+    <mxCell id="wh_attrs" value="• Mã phiếu&#xa;• Nhà cung cấp&#xa;• Ghi chú&#xa;• Tổng SP" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="620" y="560" width="160" height="70" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: YÊU CẦU ĐẶT HÀNG ==================== -->
+    <mxCell id="e_pr" value="YÊU CẦU ĐẶT HÀNG" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="560" width="170" height="40" as="geometry"/></mxCell>
+    <mxCell id="pr_attrs" value="• Mã yêu cầu&#xa;• Trạng thái&#xa;• Hạn chót&#xa;• Ghi chú" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="80" y="600" width="170" height="70" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: BÁO GIÁ NSX ==================== -->
+    <mxCell id="e_offer" value="BÁO GIÁ NSX" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="350" y="560" width="150" height="40" as="geometry"/></mxCell>
+    <mxCell id="offer_attrs" value="• Mã báo giá&#xa;• Trạng thái&#xa;• Ngày gửi&#xa;• Ghi chú" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="350" y="600" width="150" height="70" as="geometry"/></mxCell>
+
+    <!-- ==================== ENTITY: ĐƠN ĐẶT HÀNG NSX ==================== -->
+    <mxCell id="e_po" value="ĐƠN ĐẶT HÀNG NSX" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="420" width="170" height="40" as="geometry"/></mxCell>
+    <mxCell id="po_attrs" value="• Mã đơn&#xa;• Tổng tiền&#xa;• Trạng thái&#xa;• Ngày dự kiến" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="80" y="460" width="170" height="70" as="geometry"/></mxCell>
+
+    <!-- ==================== QUAN HỆ (hình thoi) ==================== -->
+
+    <!-- Người dùng ĐẶT Đơn hàng -->
+    <mxCell id="r_dat" value="ĐẶT" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="270" y="130" width="80" height="60" as="geometry"/></mxCell>
+    <!-- Người dùng CÓ Giỏ hàng -->
+    <mxCell id="r_co" value="CÓ" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="270" y="340" width="80" height="60" as="geometry"/></mxCell>
+    <!-- Đơn hàng CHỨA Sản phẩm -->
+    <mxCell id="r_chua" value="CHỨA" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="520" y="130" width="80" height="60" as="geometry"/></mxCell>
+    <!-- Giỏ hàng GỒM Sản phẩm -->
+    <mxCell id="r_gom" value="GỒM" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="520" y="340" width="80" height="60" as="geometry"/></mxCell>
+    <!-- Sản phẩm THUỘC Danh mục -->
+    <mxCell id="r_tdm" value="THUỘC" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="810" y="80" width="80" height="60" as="geometry"/></mxCell>
+    <!-- Sản phẩm THUỘC Thương hiệu -->
+    <mxCell id="r_tth" value="THUỘC" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="810" y="240" width="80" height="60" as="geometry"/></mxCell>
+    <!-- Sản phẩm CÓ Nồng độ -->
+    <mxCell id="r_tnd" value="CÓ" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="810" y="400" width="80" height="60" as="geometry"/></mxCell>
+    <!-- Sản phẩm ÁP DỤNG Khuyến mãi -->
+    <mxCell id="r_km" value="ÁP DỤNG" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1020" y="240" width="80" height="60" as="geometry"/></mxCell>
+    <!-- Phiếu nhập kho NHẬP Sản phẩm -->
+    <mxCell id="r_nhap" value="NHẬP" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="620" y="440" width="80" height="60" as="geometry"/></mxCell>
+    <!-- Admin TẠO Yêu cầu -->
+    <mxCell id="r_tao_yc" value="TẠO" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="160" y="490" width="80" height="60" as="geometry"/></mxCell>
+    <!-- Yêu cầu NHẬN Báo giá -->
+    <mxCell id="r_nhan" value="NHẬN" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="270" y="575" width="80" height="60" as="geometry"/></mxCell>
+    <!-- Báo giá TẠO ĐH NSX -->
+    <mxCell id="r_tao_po" value="TẠO" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="240" y="460" width="80" height="60" as="geometry"/></mxCell>
+    <!-- NSX GỬI Báo giá -->
+    <mxCell id="r_gui" value="GỬI" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="190" y="370" width="80" height="60" as="geometry"/></mxCell>
+
+    <!-- ==================== ARROWS với nhãn 1/N ==================== -->
+    <!-- User 1 - ĐẶT - N Đơn hàng -->
+    <mxCell id="a1" value="1" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_user" target="r_dat" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a2" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_dat" target="e_order" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- User 1 - CÓ - N Giỏ hàng -->
+    <mxCell id="a3" value="1" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_user" target="r_co" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a4" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_co" target="e_cart" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- Đơn N - CHỨA - N SP -->
+    <mxCell id="a5" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_order" target="r_chua" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a6" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_chua" target="e_prod" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- Giỏ N - GỒM - N SP -->
+    <mxCell id="a7" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_cart" target="r_gom" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a8" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_gom" target="e_prod" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- SP N - THUỘC - 1 DM -->
+    <mxCell id="a9" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_prod" target="r_tdm" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a10" value="1" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_tdm" target="e_cat" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- SP N - THUỘC - 1 TH -->
+    <mxCell id="a11" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_prod" target="r_tth" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a12" value="1" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_tth" target="e_brand" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- SP N - CÓ - 1 ND -->
+    <mxCell id="a13" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_prod" target="r_tnd" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a14" value="1" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_tnd" target="e_conc" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- SP N - ÁP DỤNG - N KM -->
+    <mxCell id="a15" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_prod" target="r_km" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a16" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_km" target="e_fest" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- Phiếu 1 - NHẬP - N SP -->
+    <mxCell id="a17" value="1" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_wh" target="r_nhap" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a18" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_nhap" target="e_prod" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- User 1 - TẠO - N YC -->
+    <mxCell id="a19" value="1" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_user" target="r_tao_yc" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a20" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_tao_yc" target="e_pr" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- YC 1 - NHẬN - N BG -->
+    <mxCell id="a21" value="1" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_pr" target="r_nhan" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a22" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_nhan" target="e_offer" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- BG 1 - TẠO - 1 ĐHNS -->
+    <mxCell id="a23" value="1" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_offer" target="r_tao_po" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a24" value="1" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_tao_po" target="e_po" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- NSX 1 - GỬI - N BG -->
+    <mxCell id="a25" value="1" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="e_user" target="r_gui" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a26" value="N" style="endArrow=none;strokeColor=#000000;fontSize=12;fontStyle=1;" edge="1" source="r_gui" target="e_offer" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <mxCell id="cap" value="Hình 3-x Mô hình dữ liệu mức ý niệm" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=13;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="600" y="780" width="700" height="30" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

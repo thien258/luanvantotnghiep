@@ -14,19 +14,26 @@ B -> C : 5: login(email, password)
 C -> E : 6: findUser(email)
 E --> C : 7: return(user)
 
-alt Thông tin hợp lệ
+alt Thông tin không hợp lệ (sai email/mật khẩu)
+    C --> KH : 8: Thông báo lỗi, quay lại form
+else Thông tin hợp lệ
     C -> C : 8: kiemTraMatKhau(password)
-    C -> C : 9: xacDinhRole(user)
-    alt role = admin/root/director
-        C --> KH : 10: Chuyển hướng /admin
-    else role = warehouse
-        C --> KH : 10: Chuyển hướng /admin/orders
-    else role = manufacturer
-        C --> KH : 10: Chuyển hướng /admin/supplier-offers
-    else role = customer
-        C --> KH : 10: Chuyển hướng trang chủ
+    C -> C : 9: kiemTraTrangThai(user.is_active)
+
+    alt Tài khoản bị vô hiệu hóa (is_active = false)
+        C -> C : 10: logout()
+        C --> KH : 11: Thông báo tài khoản đã bị vô hiệu hóa, quay lại form
+    else Tài khoản hoạt động bình thường
+        C -> C : 10: xacDinhRole(user)
+        alt role = admin / root / director
+            C --> KH : 11: Chuyển hướng /admin
+        else role = warehouse
+            C --> KH : 11: Chuyển hướng /admin/orders
+        else role = manufacturer
+            C --> KH : 11: Chuyển hướng /admin/supplier-offers
+        else role = customer
+            C --> KH : 11: Chuyển hướng trang chủ (/)
+        end
     end
-else Thông tin không hợp lệ
-    C --> KH : 11: Thông báo lỗi, quay lại form
 end
 @enduml

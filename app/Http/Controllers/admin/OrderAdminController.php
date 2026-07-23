@@ -260,6 +260,38 @@ class OrderAdminController extends Controller
             ->with('success', "Đã ghi nhận và chuyển đơn #{$order->id} sang danh sách hàng hỏng.");
     }
 
+    /**
+     * Từ chối yêu cầu hoàn hàng của khách.
+     * Chuyển đơn từ status=5 (yêu cầu hoàn) về status=4 (giao thành công).
+     * Phía khách hàng sẽ thấy đơn hiển thị bình thường như "Hoàn tất".
+     */
+    public function rejectReturn(Request $request, $order)
+    {
+        $order = Order::findOrFail($order);
+
+        if ($order->status != 5) {
+            return redirect()->route('admin.orders.index')
+                ->with('error', 'Đơn hàng không ở trạng thái yêu cầu hoàn.');
+        }
+
+        $request->validate([
+            'reject_reason' => 'nullable|string|max:500',
+        ]);
+
+        $rejectNote = trim($request->input('reject_reason', ''));
+        $noteAppend = $rejectNote
+            ? ' | Admin từ chối hoàn: ' . $rejectNote
+            : ' | Admin từ chối yêu cầu hoàn hàng.';
+
+        $order->update([
+            'status' => 4, // Trả về "Giao hàng thành công"
+            'note'   => $order->note . $noteAppend,
+        ]);
+
+        return redirect()->route('admin.orders.index')
+            ->with('success', "Đã từ chối hoàn hàng đơn #{$order->id}. Đơn được chuyển về trạng thái hoàn tất.");
+    }
+
     // =========================================================================
     // DAMAGED LIST — Danh sách hàng hỏng (status = 6)
     // =========================================================================

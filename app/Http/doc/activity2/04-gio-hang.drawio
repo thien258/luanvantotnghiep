@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="700" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+    <mxCell id="n0" value="Khách hàng" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="30" y="280" width="120" height="50" as="geometry"/></mxCell>
+    <mxCell id="d0" value="Đã đăng nhập?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="210" y="255" width="130" height="90" as="geometry"/></mxCell>
+    <mxCell id="n_login" value="Redirect /login" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="220" y="160" width="120" height="50" as="geometry"/></mxCell>
+    <mxCell id="n1" value="Validate product_id&#xa;và quantity (1-100)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="400" y="280" width="160" height="50" as="geometry"/></mxCell>
+    <mxCell id="n_err1" value="Báo lỗi" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="410" y="190" width="110" height="40" as="geometry"/></mxCell>
+    <mxCell id="d1" value="Tồn kho đủ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="620" y="255" width="130" height="90" as="geometry"/></mxCell>
+    <mxCell id="n_err2" value="Báo không đủ&#xa;tồn kho" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="630" y="160" width="120" height="50" as="geometry"/></mxCell>
+    <mxCell id="d2" value="SP đã có&#xa;trong giỏ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="820" y="255" width="130" height="90" as="geometry"/></mxCell>
+    <mxCell id="n2" value="Tăng quantity" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1030" y="220" width="140" height="50" as="geometry"/></mxCell>
+    <mxCell id="n3" value="Tạo Cart mới" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1030" y="320" width="140" height="50" as="geometry"/></mxCell>
+    <mxCell id="n4" value="Back + thông báo&#xa;thêm giỏ thành công" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1250" y="265" width="170" height="50" as="geometry"/></mxCell>
+    <mxCell id="e1" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="n0" target="d0" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="elogin" value="Chưa" style="endArrow=block;endFill=1;html=1;" edge="1" source="d0" target="n_login" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" value="Rồi" style="endArrow=block;endFill=1;html=1;" edge="1" source="d0" target="n1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_e1" value="Không hợp lệ" style="endArrow=block;endFill=1;html=1;" edge="1" source="n1" target="n_err1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" value="Hợp lệ" style="endArrow=block;endFill=1;html=1;" edge="1" source="n1" target="d1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_e2" value="Không" style="endArrow=block;endFill=1;html=1;" edge="1" source="d1" target="n_err2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e4" value="Đủ" style="endArrow=block;endFill=1;html=1;" edge="1" source="d1" target="d2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e5" value="Có" style="endArrow=block;endFill=1;html=1;" edge="1" source="d2" target="n2" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="885" y="245"/></Array></mxGeometry></mxCell>
+    <mxCell id="e6" value="Chưa" style="endArrow=block;endFill=1;html=1;" edge="1" source="d2" target="n3" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="885" y="345"/></Array></mxGeometry></mxCell>
+    <mxCell id="e7" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="n2" target="n4" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1170" y="245"/><mxPoint x="1335" y="245"/></Array></mxGeometry></mxCell>
+    <mxCell id="e8" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="n3" target="n4" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1170" y="345"/><mxPoint x="1335" y="345"/></Array></mxGeometry></mxCell>
+    <mxCell id="cap" value="Hình 2-x: Sơ đồ hoạt động Giỏ hàng" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=12;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="450" y="450" width="500" height="30" as="geometry"/></mxCell>
+    <mxCell id="desc" value="Mô tả:&#xa;+ Bước 1: Khách hàng chọn sản phẩm và bấm Thêm vào giỏ — yêu cầu đã đăng nhập.&#xa;+ Bước 2: Hệ thống validate product_id (tồn tại) và quantity (1–100).&#xa;+ Bước 3: Kiểm tra tồn kho — không đủ thì báo lỗi.&#xa;+ Bước 4: Kiểm tra sản phẩm đã có trong giỏ chưa:&#xa;    o Đã có: Tăng quantity thêm số lượng yêu cầu.&#xa;    o Chưa có: Tạo bản ghi Cart mới.&#xa;+ Bước 5: Redirect về trang trước với thông báo thêm giỏ thành công. Lưu ý: tồn kho KHÔNG trừ khi thêm giỏ." style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=12;fontStyle=0;verticalAlign=top;" vertex="1" parent="1"><mxGeometry x="30" y="500" width="1000" height="160" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

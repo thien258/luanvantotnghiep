@@ -1,0 +1,24 @@
+@startuml
+title Sơ đồ tuần tự - Đổi trả hàng
+
+actor "Khách hàng" as KH
+participant "Trang lịch sử đơn hàng" as B
+participant ":C_Order" as C
+participant ":E_Order" as EO
+
+KH -> B : 1: Vào trang lịch sử đơn hàng
+KH -> B : 2: Chọn đơn hàng đã giao thành công
+B -> C : 3: Kiểm tra điều kiện hiển thị nút đổi trả
+
+alt Quá 3 ngày kể từ ngày giao
+    C --> B : 4: Không hiển thị nút đổi trả
+else Trong vòng 3 ngày
+    C --> B : 4: Hiển thị nút Yêu cầu đổi trả
+    KH -> B : 5: Nhập lý do đổi trả
+    KH -> B : 6: Nhấn Xác nhận
+    B -> C : 7: customerReturn(id, reason)
+    C -> EO : 8: Cập nhật trạng thái đơn hàng (status = 5)
+    EO --> C : 9: Xác nhận
+    C --> KH : 10: Thông báo gửi yêu cầu thành công
+end
+@enduml

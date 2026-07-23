@@ -8,19 +8,18 @@ participant ":E_User" as E
 
 KH -> B : 1: Truy cập trang đăng ký
 B --> KH : 2: Hiển thị form đăng ký
-KH -> B : 3: Nhập thông tin (tên, email, mật khẩu, SĐT)
+KH -> B : 3: Nhập thông tin (tên, email, mật khẩu, SĐT, địa chỉ)
 KH -> B : 4: Nhấn nút Đăng ký
 B -> C : 5: Đăng ký tài khoản (dữ liệu form)
-C -> E : 6: Kiểm tra email đã tồn tại chưa
-E --> C : 7: Trả về kết quả
+C -> C : 6: Kiểm tra dữ liệu (validate)
 
-alt Thông tin hợp lệ & email chưa tồn tại
-    C -> E : 8: Lưu thông tin người dùng
-    E --> C : 9: Trả về kết quả
-    C --> KH : 10: Đăng ký thành công
-else Thông tin không hợp lệ
-    C --> KH : 11: Thông báo lỗi, quay lại form
+alt Thông tin không hợp lệ
+    C --> KH : 7: Thông báo lỗi, quay lại form
 else Email đã tồn tại
-    C --> KH : 12: Email đã được đăng ký, quay lại form
+    C --> KH : 7: Email đã được đăng ký, quay lại form
+else Thông tin hợp lệ & email chưa tồn tại
+    C -> E : 7: Lưu thông tin người dùng (role = customer)
+    E --> C : 8: Trả về kết quả
+    C --> KH : 9: Chuyển hướng sang trang xác minh email (/email/verify)
 end
 @enduml

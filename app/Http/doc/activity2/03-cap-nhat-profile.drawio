@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="700" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+    <mxCell id="n0" value="Người dùng" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="30" y="280" width="120" height="50" as="geometry"/></mxCell>
+    <mxCell id="n1" value="Vào trang Profile" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="200" y="280" width="140" height="50" as="geometry"/></mxCell>
+    <mxCell id="n2" value="Chỉnh sửa thông tin" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="390" y="280" width="150" height="50" as="geometry"/></mxCell>
+    <mxCell id="d1" value="Validate?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="600" y="255" width="120" height="90" as="geometry"/></mxCell>
+    <mxCell id="n3" value="Báo lỗi" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="610" y="160" width="110" height="50" as="geometry"/></mxCell>
+    <mxCell id="d2" value="Có đổi&#xa;mật khẩu?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="790" y="255" width="130" height="90" as="geometry"/></mxCell>
+    <mxCell id="n4" value="Hash + cập nhật&#xa;mật khẩu mới" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="990" y="200" width="160" height="50" as="geometry"/></mxCell>
+    <mxCell id="n5" value="Cập nhật thông tin&#xa;(tên/email/SĐT/địa chỉ)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="990" y="310" width="170" height="50" as="geometry"/></mxCell>
+    <mxCell id="n6" value="Redirect Profile&#xa;Thông báo thành công" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="1230" y="270" width="170" height="50" as="geometry"/></mxCell>
+    <mxCell id="e1" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="n0" target="n1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="n1" target="n2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="n2" target="d1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e4" value="Không hợp lệ" style="endArrow=block;endFill=1;html=1;" edge="1" source="d1" target="n3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e4b" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="n3" target="n2" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="665" y="120"/><mxPoint x="465" y="120"/></Array></mxGeometry></mxCell>
+    <mxCell id="e5" value="Hợp lệ" style="endArrow=block;endFill=1;html=1;" edge="1" source="d1" target="d2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e6" value="Có" style="endArrow=block;endFill=1;html=1;" edge="1" source="d2" target="n4" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="855" y="225"/></Array></mxGeometry></mxCell>
+    <mxCell id="e7" value="Không" style="endArrow=block;endFill=1;html=1;" edge="1" source="d2" target="n5" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="855" y="335"/></Array></mxGeometry></mxCell>
+    <mxCell id="e8" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="n4" target="n6" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1150" y="225"/><mxPoint x="1315" y="225"/></Array></mxGeometry></mxCell>
+    <mxCell id="e9" value="" style="endArrow=block;endFill=1;html=1;" edge="1" source="n5" target="n6" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1160" y="335"/><mxPoint x="1315" y="335"/></Array></mxGeometry></mxCell>
+    <mxCell id="cap" value="Hình 2-x: Sơ đồ hoạt động Cập nhật hồ sơ cá nhân" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=12;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="400" y="430" width="600" height="30" as="geometry"/></mxCell>
+    <mxCell id="desc" value="Mô tả:&#xa;+ Bước 1: Người dùng đăng nhập và truy cập trang Profile.&#xa;+ Bước 2: Người dùng chỉnh sửa thông tin (tên, email, SĐT, địa chỉ, mật khẩu mới — tuỳ chọn).&#xa;+ Bước 3: Hệ thống validate — email unique trừ chính mình, mật khẩu mới tối thiểu 8 ký tự nếu có điền.&#xa;+ Bước 4: Nếu có đổi mật khẩu → hash bcrypt rồi cập nhật. Không đổi → chỉ cập nhật thông tin cơ bản.&#xa;+ Bước 5 (Hoàn tất): Redirect về trang Profile với thông báo thành công." style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=12;fontStyle=0;verticalAlign=top;" vertex="1" parent="1"><mxGeometry x="30" y="480" width="900" height="140" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

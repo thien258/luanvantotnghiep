@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2600" pageHeight="1500" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+    <mxCell id="title" value="Mô hình dữ liệu mức vật lý (Physical Data Model) — MySQL / InnoDB" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="800" y="15" width="1000" height="35" as="geometry"/></mxCell>
+    <mxCell id="legend" value="🔑 PK   🔗 FK   NN=NOT NULL   UQ=UNIQUE   IDX=INDEX   DEF=DEFAULT" style="text;html=1;strokeColor=#000000;fillColor=#f5f5f5;align=center;fontSize=11;" vertex="1" parent="1"><mxGeometry x="30" y="15" width="450" height="30" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: users ===== -->
+    <mxCell id="users" value="users" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="30" y="70" width="280" height="250" as="geometry"/></mxCell>
+    <mxCell id="u_id" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="users"><mxGeometry x="0" y="25" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="u_name" value="    name  VARCHAR(191)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="users"><mxGeometry x="0" y="45" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="u_email" value="    email  VARCHAR(191)  NN  UQ" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="users"><mxGeometry x="0" y="65" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="u_phone" value="    phone  VARCHAR(15)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="users"><mxGeometry x="0" y="85" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="u_addr" value="    address  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="users"><mxGeometry x="0" y="105" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="u_pass" value="    password  VARCHAR(191)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="users"><mxGeometry x="0" y="125" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="u_role" value="    role  VARCHAR(20)  NN  DEF='customer'" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="users"><mxGeometry x="0" y="145" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="u_active" value="    is_active  TINYINT(1)  NN  DEF=1" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="users"><mxGeometry x="0" y="165" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="u_mfid" value="    manufacturer_id  BIGINT  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="users"><mxGeometry x="0" y="185" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="u_ts" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="users"><mxGeometry x="0" y="205" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="u_idx" value="    IDX: email" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="users"><mxGeometry x="0" y="225" width="280" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: categories ===== -->
+    <mxCell id="categories" value="categories" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="360" y="70" width="230" height="110" as="geometry"/></mxCell>
+    <mxCell id="cat_id" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="categories"><mxGeometry x="0" y="25" width="230" height="20" as="geometry"/></mxCell>
+    <mxCell id="cat_name" value="    name  VARCHAR(191)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="categories"><mxGeometry x="0" y="45" width="230" height="20" as="geometry"/></mxCell>
+    <mxCell id="cat_status" value="    status  INT  NN  DEF=0" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="categories"><mxGeometry x="0" y="65" width="230" height="20" as="geometry"/></mxCell>
+    <mxCell id="cat_ts" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="categories"><mxGeometry x="0" y="85" width="230" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: brands ===== -->
+    <mxCell id="brands" value="brands" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="640" y="70" width="230" height="130" as="geometry"/></mxCell>
+    <mxCell id="br_id" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="brands"><mxGeometry x="0" y="25" width="230" height="20" as="geometry"/></mxCell>
+    <mxCell id="br_name" value="    name  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="brands"><mxGeometry x="0" y="45" width="230" height="20" as="geometry"/></mxCell>
+    <mxCell id="br_img" value="    image  TEXT" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="brands"><mxGeometry x="0" y="65" width="230" height="20" as="geometry"/></mxCell>
+    <mxCell id="br_status" value="    status  INT  NN  DEF=0" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="brands"><mxGeometry x="0" y="85" width="230" height="20" as="geometry"/></mxCell>
+    <mxCell id="br_ts" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="brands"><mxGeometry x="0" y="105" width="230" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: concentrations ===== -->
+    <mxCell id="concentrations" value="concentrations" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="920" y="70" width="230" height="110" as="geometry"/></mxCell>
+    <mxCell id="cn_id" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="concentrations"><mxGeometry x="0" y="25" width="230" height="20" as="geometry"/></mxCell>
+    <mxCell id="cn_val" value="    concentration  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="concentrations"><mxGeometry x="0" y="45" width="230" height="20" as="geometry"/></mxCell>
+    <mxCell id="cn_status" value="    status  INT  NN  DEF=0" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="concentrations"><mxGeometry x="0" y="65" width="230" height="20" as="geometry"/></mxCell>
+    <mxCell id="cn_ts" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="concentrations"><mxGeometry x="0" y="85" width="230" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: products ===== -->
+    <mxCell id="products" value="products" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="640" y="260" width="280" height="290" as="geometry"/></mxCell>
+    <mxCell id="pr_id" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="25" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_title" value="    title  VARCHAR(250)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="45" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_desc" value="    decription  TEXT  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="65" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_vol" value="    volume  VARCHAR(255)  NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="85" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_price" value="    price  INT  NN  DEF=0" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="105" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_qty" value="    quantity  INT  NN  DEF=0" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="125" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_img" value="    image  TEXT  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="145" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_status" value="    status  TEXT  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="165" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_cat" value="🔗 idCategory  BIGINT UNSIGNED  NN  DEF=23" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="185" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_brand" value="🔗 idBrand  BIGINT UNSIGNED  NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="205" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_conc" value="🔗 idConcentration  BIGINT UNSIGNED  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="225" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_ts" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="products"><mxGeometry x="0" y="245" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pr_idx" value="    IDX: idCategory, idBrand, idConcentration" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="products"><mxGeometry x="0" y="265" width="280" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: orders ===== -->
+    <mxCell id="orders" value="orders" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="30" y="380" width="280" height="270" as="geometry"/></mxCell>
+    <mxCell id="or_id" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="orders"><mxGeometry x="0" y="25" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="or_uid" value="🔗 idUser  BIGINT UNSIGNED  NN  IDX" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="orders"><mxGeometry x="0" y="45" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="or_fn" value="    fullname  VARCHAR(255)  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="orders"><mxGeometry x="0" y="65" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="or_ph" value="    phone  VARCHAR(255)  NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="orders"><mxGeometry x="0" y="85" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="or_addr" value="    address  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="orders"><mxGeometry x="0" y="105" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="or_pm" value="    payment_method  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="orders"><mxGeometry x="0" y="125" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="or_tp" value="    total_price  INT  NN  DEF=0" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="orders"><mxGeometry x="0" y="145" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="or_st" value="    status  INT  NN  DEF=0" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="orders"><mxGeometry x="0" y="165" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="or_note" value="    note  TEXT  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="orders"><mxGeometry x="0" y="185" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="or_track" value="    tracking_code  VARCHAR(255)  NULL  UQ" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="orders"><mxGeometry x="0" y="205" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="or_ts" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="orders"><mxGeometry x="0" y="225" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="or_idx" value="    IDX: idUser (fk_orders_user)  ENGINE=InnoDB" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="orders"><mxGeometry x="0" y="245" width="280" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: order_details ===== -->
+    <mxCell id="order_details" value="order_details" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="360" y="380" width="260" height="190" as="geometry"/></mxCell>
+    <mxCell id="od_id" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="order_details"><mxGeometry x="0" y="25" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="od_oid" value="🔗 idOrder  BIGINT UNSIGNED  NN  IDX" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="order_details"><mxGeometry x="0" y="45" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="od_pid" value="🔗 idProduct  BIGINT UNSIGNED  NN  IDX" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="order_details"><mxGeometry x="0" y="65" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="od_name" value="    name  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="order_details"><mxGeometry x="0" y="85" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="od_qty" value="    quantity  INT  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="order_details"><mxGeometry x="0" y="105" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="od_price" value="    price  INT  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="order_details"><mxGeometry x="0" y="125" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="od_ts" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="order_details"><mxGeometry x="0" y="145" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="od_idx" value="    IDX: idOrder, idProduct  ENGINE=InnoDB" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="order_details"><mxGeometry x="0" y="165" width="260" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: carts ===== -->
+    <mxCell id="carts" value="carts" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="30" y="710" width="260" height="150" as="geometry"/></mxCell>
+    <mxCell id="ct_id" value="🔑 id  BIGINT  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="carts"><mxGeometry x="0" y="25" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="ct_uid" value="🔗 idUser  BIGINT UNSIGNED  NN  IDX" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="carts"><mxGeometry x="0" y="45" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="ct_pid" value="🔗 product_id  BIGINT UNSIGNED  NN  IDX" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="carts"><mxGeometry x="0" y="65" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="ct_qty" value="    quantity  INT  NN  DEF=1" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="carts"><mxGeometry x="0" y="85" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="ct_ts" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="carts"><mxGeometry x="0" y="105" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="ct_idx" value="    ENGINE=InnoDB" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="carts"><mxGeometry x="0" y="125" width="260" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: warehouse_receipts ===== -->
+    <mxCell id="whr" value="warehouse_receipts" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="960" y="380" width="270" height="130" as="geometry"/></mxCell>
+    <mxCell id="whr1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="whr"><mxGeometry x="0" y="25" width="270" height="20" as="geometry"/></mxCell>
+    <mxCell id="whr2" value="    receipt_code  VARCHAR(255)  NN  UQ" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="whr"><mxGeometry x="0" y="45" width="270" height="20" as="geometry"/></mxCell>
+    <mxCell id="whr3" value="    supplier  VARCHAR(255)  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="whr"><mxGeometry x="0" y="65" width="270" height="20" as="geometry"/></mxCell>
+    <mxCell id="whr4" value="    note  TEXT  NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="whr"><mxGeometry x="0" y="85" width="270" height="20" as="geometry"/></mxCell>
+    <mxCell id="whr5" value="    total_items  INT  NN  DEF=0" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="whr"><mxGeometry x="0" y="105" width="270" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: warehouse_stock_logs ===== -->
+    <mxCell id="wsl" value="warehouse_stock_logs" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="960" y="570" width="280" height="210" as="geometry"/></mxCell>
+    <mxCell id="wsl_1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="wsl"><mxGeometry x="0" y="25" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="wsl_2" value="🔗 receipt_id  BIGINT  NULL  → warehouse_receipts" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="wsl"><mxGeometry x="0" y="45" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="wsl_3" value="🔗 product_id  BIGINT  NN  → products" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="wsl"><mxGeometry x="0" y="65" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="wsl_4" value="    type  ENUM('import','export')  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="wsl"><mxGeometry x="0" y="85" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="wsl_5" value="    quantity  INT  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="wsl"><mxGeometry x="0" y="105" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="wsl_6" value="    stock_after  INT  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="wsl"><mxGeometry x="0" y="125" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="wsl_7" value="    reason  VARCHAR(255)  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="wsl"><mxGeometry x="0" y="145" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="wsl_8" value="    expiry_date  DATE  NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="wsl"><mxGeometry x="0" y="165" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="wsl_9" value="    IDX: receipt_id, product_id  ENGINE=InnoDB" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="wsl"><mxGeometry x="0" y="185" width="280" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: warehouse_imports ===== -->
+    <mxCell id="wi" value="warehouse_imports" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="640" y="830" width="290" height="230" as="geometry"/></mxCell>
+    <mxCell id="wi_1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="wi"><mxGeometry x="0" y="25" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="wi_2" value="    file_path  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="wi"><mxGeometry x="0" y="45" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="wi_3" value="    original_name  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="wi"><mxGeometry x="0" y="65" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="wi_4" value="    supplier  VARCHAR(255)  NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="wi"><mxGeometry x="0" y="85" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="wi_5" value="    note  TEXT  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="wi"><mxGeometry x="0" y="105" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="wi_6" value="🔗 uploaded_by  BIGINT  NULL  → users  SET NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="wi"><mxGeometry x="0" y="125" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="wi_7" value="    status  ENUM('pending','approved','rejected')  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="wi"><mxGeometry x="0" y="145" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="wi_8" value="🔗 reviewed_by  BIGINT  NULL  → users  SET NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="wi"><mxGeometry x="0" y="165" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="wi_9" value="    reviewed_at  TIMESTAMP  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="wi"><mxGeometry x="0" y="185" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="wi_10" value="    approved_items  JSON  NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="wi"><mxGeometry x="0" y="205" width="290" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: procurement_requests ===== -->
+    <mxCell id="prq" value="procurement_requests" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="1290" y="80" width="280" height="190" as="geometry"/></mxCell>
+    <mxCell id="prq1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="prq"><mxGeometry x="0" y="25" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="prq2" value="    request_code  VARCHAR(255)  NN  UQ" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="prq"><mxGeometry x="0" y="45" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="prq3" value="    status  ENUM('open','closed')  NN  DEF='open'" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="prq"><mxGeometry x="0" y="65" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="prq4" value="    note  TEXT  NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="prq"><mxGeometry x="0" y="85" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="prq5" value="    deadline  DATE  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="prq"><mxGeometry x="0" y="105" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="prq6" value="🔗 created_by  BIGINT  NN  → users  CASCADE" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="prq"><mxGeometry x="0" y="125" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="prq7" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="prq"><mxGeometry x="0" y="145" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="prq8" value="    IDX: created_by  ENGINE=InnoDB" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="prq"><mxGeometry x="0" y="165" width="280" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: procurement_request_items ===== -->
+    <mxCell id="pri" value="procurement_request_items" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="1290" y="330" width="280" height="170" as="geometry"/></mxCell>
+    <mxCell id="pri_1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="pri"><mxGeometry x="0" y="25" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pri_2" value="🔗 request_id  BIGINT  NN  → procurement_requests  CASCADE" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="pri"><mxGeometry x="0" y="45" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pri_3" value="🔗 product_id  BIGINT  NULL  → products  SET NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="pri"><mxGeometry x="0" y="65" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pri_4" value="    product_name  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="pri"><mxGeometry x="0" y="85" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pri_5" value="    qty_needed  INT  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="pri"><mxGeometry x="0" y="105" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pri_6" value="    note  TEXT  NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="pri"><mxGeometry x="0" y="125" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="pri_7" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="pri"><mxGeometry x="0" y="145" width="280" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: supplier_offers ===== -->
+    <mxCell id="sof" value="supplier_offers" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="1620" y="80" width="290" height="210" as="geometry"/></mxCell>
+    <mxCell id="sof1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="sof"><mxGeometry x="0" y="25" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="sof2" value="🔗 manufacturer_id  BIGINT  NN  → users  CASCADE" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="sof"><mxGeometry x="0" y="45" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="sof3" value="🔗 request_id  BIGINT  NULL  → procurement_requests" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="sof"><mxGeometry x="0" y="65" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="sof4" value="    offer_code  VARCHAR(255)  NN  UQ" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="sof"><mxGeometry x="0" y="85" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="sof5" value="    note  TEXT  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="sof"><mxGeometry x="0" y="105" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="sof6" value="    status  ENUM('draft','submitted','accepted','rejected')" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="sof"><mxGeometry x="0" y="125" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="sof7" value="    submitted_at  TIMESTAMP  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="sof"><mxGeometry x="0" y="145" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="sof8" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="sof"><mxGeometry x="0" y="165" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="sof9" value="    IDX: manufacturer_id, request_id  ENGINE=InnoDB" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="sof"><mxGeometry x="0" y="185" width="290" height="20" as="geometry"/></mxCell>
+
+
+    <!-- ===== TABLE: supplier_offer_items ===== -->
+    <mxCell id="soi" value="supplier_offer_items" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="1620" y="350" width="290" height="170" as="geometry"/></mxCell>
+    <mxCell id="soi_1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="soi"><mxGeometry x="0" y="25" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="soi_2" value="🔗 offer_id  BIGINT  NN  → supplier_offers  CASCADE" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="soi"><mxGeometry x="0" y="45" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="soi_3" value="🔗 product_id  BIGINT  NULL  → products  SET NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="soi"><mxGeometry x="0" y="65" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="soi_4" value="    product_name  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="soi"><mxGeometry x="0" y="85" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="soi_5" value="    unit_price  DECIMAL(15,2)  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="soi"><mxGeometry x="0" y="105" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="soi_6" value="    note  TEXT  NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="soi"><mxGeometry x="0" y="125" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="soi_7" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="soi"><mxGeometry x="0" y="145" width="290" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: purchase_orders ===== -->
+    <mxCell id="po" value="purchase_orders" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="1960" y="80" width="300" height="250" as="geometry"/></mxCell>
+    <mxCell id="po_1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="po"><mxGeometry x="0" y="25" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="po_2" value="🔗 offer_id  BIGINT  NN  → supplier_offers" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="po"><mxGeometry x="0" y="45" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="po_3" value="🔗 manufacturer_id  BIGINT  NN  → users  CASCADE" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="po"><mxGeometry x="0" y="65" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="po_4" value="🔗 created_by  BIGINT  NN  → users  CASCADE" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="po"><mxGeometry x="0" y="85" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="po_5" value="    order_code  VARCHAR(255)  NN  UQ" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="po"><mxGeometry x="0" y="105" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="po_6" value="    total_amount  DECIMAL(15,2)  NN  DEF=0" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="po"><mxGeometry x="0" y="125" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="po_7" value="    status  ENUM('pending','confirmed','delivering','received','cancelled')" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="po"><mxGeometry x="0" y="145" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="po_8" value="    expected_date  DATE  NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="po"><mxGeometry x="0" y="165" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="po_9" value="    note  TEXT  NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="po"><mxGeometry x="0" y="185" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="po_10" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="po"><mxGeometry x="0" y="205" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="po_11" value="    IDX: offer_id, manufacturer_id, created_by  ENGINE=InnoDB" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="po"><mxGeometry x="0" y="225" width="300" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: purchase_order_items ===== -->
+    <mxCell id="poi" value="purchase_order_items" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="1960" y="390" width="300" height="170" as="geometry"/></mxCell>
+    <mxCell id="poi_1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="poi"><mxGeometry x="0" y="25" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="poi_2" value="🔗 purchase_order_id  BIGINT  NN  → purchase_orders  CASCADE" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="poi"><mxGeometry x="0" y="45" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="poi_3" value="🔗 product_id  BIGINT  NULL  → products  SET NULL" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="poi"><mxGeometry x="0" y="65" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="poi_4" value="    product_name  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="poi"><mxGeometry x="0" y="85" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="poi_5" value="    quantity  INT  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="poi"><mxGeometry x="0" y="105" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="poi_6" value="    unit_price  DECIMAL(15,2)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="poi"><mxGeometry x="0" y="125" width="300" height="20" as="geometry"/></mxCell>
+    <mxCell id="poi_7" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="poi"><mxGeometry x="0" y="145" width="300" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: festivals ===== -->
+    <mxCell id="fest" value="festivals" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="640" y="570" width="240" height="170" as="geometry"/></mxCell>
+    <mxCell id="fest1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="fest"><mxGeometry x="0" y="25" width="240" height="20" as="geometry"/></mxCell>
+    <mxCell id="fest2" value="    name  VARCHAR(150)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="fest"><mxGeometry x="0" y="45" width="240" height="20" as="geometry"/></mxCell>
+    <mxCell id="fest3" value="    discount  INT  NN  DEF=0" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="fest"><mxGeometry x="0" y="65" width="240" height="20" as="geometry"/></mxCell>
+    <mxCell id="fest4" value="    status  INT  NN  DEF=1" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="fest"><mxGeometry x="0" y="85" width="240" height="20" as="geometry"/></mxCell>
+    <mxCell id="fest5" value="    start_date  DATE  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="fest"><mxGeometry x="0" y="105" width="240" height="20" as="geometry"/></mxCell>
+    <mxCell id="fest6" value="    end_date  DATE  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="fest"><mxGeometry x="0" y="125" width="240" height="20" as="geometry"/></mxCell>
+    <mxCell id="fest7" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="fest"><mxGeometry x="0" y="145" width="240" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: festival_product ===== -->
+    <mxCell id="fp" value="festival_product" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="640" y="780" width="260" height="130" as="geometry"/></mxCell>
+    <mxCell id="fp1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="fp"><mxGeometry x="0" y="25" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="fp2" value="🔗 idFestival  BIGINT UNSIGNED  NULL  IDX" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="fp"><mxGeometry x="0" y="45" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="fp3" value="🔗 idProduct  BIGINT UNSIGNED  NULL  IDX" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="fp"><mxGeometry x="0" y="65" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="fp4" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="fp"><mxGeometry x="0" y="85" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="fp5" value="    ENGINE=InnoDB" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="fp"><mxGeometry x="0" y="105" width="260" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: comments ===== -->
+    <mxCell id="comm" value="comments" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="960" y="830" width="260" height="130" as="geometry"/></mxCell>
+    <mxCell id="comm1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="comm"><mxGeometry x="0" y="25" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="comm2" value="🔗 idProduct  BIGINT UNSIGNED  NN  IDX" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="comm"><mxGeometry x="0" y="45" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="comm3" value="    name  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="comm"><mxGeometry x="0" y="65" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="comm4" value="    chat  TEXT  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="comm"><mxGeometry x="0" y="85" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="comm5" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="comm"><mxGeometry x="0" y="105" width="260" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: contacts ===== -->
+    <mxCell id="cont" value="contacts" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="30" y="960" width="260" height="130" as="geometry"/></mxCell>
+    <mxCell id="cont1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="cont"><mxGeometry x="0" y="25" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="cont2" value="    name  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="cont"><mxGeometry x="0" y="45" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="cont3" value="    email  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="cont"><mxGeometry x="0" y="65" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="cont4" value="    message  TEXT  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="cont"><mxGeometry x="0" y="85" width="260" height="20" as="geometry"/></mxCell>
+    <mxCell id="cont5" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="cont"><mxGeometry x="0" y="105" width="260" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: user_addresses ===== -->
+    <mxCell id="ua" value="user_addresses" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="330" y="960" width="270" height="170" as="geometry"/></mxCell>
+    <mxCell id="ua_1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="ua"><mxGeometry x="0" y="25" width="270" height="20" as="geometry"/></mxCell>
+    <mxCell id="ua_2" value="🔗 idUser  BIGINT UNSIGNED  NN  IDX" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="ua"><mxGeometry x="0" y="45" width="270" height="20" as="geometry"/></mxCell>
+    <mxCell id="ua_3" value="    name  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="ua"><mxGeometry x="0" y="65" width="270" height="20" as="geometry"/></mxCell>
+    <mxCell id="ua_4" value="    phone  VARCHAR(20)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="ua"><mxGeometry x="0" y="85" width="270" height="20" as="geometry"/></mxCell>
+    <mxCell id="ua_5" value="    address  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="ua"><mxGeometry x="0" y="105" width="270" height="20" as="geometry"/></mxCell>
+    <mxCell id="ua_6" value="    is_default  TINYINT(1)  NN  DEF=0" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="ua"><mxGeometry x="0" y="125" width="270" height="20" as="geometry"/></mxCell>
+    <mxCell id="ua_7" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="ua"><mxGeometry x="0" y="145" width="270" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== TABLE: root_activity_logs ===== -->
+    <mxCell id="ral" value="root_activity_logs" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="640" y="1080" width="280" height="150" as="geometry"/></mxCell>
+    <mxCell id="ral_1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="ral"><mxGeometry x="0" y="25" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ral_2" value="    user_id  BIGINT UNSIGNED  NN  (no FK — snapshot)" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="ral"><mxGeometry x="0" y="45" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ral_3" value="    user_name  VARCHAR(255)  NN  (snapshot)" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="ral"><mxGeometry x="0" y="65" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ral_4" value="    user_email  VARCHAR(255)  NN  (snapshot)" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="ral"><mxGeometry x="0" y="85" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ral_5" value="    action  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="ral"><mxGeometry x="0" y="105" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ral_6" value="    created_at  TIMESTAMP  NN  useCurrent  ENGINE=InnoDB" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="ral"><mxGeometry x="0" y="125" width="280" height="20" as="geometry"/></mxCell>
+
+    <!-- ===== RELATIONSHIP LINES (FK arrows) ===== -->
+    <mxCell id="fk1" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="users" target="orders" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk2" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="orders" target="order_details" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk3" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="products" target="order_details" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk4" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="users" target="carts" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk5" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="products" target="carts" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk6" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="categories" target="products" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk7" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="brands" target="products" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk8" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="concentrations" target="products" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk9" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="whr" target="wsl" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk10" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="products" target="wsl" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk11" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="users" target="prq" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk12" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="prq" target="pri" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk13" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="prq" target="sof" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk14" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="users" target="sof" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk15" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="sof" target="soi" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk16" value="1:1" style="endArrow=ERone;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="sof" target="po" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk17" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="po" target="poi" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk18" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="users" target="ua" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk19" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="products" target="fp" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk20" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="fest" target="fp" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk21" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="products" target="comm" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk22" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="users" target="wi" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+  ========== TABLE: footer ========== -->
+    <mxCell id="footer" value="footer" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="30" y="1200" width="280" height="210" as="geometry"/></mxCell>
+    <mxCell id="fo1" value="🔑 id  INT  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="footer"><mxGeometry x="0" y="25" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="fo2" value="    header  TEXT  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="footer"><mxGeometry x="0" y="45" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="fo3" value="    textheader  TEXT  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="footer"><mxGeometry x="0" y="65" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="fo4" value="    header2  TEXT  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="footer"><mxGeometry x="0" y="85" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="fo5" value="    address  TEXT  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="footer"><mxGeometry x="0" y="105" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="fo6" value="    phone  INT  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="footer"><mxGeometry x="0" y="125" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="fo7" value="    email  TEXT  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="footer"><mxGeometry x="0" y="145" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="fo8" value="🔗 created_by  BIGINT  NULL  → users  SET NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="footer"><mxGeometry x="0" y="165" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="fo9" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="footer"><mxGeometry x="0" y="185" width="280" height="20" as="geometry"/></mxCell>
+
+    <!-- ========== TABLE: title ========== -->
+    <mxCell id="title_t" value="title" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="360" y="1200" width="280" height="190" as="geometry"/></mxCell>
+    <mxCell id="ti_1" value="🔑 idTitle  INT  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="title_t"><mxGeometry x="0" y="25" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ti_2" value="    title  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="title_t"><mxGeometry x="0" y="45" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ti_3" value="    image  TEXT  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="title_t"><mxGeometry x="0" y="65" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ti_4" value="    button  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="title_t"><mxGeometry x="0" y="85" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ti_5" value="    descrip  VARCHAR(255)  NN" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="title_t"><mxGeometry x="0" y="105" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ti_6" value="🔗 created_by  BIGINT  NULL  → users  SET NULL" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="title_t"><mxGeometry x="0" y="125" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ti_7" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="title_t"><mxGeometry x="0" y="145" width="280" height="20" as="geometry"/></mxCell>
+    <mxCell id="ti_8" value="    ENGINE=InnoDB" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="title_t"><mxGeometry x="0" y="165" width="280" height="20" as="geometry"/></mxCell>
+
+    <!-- ========== TABLE: manufacturers_product ========== -->
+    <mxCell id="mfp" value="manufacturers_product" style="swimlane;startSize=25;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="690" y="1200" width="290" height="130" as="geometry"/></mxCell>
+    <mxCell id="mfp1" value="🔑 id  BIGINT UNSIGNED  NN  AI" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="mfp"><mxGeometry x="0" y="25" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="mfp2" value="🔗 manufacturer_id  BIGINT UNSIGNED  NN  → users  CASCADE" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="mfp"><mxGeometry x="0" y="45" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="mfp3" value="🔗 product_id  BIGINT UNSIGNED  NN  → products  CASCADE" style="text;html=1;strokeColor=none;fillColor=#ffffff;align=left;fontSize=10;" vertex="1" parent="mfp"><mxGeometry x="0" y="65" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="mfp4" value="    created_at / updated_at  TIMESTAMP" style="text;html=1;strokeColor=none;fillColor=#f9f9f9;align=left;fontSize=10;" vertex="1" parent="mfp"><mxGeometry x="0" y="85" width="290" height="20" as="geometry"/></mxCell>
+    <mxCell id="mfp5" value="    ENGINE=InnoDB" style="text;html=1;strokeColor=none;fillColor=#eeeeee;align=left;fontSize=9;fontStyle=2;" vertex="1" parent="mfp"><mxGeometry x="0" y="105" width="290" height="20" as="geometry"/></mxCell>
+
+    <!-- FK arrows cho 3 bảng mới -->
+    <mxCell id="fk_fo" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="users" target="footer" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk_ti" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="users" target="title_t" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk_mfp1" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="users" target="mfp" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="fk_mfp2" value="1:N" style="endArrow=ERmany;startArrow=ERone;strokeColor=#000000;fontSize=9;" edge="1" source="products" target="mfp" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <mxCell id="cap" value="Hình 3-x Mô hình dữ liệu mức vật lý — MySQL InnoDB (đầy đủ tất cả bảng)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=13;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="900" y="1420" width="800" height="30" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

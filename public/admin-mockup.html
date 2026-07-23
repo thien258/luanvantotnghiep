@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wireframe — Admin Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            color: #333;
+            padding: 20px;
+        }
+
+        /* ── outer frame ── */
+        .frame {
+            border: 1.5px solid #333;
+            width: 960px;
+            margin: 0 auto;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            border-bottom: 1.5px solid #333;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            justify-content: flex-end;
+        }
+        .topbar-user {
+            width: 36px; height: 36px;
+            border: 1.5px solid #333;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; color: #555;
+        }
+        /* simple person icon via SVG inline */
+
+        /* ── body row ── */
+        .body-row {
+            display: flex;
+            min-height: 560px;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 200px;
+            border-right: 1.5px solid #333;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-logo {
+            border: 1.5px solid #333;
+            margin: 14px;
+            height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: bold; text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .sidebar-nav {
+            border: 1.5px solid #333;
+            margin: 0 14px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-nav-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #999;
+            padding: 10px 12px 4px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .sidebar-nav-item {
+            padding: 8px 12px;
+            font-size: 11px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sidebar-nav-item.active {
+            font-weight: bold;
+        }
+        .icon-box {
+            width: 12px; height: 12px;
+            border: 1px solid #999;
+            flex-shrink: 0;
+        }
+        .sidebar-footer {
+            margin: 14px;
+            border: 1.5px solid #333;
+            padding: 8px 10px;
+            font-size: 10px;
+        }
+        .sidebar-footer .name { font-weight: bold; text-transform: uppercase; font-size: 10px; }
+        .sidebar-footer .role { color: #888; font-size: 9px; margin-top: 2px; }
+
+        /* ── MAIN ── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* stat cards row */
+        .stat-row {
+            display: flex;
+            gap: 0;
+            border-bottom: 1.5px solid #333;
+        }
+        .stat-card {
+            flex: 1;
+            border-right: 1.5px solid #333;
+            padding: 14px 16px;
+        }
+        .stat-card:last-child { border-right: none; }
+        .stat-card .sc-label {
+            font-size: 9px; text-transform: uppercase;
+            letter-spacing: 0.12em; color: #888; margin-bottom: 6px;
+        }
+        .stat-card .sc-value {
+            font-size: 20px; font-weight: bold; color: #111;
+        }
+        .stat-card .sc-sub {
+            font-size: 9px; color: #bbb; margin-top: 3px;
+        }
+
+        /* chart */
+        .chart-section {
+            border-bottom: 1.5px solid #333;
+            padding: 14px 16px;
+        }
+        .chart-title {
+            font-size: 10px; text-transform: uppercase;
+            letter-spacing: 0.1em; color: #555;
+            margin-bottom: 10px;
+        }
+        .chart-area {
+            border: 1.5px solid #ccc;
+            height: 110px;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 12px 8px;
+            gap: 6px;
+        }
+        .bar-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            height: 100%;
+            justify-content: flex-end;
+        }
+        .bar-fill {
+            width: 100%;
+            background: #ccc;
+            border: 1px solid #999;
+        }
+        .bar-month { font-size: 8px; color: #aaa; }
+
+        /* tables */
+        .tables-row {
+            display: flex;
+            flex: 1;
+        }
+        .tbl-col {
+            flex: 1;
+            border-right: 1.5px solid #333;
+        }
+        .tbl-col:last-child { border-right: none; }
+        .tbl-header {
+            border-bottom: 1.5px solid #333;
+            padding: 9px 14px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+        thead th {
+            padding: 6px 10px;
+            text-align: left;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+            border-bottom: 1px solid #ddd;
+        }
+        tbody td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        .tbl-placeholder {
+            height: 120px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="frame">
+
+    <!-- ══ TOPBAR ════════════════════════════════════════════════ -->
+    <div class="topbar">
+        <div class="topbar-user">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.5">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- ══ BODY ══════════════════════════════════════════════════ -->
+    <div class="body-row">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-logo">LOGO</div>
+
+            <div class="sidebar-nav">
+                <div class="sidebar-nav-label">Tổng quan</div>
+                <div class="sidebar-nav-item active">
+                    <div class="icon-box"></div> Dashboard
+                </div>
+
+                <div class="sidebar-nav-label">Danh mục &amp; SP</div>
+                <div class="sidebar-nav-item">
+                    <div class="icon-box"></div> Danh mục &amp; Sản phẩm
+                </div>
+
+                <div class="sidebar-nav-label">Order &amp; Kho</div>
+                <div class="sidebar-nav-item">
+                    <div class="icon-box"></div> Order &amp; Kho
+                </div>
+
+                <div class="sidebar-nav-label">Nhà Sản Xuất</div>
+                <div class="sidebar-nav-item">
+                    <div class="icon-box"></div> Nhà Sản Xuất
+                </div>
+
+                <div class="sidebar-nav-label">Hệ thống</div>
+                <div class="sidebar-nav-item">
+                    <div class="icon-box"></div> Contact
+                </div>
+                <div class="sidebar-nav-item">
+                    <div class="icon-box"></div> User
+                </div>
+                <div class="sidebar-nav-item">
+                    <div class="icon-box"></div> Footer
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="name">Admin User</div>
+                <div class="role">Quản trị viên</div>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main">
+
+            <!-- Stat cards -->
+            <div class="stat-row">
+                <div class="stat-card">
+                    <div class="sc-label">Doanh thu</div>
+                   
+                </div>
+                <div class="stat-card">
+                    <div class="sc-label">Tổng đơn hàng</div>
+                   
+                </div>
+                <div class="stat-card">
+                    <div class="sc-label">Người dùng</div>
+                   
+                </div>
+                <div class="stat-card">
+                    <div class="sc-label">Sản phẩm</div>
+                  
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="chart-section">
+                <div class="chart-title">Doanh thu theo tháng — 2026 (Triệu VNĐ)</div>
+                
+            </div>
+
+            <!-- Tables -->
+            <div class="tables-row">
+
+                <div class="tbl-col">
+                    <div class="tbl-header">Top 5 sản phẩm bán chạy</div>
+                    <div class="tbl-placeholder"></div>
+                </div>
+
+                <div class="tbl-col">
+                    <div class="tbl-header">Sản phẩm bán chậm</div>
+                    <div class="tbl-placeholder"></div>
+                </div>
+
+                <div class="tbl-col">
+                    <div class="tbl-header">Sắp hết kho</div>
+                    <div class="tbl-placeholder"></div>
+                </div>
+
+                <div class="tbl-col">
+                    <div class="tbl-header">Lô sắp hết hạn</div>
+                    <div class="tbl-placeholder"></div>
+                </div>
+
+            </div><!-- /tables-row -->
+
+        </div><!-- /main -->
+    </div><!-- /body-row -->
+</div><!-- /frame -->
+
+</body>
+</html>

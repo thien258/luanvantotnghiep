@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<title>3.2.1 Mô tả thực thể</title>
+<style>
+  body { font-family: "Times New Roman", serif; font-size: 13pt; color: #000; background: #fff; padding: 40px 60px; }
+  h1 { font-size: 14pt; border-bottom: 1px solid #000; padding-bottom: 6px; margin-bottom: 20px; }
+  h2 { font-size: 13pt; font-weight: bold; margin: 28px 0 4px 0; }
+  p.mo-ta { margin: 0 0 6px 0; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 6px; }
+  th, td { border: 1px solid #000; padding: 5px 10px; font-size: 12pt; vertical-align: middle; }
+  th { text-align: center; font-weight: bold; background: #fff; }
+  td { text-align: center; }
+  td:first-child, td:nth-child(2), td:last-child { text-align: left; }
+  td:first-child { font-family: "Courier New", monospace; font-size: 11pt; }
+</style>
+</head>
+<body>
+<h1>3.2.1 Mô tả thực thể</h1>
+
+<h2>3.2.1.1 Loại thực thể users (khách hàng / người dùng)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Thực thể users lưu trữ thông tin của tất cả người dùng trong hệ thống, bao gồm khách hàng và các tài khoản quản trị.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã người dùng</td></tr>
+<tr><td>name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Họ tên</td></tr>
+<tr><td>email</td><td>Varchar(191)</td><td></td><td>X</td><td>X</td><td>Email đăng nhập</td></tr>
+<tr><td>email_verified_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Thời điểm xác thực email</td></tr>
+<tr><td>phone</td><td>Varchar(15)</td><td></td><td></td><td>X</td><td>Số điện thoại</td></tr>
+<tr><td>address</td><td>Varchar(255)</td><td></td><td></td><td>X</td><td>Địa chỉ</td></tr>
+<tr><td>password</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Mật khẩu (đã mã hóa)</td></tr>
+<tr><td>remember_token</td><td>Varchar(100)</td><td></td><td></td><td></td><td>Token ghi nhớ đăng nhập</td></tr>
+<tr><td>role</td><td>Varchar(20)</td><td></td><td></td><td>X</td><td>Quyền hạn (mặc định: customer)</td></tr>
+<tr><td>is_active</td><td>Boolean</td><td></td><td></td><td>X</td><td>Trạng thái tài khoản (mặc định: true)</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.2 Loại thực thể user_addresses (địa chỉ người dùng)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Lưu trữ danh sách địa chỉ giao hàng của từng khách hàng, hỗ trợ nhiều địa chỉ và đánh dấu địa chỉ mặc định.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã địa chỉ</td></tr>
+<tr><td>idUser</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã người dùng → users.id</td></tr>
+<tr><td>name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên người nhận hàng</td></tr>
+<tr><td>phone</td><td>Varchar(20)</td><td></td><td></td><td>X</td><td>Số điện thoại người nhận</td></tr>
+<tr><td>address</td><td>Varchar(255)</td><td></td><td></td><td>X</td><td>Địa chỉ giao hàng chi tiết</td></tr>
+<tr><td>is_default</td><td>Boolean</td><td></td><td></td><td>X</td><td>Địa chỉ mặc định (mặc định: false)</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.3 Loại thực thể categories (danh mục sản phẩm)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Phân loại sản phẩm theo từng nhóm danh mục trong cửa hàng.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã danh mục</td></tr>
+<tr><td>name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên danh mục</td></tr>
+<tr><td>status</td><td>Int</td><td></td><td></td><td>X</td><td>Trạng thái hiển thị (0: ẩn, 1: hiện)</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.4 Loại thực thể brands (thương hiệu)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Lưu trữ thông tin các thương hiệu nước hoa được kinh doanh trên hệ thống.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã thương hiệu</td></tr>
+<tr><td>name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên thương hiệu</td></tr>
+<tr><td>image</td><td>Text</td><td></td><td></td><td>X</td><td>Đường dẫn logo thương hiệu</td></tr>
+<tr><td>descrip</td><td>Text</td><td></td><td></td><td>X</td><td>Mô tả thương hiệu</td></tr>
+<tr><td>status</td><td>Int</td><td></td><td></td><td>X</td><td>Trạng thái (0: ẩn, 1: hiện)</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.5 Loại thực thể concentrations (nồng độ nước hoa)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Phân loại sản phẩm theo nồng độ nước hoa (EDT, EDP, Parfum, Cologne…).</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã nồng độ</td></tr>
+<tr><td>concentration</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên nồng độ (EDT, EDP, Parfum…)</td></tr>
+<tr><td>status</td><td>Int</td><td></td><td></td><td>X</td><td>Trạng thái (0: ẩn, 1: hiện)</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.6 Loại thực thể products (sản phẩm)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Lưu trữ thông tin chi tiết từng sản phẩm nước hoa: tên, giá, ảnh, tồn kho và các phân loại liên quan.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã sản phẩm</td></tr>
+<tr><td>title</td><td>Varchar(250)</td><td></td><td></td><td>X</td><td>Tên sản phẩm</td></tr>
+<tr><td>decription</td><td>Text</td><td></td><td></td><td>X</td><td>Mô tả chi tiết sản phẩm</td></tr>
+<tr><td>volume</td><td>Varchar(191)</td><td></td><td></td><td></td><td>Dung tích (50ml, 100ml…)</td></tr>
+<tr><td>price</td><td>Int</td><td></td><td></td><td>X</td><td>Giá bán (VNĐ, mặc định: 0)</td></tr>
+<tr><td>quantity</td><td>Int</td><td></td><td></td><td>X</td><td>Số lượng tồn kho (mặc định: 0)</td></tr>
+<tr><td>image</td><td>Text</td><td></td><td></td><td>X</td><td>Đường dẫn ảnh sản phẩm</td></tr>
+<tr><td>idCategory</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã danh mục → categories.id</td></tr>
+<tr><td>idBrand</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã thương hiệu → brands.id</td></tr>
+<tr><td>idConcentration</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã nồng độ → concentrations.id</td></tr>
+<tr><td>status</td><td>Text</td><td></td><td></td><td>X</td><td>Trạng thái hiển thị sản phẩm</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.7 Loại thực thể carts (giỏ hàng)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Lưu trữ các sản phẩm khách hàng đã thêm vào giỏ, chờ xác nhận đặt hàng.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã giỏ hàng</td></tr>
+<tr><td>idUser</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã người dùng → users.id</td></tr>
+<tr><td>product_id</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã sản phẩm → products.id</td></tr>
+<tr><td>quantity</td><td>Int</td><td></td><td></td><td>X</td><td>Số lượng trong giỏ (mặc định: 1)</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày thêm vào giỏ</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.8 Loại thực thể orders (đơn hàng)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Lưu trữ thông tin các đơn đặt hàng của khách, bao gồm địa chỉ giao, phương thức thanh toán và trạng thái xử lý.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã đơn hàng</td></tr>
+<tr><td>idUser</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã khách hàng → users.id</td></tr>
+<tr><td>fullname</td><td>Varchar(191)</td><td></td><td></td><td></td><td>Họ tên người nhận hàng</td></tr>
+<tr><td>phone</td><td>Varchar(191)</td><td></td><td></td><td></td><td>Số điện thoại người nhận</td></tr>
+<tr><td>address</td><td>Varchar(255)</td><td></td><td></td><td>X</td><td>Địa chỉ giao hàng</td></tr>
+<tr><td>payment_method</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Phương thức thanh toán (COD, PayOS…)</td></tr>
+<tr><td>total_price</td><td>Int</td><td></td><td></td><td>X</td><td>Tổng tiền đơn hàng (VNĐ)</td></tr>
+<tr><td>status</td><td>Int</td><td></td><td></td><td>X</td><td>Trạng thái đơn hàng (0: chờ xác nhận…)</td></tr>
+<tr><td>note</td><td>Text</td><td></td><td></td><td></td><td>Ghi chú của khách hàng</td></tr>
+<tr><td>tracking_code</td><td>Varchar(191)</td><td></td><td></td><td></td><td>Mã vận đơn theo dõi giao hàng</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày đặt hàng</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.9 Loại thực thể order_details (chi tiết đơn hàng)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Danh sách sản phẩm trong từng đơn hàng. Tên và giá được lưu tại thời điểm đặt để tránh thay đổi khi sản phẩm cập nhật sau này.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã chi tiết đơn hàng</td></tr>
+<tr><td>idOrder</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã đơn hàng → orders.id</td></tr>
+<tr><td>idProduct</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã sản phẩm → products.id</td></tr>
+<tr><td>name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên sản phẩm tại thời điểm đặt</td></tr>
+<tr><td>quantity</td><td>Int</td><td></td><td></td><td>X</td><td>Số lượng đặt mua</td></tr>
+<tr><td>price</td><td>Int</td><td></td><td></td><td>X</td><td>Đơn giá tại thời điểm đặt</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.10 Loại thực thể festivals (chương trình khuyến mãi)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Lưu thông tin các đợt giảm giá theo thời gian. Mỗi festival có ngày bắt đầu, ngày kết thúc và mức giảm giá chung.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã chương trình khuyến mãi</td></tr>
+<tr><td>name</td><td>Varchar(150)</td><td></td><td></td><td>X</td><td>Tên chương trình</td></tr>
+<tr><td>discount</td><td>Int</td><td></td><td></td><td>X</td><td>Phần trăm giảm giá (mặc định: 0)</td></tr>
+<tr><td>status</td><td>Int</td><td></td><td></td><td>X</td><td>Trạng thái (1: đang hoạt động)</td></tr>
+<tr><td>start_date</td><td>Date</td><td></td><td></td><td>X</td><td>Ngày bắt đầu khuyến mãi</td></tr>
+<tr><td>end_date</td><td>Date</td><td></td><td></td><td>X</td><td>Ngày kết thúc khuyến mãi</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.11 Loại thực thể festival_product (sản phẩm trong khuyến mãi)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Bảng trung gian liên kết nhiều-nhiều giữa chương trình khuyến mãi và sản phẩm.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã bản ghi</td></tr>
+<tr><td>idFestival</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã chương trình → festivals.id</td></tr>
+<tr><td>idProduct</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã sản phẩm → products.id</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày thêm vào</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.12 Loại thực thể comments (bình luận sản phẩm)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Lưu trữ bình luận, đánh giá của người dùng về sản phẩm.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã bình luận</td></tr>
+<tr><td>idProduct</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã sản phẩm → products.id</td></tr>
+<tr><td>name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên người bình luận</td></tr>
+<tr><td>chat</td><td>Text</td><td></td><td></td><td>X</td><td>Nội dung bình luận</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày bình luận</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.13 Loại thực thể contacts (liên hệ)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Lưu trữ tin nhắn liên hệ / hỗ trợ gửi đến cửa hàng, có thể gắn với tài khoản người dùng đã đăng nhập.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã liên hệ</td></tr>
+<tr><td>name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên người gửi</td></tr>
+<tr><td>email</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Email người gửi</td></tr>
+<tr><td>message</td><td>Text</td><td></td><td></td><td>X</td><td>Nội dung tin nhắn</td></tr>
+<tr><td>user_id</td><td>BigInt (FK)</td><td></td><td></td><td></td><td>Mã người dùng (nullable) → users.id</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày gửi</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.14 Loại thực thể warehouse_receipts (phiếu nhập kho)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Mỗi phiếu đại diện một lô hàng nhập vào kho, ghi nhận nhà cung cấp và số lượng mặt hàng.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã phiếu nhập</td></tr>
+<tr><td>receipt_code</td><td>Varchar(191)</td><td></td><td>X</td><td>X</td><td>Mã phiếu – duy nhất</td></tr>
+<tr><td>supplier</td><td>Varchar(191)</td><td></td><td></td><td></td><td>Tên nhà cung cấp</td></tr>
+<tr><td>note</td><td>Text</td><td></td><td></td><td></td><td>Ghi chú lô hàng</td></tr>
+<tr><td>total_items</td><td>Int</td><td></td><td></td><td>X</td><td>Tổng số dòng mặt hàng (mặc định: 0)</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo phiếu</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.15 Loại thực thể warehouse_stock_logs (nhật ký tồn kho)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Ghi lại toàn bộ lịch sử biến động số lượng tồn kho (nhập / xuất) của từng sản phẩm theo thời gian.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã nhật ký</td></tr>
+<tr><td>receipt_id</td><td>BigInt (FK)</td><td></td><td></td><td></td><td>Mã phiếu nhập (nullable) → warehouse_receipts.id</td></tr>
+<tr><td>product_id</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã sản phẩm → products.id</td></tr>
+<tr><td>type</td><td>Enum</td><td></td><td></td><td>X</td><td>Loại giao dịch: import (nhập) / export (xuất)</td></tr>
+<tr><td>quantity</td><td>Int</td><td></td><td></td><td>X</td><td>Số lượng biến động</td></tr>
+<tr><td>stock_after</td><td>Int</td><td></td><td></td><td>X</td><td>Tồn kho sau giao dịch</td></tr>
+<tr><td>reason</td><td>Varchar(191)</td><td></td><td></td><td></td><td>Lý do xuất / nhập</td></tr>
+<tr><td>expiry_date</td><td>Date</td><td></td><td></td><td></td><td>Hạn sử dụng của lô hàng</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Thời điểm ghi nhận</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.16 Loại thực thể warehouse_imports (file nhập kho)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Quản lý file Excel nhập kho do nhân viên tải lên. Phải được admin duyệt trước khi áp dụng vào kho thực tế.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã file nhập</td></tr>
+<tr><td>file_path</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Đường dẫn lưu trữ file trên server</td></tr>
+<tr><td>original_name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên file gốc khi tải lên</td></tr>
+<tr><td>supplier</td><td>Varchar(191)</td><td></td><td></td><td></td><td>Tên nhà cung cấp</td></tr>
+<tr><td>note</td><td>Text</td><td></td><td></td><td></td><td>Ghi chú</td></tr>
+<tr><td>uploaded_by</td><td>BigInt (FK)</td><td></td><td></td><td></td><td>Nhân viên tải lên → users.id</td></tr>
+<tr><td>status</td><td>Enum</td><td></td><td></td><td>X</td><td>Trạng thái: pending / approved / rejected</td></tr>
+<tr><td>approved_items</td><td>JSON</td><td></td><td></td><td></td><td>Danh sách mặt hàng được admin chọn duyệt</td></tr>
+<tr><td>reviewed_by</td><td>BigInt (FK)</td><td></td><td></td><td></td><td>Admin duyệt file → users.id</td></tr>
+<tr><td>reviewed_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Thời điểm duyệt / từ chối</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tải lên</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.17 Loại thực thể procurement_requests (yêu cầu thu mua)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Admin tạo yêu cầu thu mua gửi đến các nhà sản xuất. Nhà sản xuất nhận và gửi báo giá lại.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã yêu cầu</td></tr>
+<tr><td>request_code</td><td>Varchar(191)</td><td></td><td>X</td><td>X</td><td>Mã yêu cầu – duy nhất</td></tr>
+<tr><td>status</td><td>Enum</td><td></td><td></td><td>X</td><td>Trạng thái: open (đang mở) / closed (đã đóng)</td></tr>
+<tr><td>note</td><td>Text</td><td></td><td></td><td></td><td>Ghi chú yêu cầu</td></tr>
+<tr><td>deadline</td><td>Date</td><td></td><td></td><td></td><td>Hạn chót nhận báo giá từ nhà sản xuất</td></tr>
+<tr><td>created_by</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Người tạo yêu cầu → users.id</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.18 Loại thực thể procurement_request_items (chi tiết yêu cầu thu mua)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Danh sách sản phẩm và số lượng cần thu mua trong từng yêu cầu.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã chi tiết</td></tr>
+<tr><td>request_id</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã yêu cầu → procurement_requests.id</td></tr>
+<tr><td>product_id</td><td>BigInt (FK)</td><td></td><td></td><td></td><td>Mã sản phẩm (nullable) → products.id</td></tr>
+<tr><td>product_name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên sản phẩm (snapshot)</td></tr>
+<tr><td>qty_needed</td><td>Int</td><td></td><td></td><td>X</td><td>Số lượng cần thu mua</td></tr>
+<tr><td>note</td><td>Text</td><td></td><td></td><td></td><td>Ghi chú</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.19 Loại thực thể supplier_offers (báo giá nhà sản xuất)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Nhà sản xuất gửi bản báo giá lên hệ thống, có thể đáp lại một yêu cầu thu mua cụ thể hoặc tự chủ động báo giá.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã báo giá</td></tr>
+<tr><td>manufacturer_id</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã nhà sản xuất → users.id</td></tr>
+<tr><td>request_id</td><td>BigInt (FK)</td><td></td><td></td><td></td><td>Mã yêu cầu thu mua (nullable) → procurement_requests.id</td></tr>
+<tr><td>offer_code</td><td>Varchar(191)</td><td></td><td>X</td><td>X</td><td>Mã báo giá – duy nhất</td></tr>
+<tr><td>note</td><td>Text</td><td></td><td></td><td></td><td>Ghi chú</td></tr>
+<tr><td>status</td><td>Enum</td><td></td><td></td><td>X</td><td>Trạng thái: draft / submitted / accepted / rejected</td></tr>
+<tr><td>submitted_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Thời điểm nộp báo giá</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.20 Loại thực thể supplier_offer_items (chi tiết báo giá)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Danh sách sản phẩm và đơn giá đề xuất trong từng bản báo giá của nhà sản xuất.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã chi tiết báo giá</td></tr>
+<tr><td>offer_id</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã báo giá → supplier_offers.id</td></tr>
+<tr><td>product_id</td><td>BigInt (FK)</td><td></td><td></td><td></td><td>Mã sản phẩm (nullable) → products.id</td></tr>
+<tr><td>product_name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên sản phẩm tại thời điểm báo giá</td></tr>
+<tr><td>unit_price</td><td>Decimal(15,2)</td><td></td><td></td><td>X</td><td>Đơn giá đề xuất</td></tr>
+<tr><td>note</td><td>Text</td><td></td><td></td><td></td><td>Ghi chú</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.21 Loại thực thể purchase_orders (đơn đặt hàng nhà sản xuất)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Admin phát hành đơn đặt mua hàng chính thức cho nhà sản xuất sau khi chấp nhận báo giá. Theo dõi tiến độ giao hàng.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã đơn đặt hàng</td></tr>
+<tr><td>offer_id</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã báo giá gốc → supplier_offers.id</td></tr>
+<tr><td>manufacturer_id</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã nhà sản xuất → users.id</td></tr>
+<tr><td>order_code</td><td>Varchar(191)</td><td></td><td>X</td><td>X</td><td>Mã đơn – duy nhất</td></tr>
+<tr><td>total_amount</td><td>Decimal(15,2)</td><td></td><td></td><td>X</td><td>Tổng giá trị đơn hàng</td></tr>
+<tr><td>status</td><td>Enum</td><td></td><td></td><td>X</td><td>pending / confirmed / delivering / received / cancelled</td></tr>
+<tr><td>expected_date</td><td>Date</td><td></td><td></td><td></td><td>Ngày dự kiến nhận hàng</td></tr>
+<tr><td>note</td><td>Text</td><td></td><td></td><td></td><td>Ghi chú</td></tr>
+<tr><td>created_by</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Admin tạo đơn → users.id</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.22 Loại thực thể purchase_order_items (chi tiết đơn đặt hàng NSX)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Danh sách sản phẩm, số lượng và giá trong từng đơn đặt hàng gửi nhà sản xuất.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã chi tiết</td></tr>
+<tr><td>purchase_order_id</td><td>BigInt (FK)</td><td></td><td></td><td>X</td><td>Mã đơn đặt hàng → purchase_orders.id</td></tr>
+<tr><td>product_id</td><td>BigInt (FK)</td><td></td><td></td><td></td><td>Mã sản phẩm (nullable) → products.id</td></tr>
+<tr><td>product_name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên sản phẩm (snapshot)</td></tr>
+<tr><td>quantity</td><td>Int</td><td></td><td></td><td>X</td><td>Số lượng đặt mua</td></tr>
+<tr><td>unit_price</td><td>Decimal(15,2)</td><td></td><td></td><td>X</td><td>Đơn giá thoả thuận</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.23 Loại thực thể root_activity_logs (nhật ký hoạt động root)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Ghi lại mọi hành động của tài khoản root phục vụ kiểm toán bảo mật. Dữ liệu người dùng lưu dạng snapshot, không bị mất khi tài khoản bị xóa.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>BigInt</td><td>X</td><td>X</td><td>X</td><td>Mã nhật ký</td></tr>
+<tr><td>user_id</td><td>BigInt</td><td></td><td></td><td>X</td><td>Mã người thực hiện (snapshot, không FK)</td></tr>
+<tr><td>user_name</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tên người thực hiện (snapshot)</td></tr>
+<tr><td>user_email</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Email người thực hiện (snapshot)</td></tr>
+<tr><td>action</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Mô tả hành động đã thực hiện</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Thời điểm thực hiện (không có updated_at)</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.24 Loại thực thể title (banner / slide trang chủ)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Nội dung các banner slider hiển thị trên trang chủ, do admin tạo và quản lý.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>idTitle</td><td>Int</td><td>X</td><td>X</td><td>X</td><td>Mã banner</td></tr>
+<tr><td>title</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Tiêu đề chính của banner</td></tr>
+<tr><td>image</td><td>Text</td><td></td><td></td><td>X</td><td>Đường dẫn ảnh banner</td></tr>
+<tr><td>button</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Nội dung nút CTA (ví dụ: "Mua ngay")</td></tr>
+<tr><td>descrip</td><td>Varchar(191)</td><td></td><td></td><td>X</td><td>Mô tả ngắn dưới tiêu đề</td></tr>
+<tr><td>created_by</td><td>BigInt (FK)</td><td></td><td></td><td></td><td>Admin tạo banner (nullable) → users.id</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+<h2>3.2.1.25 Loại thực thể footer (nội dung chân trang)</h2>
+<p class="mo-ta"><b>Mô tả:</b> Thông tin hiển thị ở footer website: địa chỉ, số điện thoại, email liên hệ của cửa hàng.</p>
+<table>
+<thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>K</th><th>U</th><th>M</th><th>Diễn giải</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>Int</td><td>X</td><td>X</td><td>X</td><td>Mã footer</td></tr>
+<tr><td>header</td><td>Text</td><td></td><td></td><td>X</td><td>Tiêu đề cột 1 trong footer</td></tr>
+<tr><td>textheader</td><td>Text</td><td></td><td></td><td>X</td><td>Nội dung cột 1</td></tr>
+<tr><td>header2</td><td>Text</td><td></td><td></td><td>X</td><td>Tiêu đề cột 2 trong footer</td></tr>
+<tr><td>address</td><td>Text</td><td></td><td></td><td>X</td><td>Địa chỉ cửa hàng</td></tr>
+<tr><td>phone</td><td>Int</td><td></td><td></td><td>X</td><td>Số điện thoại liên hệ</td></tr>
+<tr><td>email</td><td>Text</td><td></td><td></td><td>X</td><td>Email liên hệ</td></tr>
+<tr><td>created_by</td><td>BigInt (FK)</td><td></td><td></td><td></td><td>Admin tạo footer (nullable) → users.id</td></tr>
+<tr><td>created_at</td><td>Timestamp</td><td></td><td></td><td>X</td><td>Ngày tạo</td></tr>
+<tr><td>updated_at</td><td>Timestamp</td><td></td><td></td><td></td><td>Ngày cập nhật</td></tr>
+</tbody>
+</table>
+
+</body>
+</html>

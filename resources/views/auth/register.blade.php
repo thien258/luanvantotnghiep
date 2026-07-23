@@ -4,146 +4,179 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Laravel') }} - Register</title>
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { font-family: 'Nunito', sans-serif; background-color: #f8f9fa; }
-    </style>
+    <title>{{ config('app.name', 'Laravel') }} — Đăng ký</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 </head>
-<body>
-    <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto">
-                        @if (Route::has('login'))
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                            </li>
-                        @endif
-                        @if (Route::has('register'))
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                            </li>
-                        @endif
-                    </ul>
-                </div>
-            </div>
-        </nav>
+<body class="bg-light min-vh-100 d-flex align-items-center justify-content-center py-5">
 
-        <main class="py-4">
-            <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; text-align: center; padding-top: 20%;">
-                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-3">Đang gửi mã xác thực, vui lòng đợi trong giây lát...</p>
-            </div>
-
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header">{{ __('Register') }}</div>
-
-                            <div class="card-body">
-                                <form method="POST" action="{{ route('register') }}">
-                                    @csrf
-
-                                    <div class="row mb-3">
-                                        <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label>
-                                        <div class="col-md-6">
-                                            <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
-                                            @error('name')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
-                                        <div class="col-md-6">
-                                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email">
-                                            @error('email')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label for="phone" class="col-md-4 col-form-label text-md-end">{{ __('Phone') }}</label>
-                                        <div class="col-md-6">
-                                            <input id="phone" type="text" class="form-control @error('phone') is-invalid @enderror" name="phone" value="{{ old('phone') }}" required autocomplete="phone">
-                                            @error('phone')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label for="address" class="col-md-4 col-form-label text-md-end">{{ __('Address') }}</label>
-                                        <div class="col-md-6">
-                                            <input id="address" type="text" class="form-control @error('address') is-invalid @enderror" name="address" value="{{ old('address') }}" required autocomplete="address">
-                                            @error('address')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
-                                        <div class="col-md-6">
-                                            <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
-                                            @error('password')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
-                                        <div class="col-md-6">
-                                            <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-0">
-                                        <div class="col-md-6 offset-md-4">
-                                            <button type="submit" class="btn btn-primary" id="register-btn">
-                                                {{ __('Register') }}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
+    {{-- Loading overlay --}}
+    <div id="loading-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex flex-column align-items-center justify-content-center" style="z-index:9999">
+        <div class="spinner-border text-dark mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="small text-secondary mb-0">Đang xử lý, vui lòng đợi...</p>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="w-100" style="max-width:600px">
+
+        {{-- Back --}}
+        <div class="text-center mb-4">
+            <a href="{{ url('/') }}" class="text-secondary text-decoration-none small">
+                <i class="bi bi-arrow-left me-1"></i> Quay về trang chủ
+            </a>
+        </div>
+
+        {{-- Card --}}
+        <div class="card border-0 shadow-sm rounded-0 px-4 px-md-5 py-5">
+
+            <h1 class="h3 text-center fw-semibold mb-1">Tạo tài khoản</h1>
+            <p class="text-center text-secondary small mb-4">
+                Tạo tài khoản để trải nghiệm mua sắm được cá nhân hóa.
+            </p>
+
+            <form method="POST" action="{{ route('register') }}" id="register-form">
+                @csrf
+
+                {{-- Row 1: Name + Email --}}
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label for="name" class="form-label fw-semibold small text-uppercase text-dark">
+                            Họ và tên
+                        </label>
+                        <input
+                            id="name"
+                            type="text"
+                            name="name"
+                            class="form-control rounded-0 bg-light border-0 border-bottom @error('name') is-invalid @enderror"
+                            value="{{ old('name') }}"
+                            placeholder="Nguyễn Văn A"
+                            required
+                            autocomplete="name"
+                            autofocus
+                        >
+                        @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="email" class="form-label fw-semibold small text-uppercase text-dark">
+                            Địa chỉ Email
+                        </label>
+                        <input
+                            id="email"
+                            type="email"
+                            name="email"
+                            class="form-control rounded-0 bg-light border-0 border-bottom @error('email') is-invalid @enderror"
+                            value="{{ old('email') }}"
+                            placeholder="email@example.com"
+                            required
+                            autocomplete="email"
+                        >
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Row 2: Phone + Address --}}
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label for="phone" class="form-label fw-semibold small text-uppercase text-dark">
+                            Số điện thoại
+                        </label>
+                        <input
+                            id="phone"
+                            type="text"
+                            name="phone"
+                            class="form-control rounded-0 bg-light border-0 border-bottom @error('phone') is-invalid @enderror"
+                            value="{{ old('phone') }}"
+                            placeholder="0901 234 567"
+                            required
+                            autocomplete="tel"
+                        >
+                        @error('phone')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="address" class="form-label fw-semibold small text-uppercase text-dark">
+                            Địa chỉ
+                        </label>
+                        <input
+                            id="address"
+                            type="text"
+                            name="address"
+                            class="form-control rounded-0 bg-light border-0 border-bottom @error('address') is-invalid @enderror"
+                            value="{{ old('address') }}"
+                            placeholder="123 Đường ABC, Hà Nội"
+                            required
+                            autocomplete="street-address"
+                        >
+                        @error('address')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Row 3: Password + Confirm --}}
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-6">
+                        <label for="password" class="form-label fw-semibold small text-uppercase text-dark">
+                            Tạo mật khẩu
+                        </label>
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            class="form-control rounded-0 bg-light border-0 border-bottom @error('password') is-invalid @enderror"
+                            placeholder="••••••••"
+                            required
+                            autocomplete="new-password"
+                        >
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="password-confirm" class="form-label fw-semibold small text-uppercase text-dark">
+                            Xác nhận mật khẩu
+                        </label>
+                        <input
+                            id="password-confirm"
+                            type="password"
+                            name="password_confirmation"
+                            class="form-control rounded-0 bg-light border-0 border-bottom"
+                            placeholder="••••••••"
+                            required
+                            autocomplete="new-password"
+                        >
+                    </div>
+                </div>
+
+            
+
+                <button type="submit" class="btn btn-dark rounded-0 w-100 py-3 fw-semibold text-uppercase small mt-1" id="register-btn">
+                    Tạo tài khoản
+                </button>
+            </form>
+
+            <p class="text-center small text-secondary mt-4 mb-0">
+                Đã có tài khoản?
+                <a href="{{ route('login') }}" class="text-dark fw-semibold text-decoration-underline">
+                    Đăng nhập
+                </a>
+            </p>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.querySelector('form').addEventListener('submit', function () {
-            document.getElementById('loading-overlay').style.display = 'block';
+        document.getElementById('register-form').addEventListener('submit', function () {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('d-none');
+            overlay.classList.add('d-flex');
         });
     </script>
 </body>

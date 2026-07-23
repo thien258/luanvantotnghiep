@@ -185,8 +185,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse
      */
     Route::post('/orders/{id}/update-status', [OrderAdminController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('/orders/{order}/return',      [OrderAdminController::class, 'returnOrder'])->name('orders.return');
-    Route::post('/orders/{order}/return',     [OrderAdminController::class, 'processReturn'])->name('orders.processReturn');
-    Route::get('/orders-damaged',             [OrderAdminController::class, 'damagedList'])->name('orders.damaged');
+    Route::post('/orders/{order}/return',        [OrderAdminController::class, 'processReturn'])->name('orders.processReturn');
+    Route::post('/orders/{order}/reject-return', [OrderAdminController::class, 'rejectReturn'])->name('orders.rejectReturn');
+    Route::get('/orders-damaged',                [OrderAdminController::class, 'damagedList'])->name('orders.damaged');
 
     // Resource CRUD đơn hàng (index, show, ...)
     Route::resource('orders', OrderAdminController::class);

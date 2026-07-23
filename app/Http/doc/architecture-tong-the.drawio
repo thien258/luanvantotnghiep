@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+
+    <!-- ========== TIÊU ĐỀ ========== -->
+    <mxCell id="title" value="Sơ đồ kiến trúc tổng thể hệ thống AROMA (Laravel MVC)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="500" y="20" width="900" height="35" as="geometry"/></mxCell>
+
+    <!-- ========== KHUNG KHÁCH HÀNG ========== -->
+    <mxCell id="kh_swimlane" value="Khách hàng" style="swimlane;startSize=30;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2;fontStyle=1;fontSize=13;" vertex="1" parent="1"><mxGeometry x="30" y="80" width="560" height="340" as="geometry"/></mxCell>
+
+    <!-- Actor -->
+    <mxCell id="kh_actor" value="Khách hàng" style="shape=umlActor;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#000000;fontSize=10;" vertex="1" parent="kh_swimlane"><mxGeometry x="30" y="120" width="40" height="60" as="geometry"/></mxCell>
+
+    <!-- Trình duyệt -->
+    <mxCell id="kh_browser" value="Trình duyệt" style="shape=mxgraph.cisco.computers_and_peripherals.pc;strokeColor=#000000;fillColor=#ffffff;fontSize=10;fontStyle=1;" vertex="1" parent="kh_swimlane"><mxGeometry x="110" y="110" width="60" height="70" as="geometry"/></mxCell>
+
+    <!-- Blade ellipse -->
+    <mxCell id="kh_blade" value="Blade" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="kh_swimlane"><mxGeometry x="210" y="120" width="80" height="60" as="geometry"/></mxCell>
+
+    <!-- Session cylinder -->
+    <mxCell id="kh_session_cyl" value="Session" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontStyle=1;" vertex="1" parent="kh_swimlane"><mxGeometry x="330" y="60" width="70" height="70" as="geometry"/></mxCell>
+
+    <!-- Session sub note -->
+    <mxCell id="kh_session_note" value="Lưu thông tin&#xa;đăng nhập, giỏ hàng" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=9;" vertex="1" parent="kh_swimlane"><mxGeometry x="320" y="145" width="120" height="35" as="geometry"/></mxCell>
+
+    <!-- Routes cylinder -->
+    <mxCell id="kh_routes_cyl" value="Routes" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontStyle=1;" vertex="1" parent="kh_swimlane"><mxGeometry x="460" y="60" width="70" height="70" as="geometry"/></mxCell>
+
+    <!-- Routes list -->
+    <mxCell id="kh_routes_list" value="Đăng ký / Đăng nhập&#xa;Tìm kiếm sản phẩm&#xa;Quản lý đơn hàng&#xa;Đổi trả hàng" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=9;align=left;" vertex="1" parent="kh_swimlane"><mxGeometry x="450" y="145" width="90" height="65" as="geometry"/></mxCell>
+
+    <!-- Arrows inside kh_swimlane -->
+    <mxCell id="ekh1" value="" style="endArrow=block;endFill=1;strokeColor=#000000;" edge="1" source="kh_actor" target="kh_browser" parent="kh_swimlane"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="ekh2" value="Truy cập" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;" edge="1" source="kh_browser" target="kh_blade" parent="kh_swimlane"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="ekh3" value="Trả về giao diện" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;dashed=1;" edge="1" source="kh_blade" target="kh_browser" parent="kh_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="250" y="210"/><mxPoint x="140" y="210"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="ekh4" value="Gửi request" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;" edge="1" source="kh_blade" target="kh_session_cyl" parent="kh_swimlane"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="ekh5" value="Trả dữ liệu json" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;dashed=1;" edge="1" source="kh_session_cyl" target="kh_blade" parent="kh_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="365" y="160"/><mxPoint x="295" y="160"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="ekh6" value="Xác thực session" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;" edge="1" source="kh_session_cyl" target="kh_routes_cyl" parent="kh_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="400" y="90"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- ========== KHUNG QUẢN TRỊ VIÊN ========== -->
+    <mxCell id="ql_swimlane" value="Quản trị viên (Admin / Kho / NSX / Director)" style="swimlane;startSize=30;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2;fontStyle=1;fontSize=13;" vertex="1" parent="1"><mxGeometry x="30" y="470" width="560" height="380" as="geometry"/></mxCell>
+
+    <mxCell id="ql_actor" value="Quản trị viên" style="shape=umlActor;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#000000;fontSize=10;" vertex="1" parent="ql_swimlane"><mxGeometry x="30" y="130" width="40" height="60" as="geometry"/></mxCell>
+    <mxCell id="ql_browser" value="Trình duyệt" style="shape=mxgraph.cisco.computers_and_peripherals.pc;strokeColor=#000000;fillColor=#ffffff;fontSize=10;fontStyle=1;" vertex="1" parent="ql_swimlane"><mxGeometry x="110" y="120" width="60" height="70" as="geometry"/></mxCell>
+    <mxCell id="ql_blade" value="Blade" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="ql_swimlane"><mxGeometry x="210" y="130" width="80" height="60" as="geometry"/></mxCell>
+    <mxCell id="ql_session_cyl" value="Session" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontStyle=1;" vertex="1" parent="ql_swimlane"><mxGeometry x="330" y="65" width="70" height="70" as="geometry"/></mxCell>
+    <mxCell id="ql_session_note" value="Lưu thông tin&#xa;đăng nhập" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=9;" vertex="1" parent="ql_swimlane"><mxGeometry x="320" y="148" width="100" height="35" as="geometry"/></mxCell>
+    <mxCell id="ql_routes_cyl" value="Routes" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#000000;fontSize=10;fontStyle=1;" vertex="1" parent="ql_swimlane"><mxGeometry x="455" y="65" width="70" height="70" as="geometry"/></mxCell>
+    <mxCell id="ql_routes_list" value="Đăng nhập / Dashboard&#xa;Tìm kiếm sản phẩm&#xa;Quản lý đơn hàng&#xa;Quản lý đổi trả&#xa;Quản lý danh mục&#xa;Quản lý sản phẩm&#xa;Quản lý nhập kho&#xa;Quản lý yêu cầu đặt hàng" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=9;align=left;" vertex="1" parent="ql_swimlane"><mxGeometry x="445" y="148" width="100" height="110" as="geometry"/></mxCell>
+
+    <mxCell id="eql1" value="" style="endArrow=block;endFill=1;strokeColor=#000000;" edge="1" source="ql_actor" target="ql_browser" parent="ql_swimlane"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="eql2" value="Truy cập" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;" edge="1" source="ql_browser" target="ql_blade" parent="ql_swimlane"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="eql3" value="Trả về giao diện" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;dashed=1;" edge="1" source="ql_blade" target="ql_browser" parent="ql_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="250" y="220"/><mxPoint x="140" y="220"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="eql4" value="Gửi request" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;" edge="1" source="ql_blade" target="ql_session_cyl" parent="ql_swimlane"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="eql5" value="Trả dữ liệu json" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;dashed=1;" edge="1" source="ql_session_cyl" target="ql_blade" parent="ql_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="365" y="168"/><mxPoint x="295" y="168"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="eql6" value="Xác thực session" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;" edge="1" source="ql_session_cyl" target="ql_routes_cyl" parent="ql_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="400" y="95"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- ========== KHUNG BACKEND LARAVEL ========== -->
+    <mxCell id="be_swimlane" value="Laravel Backend (MVC)" style="swimlane;startSize=30;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2;fontStyle=1;fontSize=13;" vertex="1" parent="1"><mxGeometry x="680" y="270" width="1150" height="300" as="geometry"/></mxCell>
+
+    <!-- Controller -->
+    <mxCell id="ctrl" value="Controller" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=13;fontStyle=1;" vertex="1" parent="be_swimlane"><mxGeometry x="40" y="110" width="160" height="60" as="geometry"/></mxCell>
+
+    <!-- Service -->
+    <mxCell id="service" value="Service&#xa;(Xử lý logic)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="be_swimlane"><mxGeometry x="310" y="110" width="160" height="60" as="geometry"/></mxCell>
+
+    <!-- Model / Eloquent -->
+    <mxCell id="repo" value="Model / Eloquent&#xa;(Truy vấn dữ liệu)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="be_swimlane"><mxGeometry x="590" y="110" width="180" height="60" as="geometry"/></mxCell>
+
+    <!-- Database -->
+    <mxCell id="db_cyl" value="Database&#xa;(MySQL)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="be_swimlane"><mxGeometry x="890" y="85" width="100" height="100" as="geometry"/></mxCell>
+
+    <!-- Middleware note -->
+    <mxCell id="mw_note" value="Middleware: auth → CheckRole → LogRootActivity" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#000000;fontSize=10;fontStyle=2;" vertex="1" parent="be_swimlane"><mxGeometry x="40" y="40" width="380" height="30" as="geometry"/></mxCell>
+
+    <!-- Arrows Controller ↔ Service ↔ Repo ↔ DB -->
+    <mxCell id="ecs1" value="Gửi request" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;" edge="1" source="ctrl" target="service" parent="be_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="130"/><mxPoint x="310" y="130"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="ecs2" value="Nhận response" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;dashed=1;" edge="1" source="service" target="ctrl" parent="be_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="310" y="155"/><mxPoint x="200" y="155"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="esr1" value="Trả về dữ liệu" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;" edge="1" source="service" target="repo" parent="be_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="470" y="130"/><mxPoint x="590" y="130"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="esr2" value="Trả về dữ liệu" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;dashed=1;" edge="1" source="repo" target="service" parent="be_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="590" y="155"/><mxPoint x="470" y="155"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="erd1" value="Truy vấn dữ liệu" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;" edge="1" source="repo" target="db_cyl" parent="be_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="770" y="130"/><mxPoint x="890" y="130"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="erd2" value="Trả về dữ liệu" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=9;dashed=1;" edge="1" source="db_cyl" target="repo" parent="be_swimlane">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="890" y="155"/><mxPoint x="770" y="155"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- External services bên phải trong be_swimlane -->
+    <mxCell id="ext_payos" value="PayOS API&#xa;(Thanh toán)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;" vertex="1" parent="be_swimlane"><mxGeometry x="1020" y="50" width="110" height="50" as="geometry"/></mxCell>
+    <mxCell id="ext_mail" value="Mail SMTP&#xa;(Xác nhận đơn)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;" vertex="1" parent="be_swimlane"><mxGeometry x="1020" y="120" width="110" height="50" as="geometry"/></mxCell>
+    <mxCell id="ext_excel" value="PhpSpreadsheet&#xa;(Import/Export)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=10;" vertex="1" parent="be_swimlane"><mxGeometry x="1020" y="190" width="110" height="50" as="geometry"/></mxCell>
+
+    <mxCell id="e_ctrl_payos" value="" style="endArrow=block;endFill=1;strokeColor=#000000;dashed=1;" edge="1" source="ctrl" target="ext_payos" parent="be_swimlane"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_ctrl_mail" value="" style="endArrow=block;endFill=1;strokeColor=#000000;dashed=1;" edge="1" source="ctrl" target="ext_mail" parent="be_swimlane"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_ctrl_excel" value="" style="endArrow=block;endFill=1;strokeColor=#000000;dashed=1;" edge="1" source="ctrl" target="ext_excel" parent="be_swimlane"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- ========== ARROWS: CLIENT → BACKEND ========== -->
+    <!-- Routes khách → Controller -->
+    <mxCell id="e_kh_be" value="Nhận request" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=10;" edge="1" source="kh_routes_cyl" target="ctrl" parent="1">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="510" y="165"/><mxPoint x="720" y="165"/><mxPoint x="720" y="380"/></Array></mxGeometry>
+    </mxCell>
+    <!-- Controller → Routes khách (trả về response) -->
+    <mxCell id="e_be_kh" value="Trả về response" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=10;dashed=1;" edge="1" source="ctrl" target="kh_routes_cyl" parent="1">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="700" y="395"/><mxPoint x="700" y="200"/><mxPoint x="510" y="200"/></Array></mxGeometry>
+    </mxCell>
+    <!-- Routes QL → Controller -->
+    <mxCell id="e_ql_be" value="Trả dữ liệu" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=10;" edge="1" source="ql_routes_cyl" target="ctrl" parent="1">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="510" y="540"/><mxPoint x="720" y="540"/><mxPoint x="720" y="440"/></Array></mxGeometry>
+    </mxCell>
+    <!-- Controller → Routes QL -->
+    <mxCell id="e_be_ql" value="Trả về response" style="endArrow=block;endFill=1;strokeColor=#000000;fontSize=10;dashed=1;" edge="1" source="ctrl" target="ql_routes_cyl" parent="1">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="695" y="455"/><mxPoint x="695" y="580"/><mxPoint x="510" y="580"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- Caption -->
+    <mxCell id="cap" value="Hình 3-x Sơ đồ kiến trúc tổng thể hệ thống" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=13;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="600" y="930" width="700" height="30" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>
