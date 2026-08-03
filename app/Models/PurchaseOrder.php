@@ -38,7 +38,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PurchaseOrderItem> $items
  * @property-read int|null $items_count
- * @property-read \App\Models\ManuFacturer $manufacturer
+ * @property-read \App\Models\User $manufacturer
  * @property-read \App\Models\SupplierOffer|null $offer
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PurchaseOrder newQuery()

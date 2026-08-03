@@ -32,7 +32,9 @@ class LoginController extends Controller
 
     protected function redirectTo()
     {
-        $role = auth()->user()->role;
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $role = $user->role;
 
         if ($role === 'root') {
             return '/admin';

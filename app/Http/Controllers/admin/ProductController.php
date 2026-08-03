@@ -97,7 +97,7 @@ class ProductController extends Controller
             'categories'     => Category::all(),
             'concentrations' => Concentration::all(),
             'brands'         => Brand::all(),
-            'manufacturers'  => ManuFacturer::all(),
+            'manufacturers'  => \App\Models\User::where('role', 'manufacturer')->orderBy('name')->get(),
             'festivals'      => Festival::where('status', 1)->get(), // chỉ festival đang active
         ]);
     }
@@ -184,7 +184,7 @@ class ProductController extends Controller
             'festivals'               => Festival::where('status', 1)->get(),
             // IDs festival hiện tại của SP (để pre-check checkbox)
             'selectedFestivalIds'     => $product->festivals()->pluck('festivals.id')->toArray(),
-            'manufacturers'           => ManuFacturer::all(),
+            'manufacturers'           => \App\Models\User::where('role', 'manufacturer')->orderBy('name')->get(),
             // IDs NSX hiện tại của SP (để pre-check checkbox)
             'selectedManufacturerIds' => $product->manufacturers()->pluck('manufacturers.id')->toArray(),
         ]);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use \App\Models\WarehouseStockLog;
 
 /**
@@ -27,7 +28,9 @@ class OrderAdminController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            $role = auth()->user()->role;
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            $role = $user->role;
             // director và root có toàn quyền xem mọi trang đơn hàng
             if (in_array($role, ['director', 'root'])) {
                 return $next($request);

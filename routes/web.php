@@ -65,8 +65,8 @@ Route::get('/category_product/{category}', [HomeController::class, 'category_pro
 Route::get('/brand_product/{brand}',       [HomeController::class, 'brand_product'])->name('brand_product');
 Route::get('/festival_product/{festival}', [HomeController::class, 'festival_product'])->name('festival_product');
 
-// Trang đăng ký (view riêng, không dùng auth scaffolding mặc định)
-Route::get('/register', fn() => view('register'))->name('register');
+// Trang đăng ký
+Route::get('/register', fn() => view('auth.register'))->name('register');
 
 // Override trang login mặc định → dùng view login.blade.php đẹp của project
 Route::get('/login', fn() => view('login'))->name('login');
@@ -224,4 +224,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse
     Route::get('activity-log', [ActivityLogController::class, 'index'])
         ->middleware('role:director')  // chỉ director, không cho root vào xem log của chính mình
         ->name('activity-log.index');
+
+    // ── Test page — lấy data từ Concentration, không cần controller riêng ──
+    Route::get('test-page', fn() => view('admin.test-page.index', [
+        'concentrations' => \App\Models\Concentration::orderBy('id', 'desc')->get(),
+    ]))->name('test-page.index');
 });

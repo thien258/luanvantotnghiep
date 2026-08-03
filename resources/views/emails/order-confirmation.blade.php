@@ -141,25 +141,17 @@
                             <div style="background:#fffbf0;border:1px solid #f0c040;border-left:4px solid #f0a000;border-radius:6px;padding:20px;margin-bottom:24px;">
                                 <p style="font-size:15px;font-weight:700;color:#b06000;margin:0 0 8px;">⚠️ Đơn COD được xử lý sau đơn chuyển khoản</p>
                                 <p style="font-size:13px;color:#666;margin:0 0 16px;">
-                                    Các đơn đã thanh toán trước sẽ được ưu tiên đóng gói và giao hàng sớm hơn.<br>
-                                    Quét mã QR bên dưới để thanh toán ngay và được ưu tiên xử lý.
+                                    Các đơn đã thanh toán trước sẽ được ưu tiên đóng gói và giao hàng sớm hơn.
                                 </p>
                                 @if(!empty($payosUrl))
                                 <div style="text-align:center;">
-                                    <img
-                                        src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($payosUrl) }}"
-                                        alt="QR thanh toán"
-                                        width="180"
-                                        height="180"
-                                        style="border:1px solid #ddd;border-radius:6px;display:block;margin:0 auto 12px;">
-                                    <p style="font-size:12px;color:#999;margin:0 0 12px;">Hoặc bấm nút bên dưới nếu xem trên điện thoại</p>
                                     <a href="{{ $payosUrl }}"
-                                        style="display:inline-block;background:#e8a000;color:#fff;text-decoration:none;padding:11px 28px;border-radius:4px;font-size:14px;font-weight:700;">
+                                        style="display:inline-block;background:#e8a000;color:#fff;text-decoration:none;padding:13px 32px;border-radius:4px;font-size:15px;font-weight:700;">
                                         💳 Thanh toán ngay
                                     </a>
                                 </div>
                                 <p style="font-size:11px;color:#e65100;margin:12px 0 0;text-align:center;">
-                                    ⚠️ Mã QR và link thanh toán chỉ dùng <strong>1 lần</strong>. Nếu bạn đã bấm vào nhưng chưa thanh toán hoặc bấm Hủy, mã này sẽ không còn hiệu lực.<br>
+                                    ⚠️ Link thanh toán chỉ dùng <strong>1 lần</strong>. Nếu đã bấm nhưng chưa thanh toán hoặc bấm Hủy, link sẽ không còn hiệu lực.<br>
                                     Để thanh toán lại, vui lòng đăng nhập → <strong>Lịch sử đơn hàng</strong> → chọn đơn này → bấm <strong>"Thanh toán online"</strong>.
                                 </p>
                                 @else

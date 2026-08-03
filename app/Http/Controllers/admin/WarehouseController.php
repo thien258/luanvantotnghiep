@@ -46,7 +46,9 @@ class WarehouseController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            $role = auth()->user()->role;
+            /** @var \App\Models\User $authUser */
+            $authUser = Auth::user();
+            $role = $authUser->role;
             // Chỉ admin và warehouse vào được
             if (!in_array($role, ['admin', 'warehouse', 'director', 'root'])) {
                 abort(403);

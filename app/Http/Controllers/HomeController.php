@@ -93,7 +93,9 @@ class HomeController extends Controller
 
         // Lọc sản phẩm cho từng festival
         $festivals->each(function($festival) use ($today) {
+            /** @var \App\Models\Festival $festival */
             $filteredProducts = $festival->products->filter(function($product) use ($festival, $today) {
+                /** @var \App\Models\Product $product */
                 // Tìm discount cao nhất từ tất cả festival active của sản phẩm này
                 $maxActiveDiscount = $product->festivals
                     ->where('status', 1)
@@ -158,8 +160,7 @@ class HomeController extends Controller
 
         // Eager load festivals để tính giá giảm
         $products = $query->with('festivals')->get();
-
-        // Filter giá — phải filter SAU khi get() vì giá có thể bị giảm bởi festival
+        /** @var \Illuminate\Database\Eloquent\Collection|\App\Models\Product[] $products */
         if ($request->has('min_price') && $request->has('max_price')) {
             $min      = (int) $request->min_price;
             $max      = (int) $request->max_price;
@@ -216,6 +217,7 @@ class HomeController extends Controller
         }
 
         $products = $query->with('festivals')->get();
+        /** @var \Illuminate\Database\Eloquent\Collection|\App\Models\Product[] $products */
 
         // Filter giá sau giảm
         if ($request->has('min_price') && $request->has('max_price')) {
@@ -316,6 +318,7 @@ class HomeController extends Controller
         }
 
         $products = $query->with('festivals')->get();
+        /** @var \Illuminate\Database\Eloquent\Collection|\App\Models\Product[] $products */
 
         // Filter giá sau giảm
         if ($request->has('min_price') && $request->has('max_price')) {
@@ -392,6 +395,7 @@ class HomeController extends Controller
         }
 
         $products = $query->with('festivals')->get();
+        /** @var \Illuminate\Database\Eloquent\Collection|\App\Models\Product[] $products */
 
         // ── LỌC THEO DISCOUNT CAO NHẤT ───────────────────────────────
         $today    = \Carbon\Carbon::today()->toDateString();
@@ -501,7 +505,7 @@ class HomeController extends Controller
     public function showManufacturerProducts()
     {
         // Lấy NSX "a" với eager loading relationships
-        $manufacturer = ManuFacturer::where('name', 'a')
+        $manufacturer = \App\Models\User::where('name', 'a')
             ->with(['products.brand', 'products.category', 'products.concentration'])
             ->first();
 

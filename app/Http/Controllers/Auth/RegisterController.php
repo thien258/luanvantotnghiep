@@ -49,11 +49,30 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'phone' => ['required', 'string', 'max:10','unique:users','regex:/^0[0-9]{9,10}$/'],
-            'address' => ['required', 'string', 'max:255'],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'phone'    => ['required', 'string', 'unique:users', 'regex:/^0[0-9]{9}$/'],
+            'address'  => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'name.required'     => 'Vui lòng nhập họ và tên.',
+            'name.max'          => 'Họ và tên không được vượt quá 255 ký tự.',
+
+            'email.required'    => 'Vui lòng nhập địa chỉ email.',
+            'email.email'       => 'Địa chỉ email không đúng định dạng.',
+            'email.max'         => 'Email không được vượt quá 255 ký tự.',
+            'email.unique'      => 'Email này đã được đăng ký, vui lòng dùng email khác.',
+
+            'phone.required'    => 'Vui lòng nhập số điện thoại.',
+            'phone.unique'      => 'Số điện thoại này đã được đăng ký.',
+            'phone.regex'       => 'Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số.',
+
+            'address.required'  => 'Vui lòng nhập địa chỉ.',
+            'address.max'       => 'Địa chỉ không được vượt quá 255 ký tự.',
+
+            'password.required' => 'Vui lòng nhập mật khẩu.',
+            'password.min'      => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'password.confirmed'=> 'Xác nhận mật khẩu không khớp.',
         ]);
     }
 

@@ -74,6 +74,7 @@ class ProductShowController extends Controller
 
         // Eager load festivals để tính giá giảm và filter giá
         $products = $query->with('festivals')->get();
+        /** @var \Illuminate\Database\Eloquent\Collection|\App\Models\Product[] $products */
 
         // ── Filter giá — phải filter SAU get() vì giá phụ thuộc festival ──
         if ($request->has('min_price') && $request->has('max_price')) {

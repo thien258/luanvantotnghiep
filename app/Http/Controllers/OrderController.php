@@ -36,8 +36,6 @@ use Illuminate\Support\Facades\Mail;
  */
 class OrderController extends Controller
 {
-    public function store(Request $request) {}
-
     // =========================================================================
     // CHECKOUT — Lưu giỏ hàng đã chọn vào session
     // =========================================================================
@@ -284,12 +282,14 @@ class OrderController extends Controller
             ->where('status', 1)
             ->firstOrFail();
 
-        $checkoutUrl = $this->createPayOSLink($order);
+        // Tạo orderCode mới = orderId * 10000 + giây hiện tại (tránh trùng với lần trước)
+        $checkoutUrl = $this->createPayOSLink($order, true);
 
         if ($checkoutUrl) {
             return redirect($checkoutUrl);
         }
 
+        Log::warning('repay: createPayOSLink returned null for order ' . $order->id);
         return redirect()->back()->with('error', 'Không thể tạo link thanh toán. Vui lòng thử lại sau.');
     }
 
@@ -424,13 +424,16 @@ class OrderController extends Controller
      * Signature: HMAC-SHA256 của chuỗi "amount=...&cancelUrl=...&description=...&orderCode=...&returnUrl=..."
      * (sắp xếp theo alphabet, đây là yêu cầu của PayOS)
      */
-    public function createPayOSLink($order)
+    public function createPayOSLink($order, bool $forceNew = false)
     {
         $clientId    = env('PAYOS_CLIENT_ID');
         $apiKey      = env('PAYOS_API_KEY');
         $checksumKey = env('PAYOS_CHECKSUM_KEY');
 
-        $orderCode   = intval($order->id);
+        // forceNew: thêm suffix seconds để tránh trùng orderCode với lần tạo trước
+        $orderCode   = $forceNew
+            ? intval($order->id) * 10000 + (int)(now()->timestamp % 10000)
+            : intval($order->id);
         $amount      = intval($order->total_price);
         $description = 'AROMA DH' . $order->id; // max 25 ký tự theo PayOS
         $returnUrl   = route('payos.success');
@@ -464,6 +467,9 @@ class OrderController extends Controller
             if (isset($result['code']) && $result['code'] === '00') {
                 return $result['data']['checkoutUrl'];
             }
+            Log::warning('PayOS response code not 00: ' . json_encode($result));
+        } else {
+            Log::warning('PayOS HTTP error: ' . $response->status() . ' ' . $response->body());
         }
 
         return null; // thất bại → fallback về VietQR

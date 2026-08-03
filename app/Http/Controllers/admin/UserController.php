@@ -5,6 +5,8 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\SupplierOffer;
+use App\Models\PurchaseOrder;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -37,6 +39,25 @@ class UserController extends Controller
         }
 
         $newRole = $request->input('role');
+
+        // Director không được đổi role — chỉ có thể tắt/bật tài khoản
+        if ($user->role === 'director') {
+            return redirect()->back()->with('error', 'Không thể đổi role của Giám đốc. Chỉ được tắt/bật tài khoản.');
+        }
+
+        // Nếu user đang là manufacturer và muốn đổi sang role khác,
+        // kiểm tra xem họ có dữ liệu NSX (báo giá / đơn đặt hàng) không.
+        if ($user->role === 'manufacturer' && $newRole !== 'manufacturer') {
+            $hasOffers = SupplierOffer::where('manufacturer_id', $user->id)->exists();
+            $hasOrders = PurchaseOrder::where('manufacturer_id', $user->id)->exists();
+
+            if ($hasOffers || $hasOrders) {
+                return redirect()->back()->with(
+                    'error',
+                    "Không thể đổi role của {$user->name} vì tài khoản này đã có dữ liệu nhà sản xuất (báo giá / đơn đặt hàng). Chỉ có thể tắt/bật tài khoản."
+                );
+            }
+        }
 
         // Xác định role nào operator được phép gán
         $allowedRoles = match ($operator->role) {

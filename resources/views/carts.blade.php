@@ -9,8 +9,8 @@
         </p>
     </div>
 
-    @if(session('error')) <div class="alert alert-danger rounded-0 mb-4 small py-2">⚠️ {{ session('error') }}</div> @endif
-    @if(session('status')) <div class="alert alert-success rounded-0 mb-4 small py-2">✅ {{ session('status') }}</div> @endif
+    @if(session('error')) <div class="alert alert-danger rounded-0 mb-4 small py-2"> {{ session('error') }}</div> @endif
+    @if(session('status')) <div class="alert alert-success rounded-0 mb-4 small py-2"> {{ session('status') }}</div> @endif
 
     <div class="row g-5">
         <div class="col-lg-7">

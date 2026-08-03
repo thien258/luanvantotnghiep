@@ -25,7 +25,9 @@ class ProcurementController extends Controller
     public function __construct()
     {
       $this->middleware(function ($request, $next) {
-        $role = auth()->user()->role;
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+        $role = $authUser->role;
         if (!in_array($role, ['admin', 'manufacturer', 'director', 'root'])) {
             abort(403);
         }
@@ -36,7 +38,8 @@ class ProcurementController extends Controller
     // Danh sách tất cả yêu cầu thu mua
     public function index()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $query = ProcurementRequest::with(['items.product', 'offers'])
             ->orderBy('created_at', 'desc');
 
@@ -111,10 +114,12 @@ class ProcurementController extends Controller
         ])->findOrFail($id);
 
         // manufacturer chỉ thấy báo giá của mình trong danh sách offers
-        if (auth()->user()->role === 'manufacturer') {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+        if ($authUser->role === 'manufacturer') {
             $procRequest->setRelation(
                 'offers',
-                $procRequest->offers->where('manufacturer_id', auth()->id())
+                $procRequest->offers->where('manufacturer_id', $authUser->id)
             );
         }
 

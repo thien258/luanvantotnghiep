@@ -69,6 +69,15 @@
         @php
             $isSelf       = $user->id === $operator->id;
             $canToggle    = !$isSelf && in_array($user->role, $allowedTargets);
+
+            // Manufacturer → không được đổi role
+            $isLockedManufacturer = $user->role === 'manufacturer';
+
+            // Director → không bao giờ được đổi role
+            $isLockedDirector = $user->role === 'director';
+
+            // Root → không bao giờ được đổi role
+            $isLockedRoot = $user->role === 'root';
         @endphp
         <tr class="{{ $user->is_active ? '' : 'table-secondary text-muted' }}">
             <td>{{ $user->id }}</td>
@@ -96,6 +105,27 @@
                 @else
                     {{-- Đổi role: tuỳ quyền operator --}}
                     @if($canChangeRole)
+                    @php
+                        $roleLabels = [
+                            'customer'     => 'Customer',
+                            'warehouse'    => 'Nhân viên kho',
+                            'manufacturer' => 'Nhà sản xuất',
+                            'admin'        => 'Admin',
+                            'director'     => 'Giám đốc',
+                            'root'         => 'Root',
+                        ];
+                        $currentRoleInAllowed = in_array($user->role, $allowedRoles);
+                    @endphp
+
+                    @if($isLockedDirector || $isLockedManufacturer || $isLockedRoot)
+                        {{-- Locked: hiển thị dropdown nhưng disabled --}}
+                        <select class="form-control form-control-sm d-inline-block"
+                                style="width:auto;"
+                                disabled
+                                title="{{ $isLockedDirector ? 'Giám đốc không thể đổi role' : ($isLockedRoot ? 'Root không thể đổi role' : 'Nhà sản xuất không thể đổi role') }}">
+                            <option selected>{{ $roleLabels[$user->role] ?? $user->role }}</option>
+                        </select>
+                    @else
                     <form action="{{ route('admin.user.update', $user->id) }}" method="POST" class="mb-0">
                         @csrf
                         @method('PUT')
@@ -103,26 +133,22 @@
                                 class="form-control form-control-sm d-inline-block"
                                 style="width:auto;"
                                 onchange="this.form.submit()">
-                            @if(in_array('customer', $allowedRoles))
-                            <option value="customer"     {{ $user->role === 'customer'     ? 'selected' : '' }}>Customer</option>
+                            {{-- Nếu role hiện tại không nằm trong danh sách được phép đổi,
+                                 thêm option disabled để giữ nguyên trạng thái hiển thị --}}
+                            @if(!$currentRoleInAllowed)
+                            <option value="{{ $user->role }}" selected disabled>
+                                {{ $roleLabels[$user->role] ?? $user->role }} (không thể đổi)
+                            </option>
                             @endif
-                            @if(in_array('warehouse', $allowedRoles))
-                            <option value="warehouse"    {{ $user->role === 'warehouse'    ? 'selected' : '' }}>Nhân viên kho</option>
-                            @endif
-                            @if(in_array('manufacturer', $allowedRoles))
-                            <option value="manufacturer" {{ $user->role === 'manufacturer' ? 'selected' : '' }}>Nhà sản xuất</option>
-                            @endif
-                            @if(in_array('admin', $allowedRoles))
-                            <option value="admin"        {{ $user->role === 'admin'        ? 'selected' : '' }}>Admin</option>
-                            @endif
-                            @if(in_array('director', $allowedRoles))
-                            <option value="director"     {{ $user->role === 'director'     ? 'selected' : '' }}>Giám đốc</option>
-                            @endif
-                            @if(in_array('root', $allowedRoles))
-                            <option value="root"         {{ $user->role === 'root'         ? 'selected' : '' }}>Root</option>
-                            @endif
+
+                            @foreach($allowedRoles as $roleVal)
+                            <option value="{{ $roleVal }}" {{ $user->role === $roleVal ? 'selected' : '' }}>
+                                {{ $roleLabels[$roleVal] ?? $roleVal }}
+                            </option>
+                            @endforeach
                         </select>
                     </form>
+                    @endif
                     @endif
 
                     {{-- Toggle tắt/mở: chỉ với role được phép --}}

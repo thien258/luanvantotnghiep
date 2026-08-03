@@ -113,8 +113,8 @@
                 <div class="collapse {{ $orderKhoActive ? 'show' : '' }}" id="orderKhoSubmenu">
                     <ul class="nav flex-column pl-4 pb-1">
 
-                        {{-- Order: chỉ warehouse --}}
-                        @if($role === 'warehouse')
+                        {{-- Order: warehouse và root --}}
+                        @if(in_array($role, ['warehouse', 'root']))
                         <li class="nav-item {{ request()->routeIs('admin.orders.index') ? 'active font-weight-bold' : '' }}">
                             <a class="nav-link text-dark py-1 small" href="{{ route('admin.orders.index') }}">
                                 <i class="fa-solid fa-bag-shopping text-muted mr-2"></i>Order

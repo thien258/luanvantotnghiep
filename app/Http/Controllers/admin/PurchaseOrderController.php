@@ -33,7 +33,9 @@ class PurchaseOrderController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            $role = auth()->user()->role;
+            /** @var \App\Models\User $authUser */
+            $authUser = Auth::user();
+            $role = $authUser->role;
             if (!in_array($role, ['admin', 'warehouse', 'manufacturer', 'director', 'root'])) {
                 abort(403);
             }
@@ -43,7 +45,8 @@ class PurchaseOrderController extends Controller
 
     public function index()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $query = PurchaseOrder::with('manufacturer');
 
         // manufacturer chỉ thấy đơn của mình

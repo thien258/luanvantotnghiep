@@ -20,9 +20,7 @@
             <div class="alert alert-danger rounded-0">{{ session('error') }}</div>
         @endif
 
-        <form action="{{ route('admin.orders.processReturn', $order->id) }}" method="POST">
-            @csrf
-            <div class="row g-4">
+        <div class="row g-4">
 
                 {{-- CỘT TRÁI: HÓA ĐƠN --}}
                 <div class="col-lg-6">
@@ -132,23 +130,23 @@
                                 </button>
                             </div>
 
-                    
                             @else
-                            <input type="hidden" name="return_reason" value="bomb">
                             <div class="alert alert-light border rounded-0 mb-4 small text-muted">
                                 <i class="fa fa-info-circle me-2"></i>
                                 Đơn COD — khách chưa trả tiền, không cần hoàn tiền.
                             </div>
                             @endif
 
-                            {{-- Validate: validate condition vẫn cần dù không dùng --}}
-                            <input type="hidden" name="condition" value="damaged">
-
-                            <button type="submit" class="btn btn-dark rounded-0 w-100 py-2 text-uppercase fw-bold mb-2"
-                                    style="font-size:0.8rem; letter-spacing:1.5px;"
-                                    onclick="return confirm('Xác nhận chuyển đơn sang danh sách chờ trả nhà sản xuất?')">
-                                <i class="fa fa-check me-2"></i>Xác nhận xử lý hoàn hàng
-                            </button>
+                            {{-- Form xác nhận xử lý hoàn hàng (processReturn) --}}
+                            <form action="{{ route('admin.orders.processReturn', $order->id) }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="condition" value="damaged">
+                                <button type="submit" class="btn btn-dark rounded-0 w-100 py-2 text-uppercase fw-bold mb-2"
+                                        style="font-size:0.8rem; letter-spacing:1.5px;"
+                                        onclick="return confirm('Xác nhận chuyển đơn sang danh sách chờ trả nhà sản xuất?')">
+                                    <i class="fa fa-check me-2"></i>Xác nhận xử lý hoàn hàng
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -187,7 +185,6 @@
                 </div>
 
             </div>
-        </form>
 
     </div>
 </div>

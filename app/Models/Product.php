@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -45,7 +46,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \App\Models\Concentration|null $concentration
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Festival> $festivals
  * @property-read int|null $festivals_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ManuFacturer> $manufacturers
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $manufacturers
  * @property-read int|null $manufacturers_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Product newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Product newQuery()
@@ -129,7 +130,7 @@ class Product extends Model
      */
     public function manufacturers()
     {
-        return $this->belongsToMany(ManuFacturer::class, 'manufacturers_product', 'product_id', 'manufacturer_id');
+        return $this->belongsToMany(User::class, 'manufacturers_product', 'product_id', 'manufacturer_id');
     }
 
     // =========================================================================

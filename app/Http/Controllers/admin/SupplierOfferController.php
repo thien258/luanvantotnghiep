@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\SupplierOffer;
 use App\Models\SupplierOfferItem;
 use App\Models\User;
@@ -30,7 +31,9 @@ class SupplierOfferController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            $role = auth()->user()->role;
+            /** @var \App\Models\User $authUser */
+            $authUser = Auth::user();
+            $role = $authUser->role;
             if (!in_array($role, ['admin', 'manufacturer', 'director', 'root'])) {
                 abort(403);
             }
@@ -39,7 +42,8 @@ class SupplierOfferController extends Controller
     }
     public function index()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $query = SupplierOffer::with('manufacturer')
             ->orderByRaw("FIELD(status, 'submitted', 'accepted', 'rejected', 'draft')")
             ->orderBy('created_at', 'desc');
@@ -146,8 +150,10 @@ class SupplierOfferController extends Controller
         ])->findOrFail($id);
 
         // manufacturer chỉ xem offer của mình
-        if (auth()->user()->role === 'manufacturer') {
-            if ($offer->manufacturer_id !== auth()->id()) {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+        if ($authUser->role === 'manufacturer') {
+            if ($offer->manufacturer_id !== $authUser->id) {
                 abort(403, 'Bạn không có quyền xem báo giá này.');
             }
         }
