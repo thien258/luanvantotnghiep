@@ -4,7 +4,7 @@
 <section class="blog-banner-area py-5 bg-light border-bottom">
     <div class="container">
         <div class="text-center py-4">
-            <h1 class="display-5 fw-bold text-dark">Exclusive Fragrance</h1>
+            <h1 class="display-5 fw-bold text-dark">SẢN PHẨM</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb justify-content-center mb-0">
                     <li class="breadcrumb-item"><a href="{{ route('welcome') ?? '#' }}" class="text-decoration-none text-muted">Home</a></li>
@@ -56,7 +56,7 @@
 
                     <div class="mb-4 py-3 border-top border-bottom">
                         <div class="text-uppercase small tracking-widest text-muted mb-2">
-                            Concentration: <span class="text-dark fw-bold ms-2">{{$product->concentration->concentration ?? 'N/A'}}</span>
+                            Nồng độ: <span class="text-dark fw-bold ms-2">{{$product->concentration->concentration ?? 'N/A'}}</span>
                         </div>
                         
                         {{-- 2. HIỂN THỊ DUNG TÍCH CỐ ĐỊNH --}}
@@ -83,12 +83,12 @@
                         <div class="d-flex align-items-center gap-3 mb-3">
                             <label class="text-uppercase small fw-bold mb-0">Số lượng:</label>
                             <div class="input-group" style="width: 150px;">
-                                <button type="button" class="btn btn-outline-secondary rounded-0" onclick="decreaseQty()">
+                                <button type="button" class=" btn btn-outline-secondary rounded-0" onclick="decreaseQty()">
                                     <i class="fa fa-minus"></i>
                                 </button>
                                 <input type="number" name="quantity" id="quantityInput" value="1" min="1" 
                                        max="{{ $product->quantity }}" data-max="{{ $product->quantity }}" 
-                                       class="form-control text-center rounded-0" readonly>
+                                       class=" text-center form-control text-center rounded-0" readonly>
                                 <button type="button" class="btn btn-outline-secondary rounded-0" onclick="increaseQty()">
                                     <i class="fa fa-plus"></i>
                                 </button>
@@ -129,7 +129,7 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-6 mb-5 mb-lg-0">
-                <h4 class="fw-bold mb-4 border-bottom pb-2">Customer Feedback</h4>
+                <h4 class="fw-bold mb-4 border-bottom pb-2">Đánh giá khách hàng</h4>
                 @forelse($product->comment as $c)
                 <div class="bg-white p-3 mb-3 shadow-sm border-start border-dark border-4">
                     <p class="fw-bold mb-1 text-uppercase small">{{ $c->name }}</p>
@@ -143,7 +143,7 @@
             </div>
             <div class="col-lg-5 offset-lg-1">
                 <div class="p-4 bg-white shadow-sm border">
-                    <h4 class="fw-bold mb-4">Leave a Review</h4>
+                    <h4 class="fw-bold mb-4">Để lại bình luận</h4>
                     {{-- [FIX] Hiển thị lỗi validation khi gửi bình luận thất bại --}}
                     @if($errors->any())
                     <div class="alert alert-danger rounded-0 mb-3">
@@ -158,11 +158,11 @@
                         @csrf
                         <input type="hidden" name="idProduct" value="{{ $product->id }}">
                         <div class="mb-3">
-                            <label class="form-label small fw-bold text-uppercase">Your Name</label>
+                            <label class="form-label small fw-bold text-uppercase">Tên của bạn</label>
                             <input type="text" class="form-control rounded-0 shadow-none" name="name" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-bold text-uppercase">Your Experience</label>
+                            <label class="form-label small fw-bold text-uppercase">Phần đánh giá</label>
                             <textarea name="chat" class="form-control rounded-0 shadow-none" rows="4" required></textarea>
                         </div>
                         <button type="submit" class="btn btn-dark w-100 rounded-0 py-3 text-uppercase fw-bold">Submit Now</button>

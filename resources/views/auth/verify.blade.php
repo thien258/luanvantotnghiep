@@ -21,20 +21,20 @@
                 </a>
                 <div class="collapse navbar-collapse">
                     <ul class="navbar-nav ms-auto">
+                        @auth
                         <li class="nav-item dropdown">
                             <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 {{ Auth::user()->name }}
                             </a>
                             <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="{{ route('logout') }}"
-                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    {{ __('Logout') }}
-                                </a>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                    @csrf
-                                </form>
+                                <a class="dropdown-item" href="{{ route('logout') }}">Đăng xuất</a>
                             </div>
                         </li>
+                        @else
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">Đăng nhập</a>
+                        </li>
+                        @endauth
                     </ul>
                 </div>
             </div>
@@ -45,21 +45,43 @@
                 <div class="row justify-content-center">
                     <div class="col-md-8">
                         <div class="card">
-                            <div class="card-header">{{ __('Verify Your Email Address') }}</div>
+                            <div class="card-header">XÁC NHẬN EMAIL CỦA BẠN</div>
 
                             <div class="card-body">
-                                @if (session('resent'))
-                                    <div class="alert alert-success" role="alert">
-                                        {{ __('A fresh verification link has been sent to your email address.') }}
+                                {{-- Thông báo lỗi khi bị chặn đăng nhập vì chưa verify --}}
+                                @if ($errors->any())
+                                    <div class="alert alert-warning" role="alert">
+                                        {{ $errors->first('email') }}
                                     </div>
                                 @endif
 
-                                {{ __('Before proceeding, please check your email for a verification link.') }}
-                                {{ __('If you did not receive the email') }},
-                                <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
-                                    @csrf
-                                    <button type="submit" class="btn btn-link p-0 m-0 align-baseline">{{ __('click here to request another') }}</button>.
-                                </form>
+                                @if (session('resent'))
+                                    <div class="alert alert-success" role="alert">
+                                        Link xác nhận mới đã được gửi đến email của bạn.
+                                    </div>
+                                @endif
+
+                                <p>Trước khi tiếp tục, vui lòng kiểm tra email của bạn để tìm liên kết xác nhận.</p>
+
+                                @if (session('resend_email'))
+                                    <p class="text-muted">Email đã gửi đến: <strong>{{ session('resend_email') }}</strong></p>
+                                @endif
+
+                                @auth
+                                {{-- Nếu đang đăng nhập (trường hợp chưa verify mà vào thẳng) thì cho gửi lại --}}
+                                <p>
+                                    Nếu bạn không nhận được email,
+                                    <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-link p-0 m-0 align-baseline">nhấn vào đây để gửi lại</button>.
+                                    </form>
+                                </p>
+                                @else
+                                <p>
+                                    Hãy <a href="{{ route('login') }}">đăng nhập lại</a> sau khi xác nhận email,
+                                    hoặc <a href="{{ route('register') }}">đăng ký tài khoản mới</a>.
+                                </p>
+                                @endauth
                             </div>
                         </div>
                     </div>

@@ -83,7 +83,7 @@ Route::get('logout', [HomeController::class, 'logout'])->name('logout');
 // (Giỏ hàng, thanh toán, đơn hàng, địa chỉ, hồ sơ)
 // =========================================================================
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     // Hồ sơ cá nhân
     Route::resource('profile', ProfileController::class);

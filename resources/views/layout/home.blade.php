@@ -44,38 +44,50 @@
 									<li class="nav-item active"><a class="nav-link" style="color: #000 !important;" href="{{ route('show_products') }}">Products</a></li>
 
 									<li class="nav-item submenu dropdown">
-										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Category</a>
-										<ul class="dropdown-menu">
+										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+											Category <i class="fas fa-chevron-down fa-xs ml-1"></i>
+										</a>
+										<ul class="dropdown-menu shadow border-0 rounded-lg py-2">
 											@forelse($categories as $object)
-											<li class="nav-item">
-												<a href="{{ route('category_product', ['category' => $object->id]) }}">{{ $object->name }}</a>
+											<li>
+												<a class="dropdown-item px-4 py-2" href="{{ route('category_product', ['category' => $object->id]) }}">
+													<i class="fas fa-tag fa-xs mr-2 text-muted"></i>{{ $object->name }}
+												</a>
 											</li>
 											@empty
-											<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
+											<li><span class="dropdown-item text-muted">Chưa có danh mục</span></li>
 											@endforelse
 										</ul>
 									</li>
 
 									<li class="nav-item submenu dropdown">
-										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Brand</a>
-										<ul class="dropdown-menu">
+										<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+											Brand <i class="fas fa-chevron-down fa-xs ml-1"></i>
+										</a>
+										<ul class="dropdown-menu shadow border-0 rounded-lg py-2">
 											@forelse($brands as $object)
-											<li class="nav-item">
-												<a href="{{ route('brand_product', ['brand' => $object->id]) }}">{{ $object->name }}</a>
+											<li>
+												<a class="dropdown-item px-4 py-2" href="{{ route('brand_product', ['brand' => $object->id]) }}">
+													<i class="fas fa-gem fa-xs mr-2 text-muted"></i>{{ $object->name }}
+												</a>
 											</li>
 											@empty
-											<li class="nav-item"><a href="#" class="nav-link">Trống</a></li>
+											<li><span class="dropdown-item text-muted">Chưa có thương hiệu</span></li>
 											@endforelse
 										</ul>
 									</li>
 
                                     @if($festivals->isNotEmpty())
                                     <li class="nav-item submenu dropdown">
-                                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Festival</a>
-                                        <ul class="dropdown-menu">
+                                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                            Festival <i class="fas fa-chevron-down fa-xs ml-1"></i>
+                                        </a>
+                                        <ul class="dropdown-menu shadow border-0 rounded-lg py-2">
                                             @foreach($festivals as $object)
-                                            <li class="nav-item">
-                                                <a href="{{ route('festival_product', ['festival' => $object->id]) }}">{{ $object->name }}</a>
+                                            <li>
+                                                <a class="dropdown-item px-4 py-2" href="{{ route('festival_product', ['festival' => $object->id]) }}">
+                                                    <i class="fas fastar- fa-xs mr-2 text-muted"></i>{{ $object->name }}
+                                                </a>
                                             </li>
                                             @endforeach
                                         </ul>

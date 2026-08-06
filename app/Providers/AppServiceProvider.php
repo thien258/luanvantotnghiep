@@ -12,6 +12,8 @@ use App\Models\Footer;
 use App\Models\Festival;
 use App\Models\Product;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\Messages\MailMessage;
 
 /**
  * AppServiceProvider — Service Provider trung tâm, khởi động ứng dụng.
@@ -83,6 +85,25 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view) {
             // Lấy bản ghi footer đầu tiên (hệ thống chỉ có 1 footer)
             $view->with('footer', Footer::first());
+        });
+
+        // ── 6. OVERRIDE EMAIL RESET PASSWORD SANG TIẾNG VIỆT ─────────────────
+        ResetPassword::toMailUsing(function ($notifiable, $token) {
+            $url = url(route('password.reset', [
+                'token' => $token,
+                'email' => $notifiable->getEmailForPasswordReset(),
+            ], false));
+
+            $expireMinutes = config('auth.passwords.' . config('auth.defaults.passwords') . '.expire');
+
+            return (new MailMessage)
+                ->subject('Yêu cầu đặt lại mật khẩu')
+                ->greeting('Xin chào!')
+                ->line('Bạn nhận được email này vì chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.')
+                ->action('Đặt lại mật khẩu', $url)
+                ->line("Link đặt lại mật khẩu sẽ hết hạn sau {$expireMinutes} phút.")
+                ->line('Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.')
+                ->salutation('Trân trọng, ' . config('app.name'));
         });
     }
 }

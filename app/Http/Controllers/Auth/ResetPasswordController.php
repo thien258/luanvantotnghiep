@@ -30,7 +30,7 @@ class ResetPasswordController extends Controller
     protected $redirectTo = '/login';
     protected function resetPassword($user, $password)
     {
-        // Thêm dòng này để mách cho VS Code biết $user là Model User nhé:
+     
         /** @var \App\Models\User $user */
         // Đặt lại mật khẩu cho user
       $user->update([
@@ -38,9 +38,7 @@ class ResetPasswordController extends Controller
         'remember_token' => Str::random(60),
     ]);
 
-        // CHỖ NÀY QUAN TRỌNG: 
-        // Laravel mặc định có dòng: $this->guard()->login($user); 
-        // Tôi đã XÓA nó đi để nó không tự đăng nhập nữa.
+      
 
         // Hiện thông báo thành công cho người dùng thấy
         session()->flash('status', 'Mật khẩu đã được đổi thành công. Vui lòng đăng nhập lại!');
