@@ -98,6 +98,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('comments', App\Http\Controllers\CommentController::class);
 
     // ── Luồng đặt hàng ───────────────────────────────────────────────
+    // Gửi đánh giá sản phẩm từ trang lịch sử đơn hàng
+    Route::post('/order/{id}/review', [App\Http\Controllers\CommentController::class, 'storeReview'])->name('order.review');
+
 
     // Bước 1: Chọn SP trong giỏ → lưu IDs vào session → redirect sang trang thanh toán
     Route::post('/order/checkout', [OrderController::class, 'checkout'])->name('order.checkout');

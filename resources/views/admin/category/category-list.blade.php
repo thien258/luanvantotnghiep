@@ -2,15 +2,15 @@
 @section('body')
 <div class="card-footer small text-mutted">
     <h3>Category</h3>
-    <a href="{{ route('admin.category.create') }}" class="btn btn-warning mb-3">Add</a>
+    <a href="{{ route('admin.category.create') }}" class="btn btn-warning mb-3">Thêm</a>
     
     <table class="table text-center align-middle table-hover">
         <thead class="table-light">
             <tr>
                 <th scope="col">#</th>
-                <th scope="col">Name</th>
-                <th scope="col">Status</th>
-                <th scope="col">Option</th>
+                <th scope="col">Tên</th>
+                <th scope="col">Trạng thái</th>
+                <th scope="col">Lựa chọn</th>
             </tr>
         </thead>
         <tbody>

@@ -27,8 +27,15 @@ class Comment extends Model
 {
     //
     protected $table= 'comments';
-    protected $fillable = ['idProduct','name','chat'];
+    protected $fillable = ['idProduct','name','chat','rating','user_id','order_detail_id'];
      public function product(){
         return $this->belongsTo('App\Models\Product','idProduct','id');
     }
+    public function user(){
+        return $this->belongsTo('App\Models\User','user_id','id');
+    }
+public function orderDetail(){
+        return $this->belongsTo('App\Models\OrderDetail','order_detail_id','id');
+    }
+    
 }

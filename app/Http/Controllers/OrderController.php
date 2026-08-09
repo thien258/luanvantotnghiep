@@ -212,6 +212,9 @@ class OrderController extends Controller
         $orders = Order::where('idUser', Auth::id())
             ->where('status', '!=', 0)
             ->orderBy('id', 'desc')
+            ->with(['details.product', 'details.comments' => function ($q) {
+                $q->where('user_id', Auth::id());
+            }])
             ->get();
 
         return view('order.history', compact('orders'));

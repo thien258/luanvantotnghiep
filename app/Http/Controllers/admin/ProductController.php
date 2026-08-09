@@ -186,7 +186,7 @@ class ProductController extends Controller
             'selectedFestivalIds'     => $product->festivals()->pluck('festivals.id')->toArray(),
             'manufacturers'           => \App\Models\User::where('role', 'manufacturer')->orderBy('name')->get(),
             // IDs NSX hiện tại của SP (để pre-check checkbox)
-            'selectedManufacturerIds' => $product->manufacturers()->pluck('manufacturers.id')->toArray(),
+            'selectedManufacturerIds' => $product->manufacturers()->pluck('users.id')->toArray(),
         ]);
     }
 

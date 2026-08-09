@@ -17,14 +17,12 @@
 
                         <div class="mb-3">
                             <label class="form-label">Header</label>
-                            <input type="text" name="header" class="form-control"
-                                   value="{{ $footer->header }}">
+                            <textarea name="header" class="form-control" rows="2">{{ $footer->header }}</textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Text Header</label>
-                            <input type="text" name="textheader" class="form-control"
-                                   value="{{ $footer->textheader }}">
+                            <textarea name="textheader" class="form-control" rows="4">{{ $footer->textheader }}</textarea>
                         </div>
 
                         <div class="mb-3">

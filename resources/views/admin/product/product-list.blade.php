@@ -27,18 +27,18 @@
 <table class="table table-bordered table-hover align-middle">
     <thead class="table-light">
         <tr>
-            <th scope="col">Title</th>
-            <th scope="col">Description</th>
-            <th scope="col">Category</th>
-            <th scope="col">Brand</th>
-            <th scope="col">Image</th>
+            <th scope="col">Tên</th>
+            <th scope="col">Mô tả</th>
+            <th scope="col">Danh mục</th>
+            <th scope="col">Thương hiệu</th>
+            <th scope="col">Hình ảnh</th>
             <th scope="col">Giá bán</th>
             <th scope="col">Dung tích</th>
             <th scope="col">Nồng độ</th>
             <th scope="col">Kho hàng</th>
             <th scope="col">Sự kiện</th>
-            <th scope="col">Status</th>
-            <th scope="col">Option</th>
+            <th scope="col">Trạng thái</th>
+            <th scope="col">Lựa chọn</th>
         </tr>
     </thead>
     <tbody>

@@ -3,15 +3,15 @@
 @section('body')
 <div class="card-footer small text-mutted">
     <h3>Concentration</h3>
-    <a href="{{ route('admin.concentration.create') }}" class="btn btn-warning">Add</a>
+    <a href="{{ route('admin.concentration.create') }}" class="btn btn-warning">Thêm</a>
     <table class="table">
         <thead>
             <tr>
                 <th scope="col">#</th>
-                <th scope="col">Name</th>
+                <th scope="col">Tên</th>
            
-                <th scope="col">status</th>
-                <th scope="col">Edit</th>
+                <th scope="col">Trạng thái</th>
+                <th scope="col">Chỉnh sửa</th>
                 <!-- <th scope="col">Delete</th> -->
 
             </tr>

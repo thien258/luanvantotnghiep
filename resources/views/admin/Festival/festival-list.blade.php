@@ -2,7 +2,7 @@
 @section('body')
 <div class="card-footer small text-mutted">
     <h3>Festival</h3>
-    <a href="{{ route('admin.festival.create') }}" class="btn btn-warning">Add</a>
+    <a href="{{ route('admin.festival.create') }}" class="btn btn-warning">Thêm</a>
     <table class="table">
         <thead>
             <tr>
@@ -11,10 +11,10 @@
                 <th scope="col">giảm giá</th>
                 <th scope="col">Thời gian bắt đầu</th>
                 <th scope="col">Thời gian kết thúc</th>
-                <th scope="col">Add Product</th>
-                <th scope="col">status</th>
-                <th scope="col">Edit</th>
-                <th scope="col">Delete</th>
+                <th scope="col">Thêm sản phẩm</th>
+                <th scope="col">Trạng thái</th>
+                <th scope="col">Sửa</th>
+                <th scope="col">Xóa</th>
 
             </tr>
         </thead>

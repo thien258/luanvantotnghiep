@@ -55,10 +55,36 @@
                         </td>
                         
                         <td class="py-3 pe-4">
-                            <div class="d-flex justify-content-end align-items-center gap-2">
+                            <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
                                 <a href="{{ route('order.history.detail', $order->id) }}" class="btn btn-dark btn-sm rounded-0 text-uppercase fw-semibold" style="font-size: 0.65rem; letter-spacing: 1px; padding: 6px 12px; white-space: nowrap;">
                                     Xem chi tiết
                                 </a>
+
+                                @if($order->status == 4)
+                                @php
+                                    // Kiểm tra còn sản phẩm nào chưa đánh giá không
+                                    $hasUnreviewed = $order->details->contains(fn($d) => $d->comments->isEmpty());
+                                @endphp
+                                @if($hasUnreviewed)
+                                @php
+                                    // Chuẩn bị data sản phẩm chưa đánh giá cho modal
+                                    $unreviewedDetails = $order->details->filter(fn($d) => $d->comments->isEmpty())->map(fn($d) => [
+                                        'id'    => $d->id,
+                                        'name'  => $d->product?->title ?? $d->name,
+                                        'image' => $d->product?->image ?? '',
+                                    ])->values();
+                                @endphp
+                                <button type="button"
+                                        class="btn btn-outline-dark btn-sm rounded-0 text-uppercase fw-semibold btn-trigger-review"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#reviewOrderModal"
+                                        data-order-id="{{ $order->id }}"
+                                        data-details="{{ json_encode($unreviewedDetails) }}"
+                                        style="font-size: 0.65rem; letter-spacing: 1px; padding: 6px 12px; white-space: nowrap;">
+                                    ⭐ Đánh giá
+                                </button>
+                                @endif
+                                @endif
 
                                 @if($order->status == 4 && $order->updated_at->diffInDays(now()) <= 3)
                                 <button type="button" 
@@ -175,5 +201,83 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     </div>
 </div>
+
+{{-- Modal đánh giá sản phẩm --}}
+<div class="modal fade" id="reviewOrderModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-0 border-dark">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark text-uppercase" style="font-family: 'Playfair Display', serif; font-size: 1.1rem; letter-spacing: 1px;">
+                    Đánh giá sản phẩm — Đơn <span id="review-order-text">#DH</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="reviewOrderForm" action="" method="POST">
+                @csrf
+                <div class="modal-body py-3" id="review-products-container">
+                    {{-- Sản phẩm sẽ được render bởi JS --}}
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-sm btn-light rounded-0 text-uppercase fw-semibold" data-bs-dismiss="modal" style="font-size:0.7rem; padding: 8px 16px;">Hủy</button>
+                    <button type="submit" class="btn btn-sm btn-dark rounded-0 text-uppercase fw-semibold" style="font-size:0.7rem; padding: 8px 16px; letter-spacing: 0.5px;">Gửi đánh giá</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.star-rating { display: flex; gap: 4px; flex-direction: row-reverse; justify-content: flex-end; }
+.star-rating input { display: none; }
+.star-rating label { font-size: 1.6rem; color: #ccc; cursor: pointer; transition: color 0.15s; }
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label { color: #f5a623; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var reviewBase = "{{ url('order') }}";
+
+    document.querySelectorAll('.btn-trigger-review').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var orderId = this.dataset.orderId;
+            var details = JSON.parse(this.dataset.details || '[]');
+
+            document.getElementById('review-order-text').textContent = '#DH' + orderId;
+            document.getElementById('reviewOrderForm').action = reviewBase + '/' + orderId + '/review';
+
+            var container = document.getElementById('review-products-container');
+            container.innerHTML = '';
+
+            details.forEach(function(detail, idx) {
+                var imgHtml = detail.image
+                    ? '<img src="' + detail.image + '" style="width:56px;height:56px;object-fit:cover;" class="border me-3 flex-shrink-0">'
+                    : '<div class="border bg-light me-3 flex-shrink-0 d-flex align-items-center justify-content-center text-muted" style="width:56px;height:56px;font-size:0.6rem;">No Img</div>';
+
+                var stars = '';
+                // Render sao theo thứ tự ngược (CSS trick)
+                for (var s = 5; s >= 1; s--) {
+                    var sid = 'star_' + detail.id + '_' + s;
+                    stars += '<input type="radio" id="' + sid + '" name="reviews[' + detail.id + '][rating]" value="' + s + '">';
+                    stars += '<label for="' + sid + '" title="' + s + ' sao">★</label>';
+                }
+
+                container.innerHTML += `
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex align-items-start">
+                            ${imgHtml}
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold text-dark small mb-2">${detail.name}</div>
+                                <div class="star-rating mb-2">${stars}</div>
+                                <textarea name="reviews[${detail.id}][chat]" class="form-control rounded-0 shadow-none" rows="2" placeholder="Cảm nhận của bạn (không bắt buộc)..." style="font-size:0.82rem;"></textarea>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        });
+    });
+});
+</script>
 
 @endsection

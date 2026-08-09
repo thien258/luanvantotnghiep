@@ -60,4 +60,13 @@ class OrderDetail extends Model
     {
         return $this->belongsTo(Product::class, 'idProduct', 'id');
     }
+
+    /**
+     * Quan hệ: Dòng chi tiết có thể có nhiều đánh giá (Comment).
+     * Dùng để kiểm tra user đã đánh giá sản phẩm này trong đơn chưa.
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'order_detail_id', 'id');
+    }
 }

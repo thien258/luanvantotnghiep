@@ -130,10 +130,36 @@
         <div class="row">
             <div class="col-lg-6 mb-5 mb-lg-0">
                 <h4 class="fw-bold mb-4 border-bottom pb-2">Đánh giá khách hàng</h4>
+                @php
+                    $avgRating = $product->comment->whereNotNull('rating')->avg('rating');
+                    $reviewCount = $product->comment->whereNotNull('rating')->count();
+                @endphp
+                @if($reviewCount > 0)
+                <div class="mb-3 d-flex align-items-center gap-2">
+                    <span class="text-warning fs-5">
+                        @for($i = 1; $i <= 5; $i++)
+                            {{ $i <= round($avgRating) ? '★' : '☆' }}
+                        @endfor
+                    </span>
+                    <span class="fw-bold">{{ number_format($avgRating, 1) }}</span>
+                    <span class="text-muted small">({{ $reviewCount }} đánh giá)</span>
+                </div>
+                @endif
                 @forelse($product->comment as $c)
                 <div class="bg-white p-3 mb-3 shadow-sm border-start border-dark border-4">
-                    <p class="fw-bold mb-1 text-uppercase small">{{ $c->name }}</p>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <p class="fw-bold mb-0 text-uppercase small">{{ $c->name }}</p>
+                        @if($c->rating)
+                        <span class="text-warning small">
+                            @for($i = 1; $i <= 5; $i++)
+                                {{ $i <= $c->rating ? '★' : '☆' }}
+                            @endfor
+                        </span>
+                        @endif
+                    </div>
+                    @if($c->chat)
                     <p class="text-muted mb-0 small">"{{ $c->chat }}"</p>
+                    @endif
                 </div>
                 @empty
                 <div class="p-4 bg-white shadow-sm border text-center text-muted">

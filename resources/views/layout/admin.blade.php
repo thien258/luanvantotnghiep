@@ -19,9 +19,9 @@
 
         <ul class="navbar-nav bg-white sidebar sidebar-light border-right accordion" id="accordionSidebar">
 
-            <a class="sidebar-brand d-flex flex-column align-items-start justify-content-center py-5 px-4" href="{{ route('admin.dashboard') }}">
+            <a class="sidebar-brand d-flex flex-column align-items-center justify-content-center py-5 px-4" href="{{ route('admin.dashboard') }}">
                 <div class="sidebar-brand-text text-dark font-weight-normal h4 mb-0">Aura & Essence</div>
-                <div class="text-dark font-weight-bold text-uppercase mt-2 small">Atelier Admin</div>
+                <div class="text-dark font-weight-bold text-uppercase mt-2 small text-center"> Admin</div>
             </a>
 
             <hr class="sidebar-divider my-2">
@@ -36,7 +36,7 @@
                     <span>
                         @if($role === 'director') Báo cáo Doanh thu
                         @elseif($role === 'root') Dashboard (Root)
-                        @else Dashboard Overview
+                        @else Dashboard
                         @endif
                     </span>                </a>
             </li>
@@ -303,7 +303,7 @@
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item text-dark py-2" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-dark"></i>
-                                    Logout
+                                    Đăng xuất
                                 </a>
                             </div>
                         </li>
