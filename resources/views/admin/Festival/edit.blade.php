@@ -22,7 +22,11 @@
     </div>
     <div class="mb-3">
       <label for="discount" class="form-label">Giảm giá (%)</label>
-      <input type="number" class="form-control" value="{{$festival->discount}}" id="discount" name="discount" aria-describedby="emailHelp">
+      <input type="number" class="form-control" value="{{$festival->discount}}" id="discount" name="discount"
+             min="1" max="100" step="any"
+             oninvalid="this.setCustomValidity('Mức giảm giá phải lớn hơn 0% và không vượt quá 100%.')"
+             oninput="this.setCustomValidity('')"
+             aria-describedby="emailHelp">
     </div>
     <div class="mb-3">
       <label for="start_date" class="form-label">Thời gian bắt đầu</label>

@@ -128,7 +128,7 @@
 <div class="bg-light py-5 border-top">
     <div class="container">
         <div class="row">
-            <div class="col-lg-6 mb-5 mb-lg-0">
+            <div class="col-12">
                 <h4 class="fw-bold mb-4 border-bottom pb-2">Đánh giá khách hàng</h4>
                 @php
                     $avgRating = $product->comment->whereNotNull('rating')->avg('rating');
@@ -145,58 +145,172 @@
                     <span class="text-muted small">({{ $reviewCount }} đánh giá)</span>
                 </div>
                 @endif
-                @forelse($product->comment as $c)
-                <div class="bg-white p-3 mb-3 shadow-sm border-start border-dark border-4">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <p class="fw-bold mb-0 text-uppercase small">{{ $c->name }}</p>
-                        @if($c->rating)
-                        <span class="text-warning small">
-                            @for($i = 1; $i <= 5; $i++)
-                                {{ $i <= $c->rating ? '★' : '☆' }}
-                            @endfor
-                        </span>
-                        @endif
+                <div class="row">
+                    @forelse($product->comment as $c)
+                    @if($loop->index < 3)
+                    <div class="col-md-6 col-lg-4">
+                        <div class="bg-white p-3 mb-3 shadow-sm border-start border-dark border-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <p class="fw-bold mb-0 text-uppercase small">{{ $c->name }}</p>
+                                @if($c->rating)
+                                <span class="text-warning small">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        {{ $i <= $c->rating ? '★' : '☆' }}
+                                    @endfor
+                                </span>
+                                @endif
+                            </div>
+                            @if($c->chat)
+                            <p class="text-muted mb-0 small">"{{ $c->chat }}"</p>
+                            @endif
+                        </div>
                     </div>
-                    @if($c->chat)
-                    <p class="text-muted mb-0 small">"{{ $c->chat }}"</p>
                     @endif
+                    @empty
+                    <div class="col-12">
+                        <div class="p-4 bg-white shadow-sm border text-center text-muted">
+                            <p class="mb-0 fst-italic">Chưa có đánh giá nào.</p>
+                        </div>
+                    </div>
+                    @endforelse
                 </div>
-                @empty
-                <div class="p-4 bg-white shadow-sm border text-center text-muted">
-                    <p class="mb-0 fst-italic">Chưa có đánh giá nào.</p>
+
+                @if($product->comment->count() > 3)
+                <div class="text-center mt-2">
+                    <button class="btn btn-outline-dark btn-sm rounded-0 px-4" onclick="document.getElementById('modalAllReviews').style.display='flex'">
+                        Xem thêm ({{ $product->comment->count() - 3 }}) <i class="fa-solid fa-chevron-down ms-1"></i>
+                    </button>
                 </div>
-                @endforelse
-            </div>
-            <div class="col-lg-5 offset-lg-1">
-                <div class="p-4 bg-white shadow-sm border">
-                    <h4 class="fw-bold mb-4">Để lại bình luận</h4>
-                    {{-- [FIX] Hiển thị lỗi validation khi gửi bình luận thất bại --}}
-                    @if($errors->any())
-                    <div class="alert alert-danger rounded-0 mb-3">
-                        <ul class="mb-0 ps-3 small">
-                            @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
+
+                {{-- Modal tất cả đánh giá --}}
+                <div id="modalAllReviews" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+                    <div style="background:#fff; width:100%; max-width:700px; max-height:85vh; display:flex; flex-direction:column; margin:16px;">
+                        <div style="padding:20px 24px; border-bottom:1px solid #dee2e6; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <strong style="font-size:1.1rem;">Tất cả đánh giá</strong>
+                                @if($reviewCount > 0)
+                                <span class="text-warning ms-2">
+                                    @for($i = 1; $i <= 5; $i++){{ $i <= round($avgRating) ? '★' : '☆' }}@endfor
+                                </span>
+                                <span class="text-muted small ms-1">{{ number_format($avgRating, 1) }}/5 ({{ $reviewCount }} đánh giá)</span>
+                                @endif
+                            </div>
+                            <button onclick="document.getElementById('modalAllReviews').style.display='none'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;line-height:1;">&times;</button>
+                        </div>
+                        {{-- Filter theo số sao --}}
+                        @php
+                            $starCounts = [];
+                            foreach([5,4,3,2,1] as $s) {
+                                $starCounts[$s] = $product->comment->where('rating', $s)->count();
+                            }
+                        @endphp
+                        <div style="padding:12px 24px; border-bottom:1px solid #f0f0f0; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                            <span class="small text-muted me-1">Lọc:</span>
+                            <button onclick="filterReviews(0)" id="filter-btn-0" class="btn btn-sm btn-dark rounded-0 px-3" style="font-size:12px;">Tất cả</button>
+                            <button onclick="filterReviews(5)" id="filter-btn-5" class="btn btn-sm btn-outline-dark rounded-0 px-3" style="font-size:12px;">5 ★ <span class="text-muted">({{ $starCounts[5] }})</span></button>
+                            <button onclick="filterReviews(4)" id="filter-btn-4" class="btn btn-sm btn-outline-dark rounded-0 px-3" style="font-size:12px;">4 ★ <span class="text-muted">({{ $starCounts[4] }})</span></button>
+                            <button onclick="filterReviews(3)" id="filter-btn-3" class="btn btn-sm btn-outline-dark rounded-0 px-3" style="font-size:12px;">3 ★ <span class="text-muted">({{ $starCounts[3] }})</span></button>
+                            <button onclick="filterReviews(2)" id="filter-btn-2" class="btn btn-sm btn-outline-dark rounded-0 px-3" style="font-size:12px;">2 ★ <span class="text-muted">({{ $starCounts[2] }})</span></button>
+                            <button onclick="filterReviews(1)" id="filter-btn-1" class="btn btn-sm btn-outline-dark rounded-0 px-3" style="font-size:12px;">1 ★ <span class="text-muted">({{ $starCounts[1] }})</span></button>
+                        </div>
+                        <div style="overflow-y:auto; padding:20px 24px; flex:1;" id="review-list-modal">
+                            @foreach($product->comment as $c)
+                            <div class="review-modal-item" data-rating="{{ $c->rating ?? 0 }}" style="border-bottom:1px solid #f0f0f0; padding-bottom:16px; margin-bottom:16px;">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold text-uppercase small">{{ $c->name }}</span>
+                                    @if($c->rating)
+                                    <span class="text-warning small">
+                                        @for($i = 1; $i <= 5; $i++){{ $i <= $c->rating ? '★' : '☆' }}@endfor
+                                    </span>
+                                    @endif
+                                </div>
+                                @if($c->chat)
+                                <p class="text-muted mb-1 small">"{{ $c->chat }}"</p>
+                                @endif
+                                <span class="text-muted" style="font-size:11px;">{{ $c->created_at->format('d/m/Y') }}</span>
+                            </div>
                             @endforeach
-                        </ul>
+                            <p id="no-review-msg" style="display:none;" class="text-center text-muted fst-italic py-3">Không có đánh giá nào.</p>
+                        </div>
+                        <div style="padding:16px 24px; border-top:1px solid #dee2e6; text-align:right;">
+                            <button onclick="document.getElementById('modalAllReviews').style.display='none'" class="btn btn-dark rounded-0 px-4">Đóng</button>
+                        </div>
                     </div>
-                    @endif
-                    <form action="{{ route('comments.store') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="idProduct" value="{{ $product->id }}">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-uppercase">Tên của bạn</label>
-                            <input type="text" class="form-control rounded-0 shadow-none" name="name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-uppercase">Phần đánh giá</label>
-                            <textarea name="chat" class="form-control rounded-0 shadow-none" rows="4" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-dark w-100 rounded-0 py-3 text-uppercase fw-bold">Submit Now</button>
-                    </form>
                 </div>
+                <script>
+                // Đóng modal khi click ra ngoài
+                document.getElementById('modalAllReviews').addEventListener('click', function(e) {
+                    if (e.target === this) this.style.display = 'none';
+                });
+
+                function filterReviews(star) {
+                    // Cập nhật trạng thái nút
+                    [0,1,2,3,4,5].forEach(function(s) {
+                        var btn = document.getElementById('filter-btn-' + s);
+                        if (!btn) return;
+                        btn.className = s === star
+                            ? 'btn btn-sm btn-dark rounded-0 px-3'
+                            : 'btn btn-sm btn-outline-dark rounded-0 px-3';
+                        btn.style.fontSize = '12px';
+                    });
+
+                    // Lọc các item
+                    var items = document.querySelectorAll('.review-modal-item');
+                    var count = 0;
+                    items.forEach(function(item) {
+                        var rating = parseInt(item.getAttribute('data-rating')) || 0;
+                        var show = (star === 0) || (rating === star);
+                        item.style.display = show ? '' : 'none';
+                        if (show) count++;
+                    });
+
+                    // Hiện thông báo nếu không có kết quả
+                    document.getElementById('no-review-msg').style.display = count === 0 ? '' : 'none';
+                }
+                </script>
+                @endif
             </div>
         </div>
     </div>
 </div>
+
+{{-- Sản phẩm tương tự cùng thương hiệu --}}
+@if($relatedProducts->count() > 0)
+<div class="py-5 border-top">
+    <div class="container">
+        <h4 class="fw-bold mb-4 border-bottom pb-2">
+            Sản phẩm tương tự
+            <span class="text-muted fw-normal fs-6 ms-2">{{ $product->brand->title ?? '' }}</span>
+        </h4>
+        <div class="row g-3">
+            @foreach($relatedProducts as $related)
+            @php
+                $relatedFinalPrice    = $related->getDiscountedPrice();
+                $relatedOriginalPrice = $related->price;
+            @endphp
+            <div class="col-6 col-md-3">
+                <a href="{{ route('single_product', $related->id) }}" class="text-decoration-none text-dark">
+                    <div class="bg-white border shadow-sm h-100 d-flex flex-column">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px; overflow: hidden;">
+                            <img src="{{ $related->image }}" alt="{{ $related->title }}"
+                                 class="img-fluid" style="max-height: 190px; object-fit: contain;">
+                        </div>
+                        <div class="p-3 d-flex flex-column flex-grow-1">
+                            <p class="fw-bold mb-1 small" style="min-height: 40px; line-height: 1.4;">{{ $related->title }}</p>
+                            @if($relatedFinalPrice < $relatedOriginalPrice)
+                                <span class="text-danger fw-bold">{{ number_format($relatedFinalPrice) }} VNĐ</span>
+                                <span class="text-muted text-decoration-line-through small">{{ number_format($relatedOriginalPrice) }} VNĐ</span>
+                            @else
+                                <span class="text-danger fw-bold">{{ number_format($relatedOriginalPrice) }} VNĐ</span>
+                            @endif
+                        </div>
+                    </div>
+                </a>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
 
 @endsection

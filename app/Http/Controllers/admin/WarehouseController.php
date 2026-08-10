@@ -442,13 +442,23 @@ class WarehouseController extends Controller
                 return $errors;
             }
 
+            // Map header name → column index để đọc đúng cột dù thứ tự có thay đổi
+            $headerIndex = array_flip($header ?? []);
+
             // Kiểm tra từng dòng
             foreach ($rows as $i => $row) {
                 $lineNum = $i + 2; // dòng 1 = header, dòng 2 = data đầu tiên
-                $title      = trim((string)($row[0] ?? ''));
-                $unitPrice  = trim((string)($row[3] ?? ''));
-                $quantity   = trim((string)($row[5] ?? ''));
-                $expiry     = trim((string)($row[10] ?? ''));
+
+                // Đọc theo tên cột trong header, fallback về index cố định
+                $titleIdx    = $headerIndex['title']        ?? 0;
+                $unitPriceIdx= $headerIndex['unit_price']   ?? 3;
+                $quantityIdx = $headerIndex['quantity']     ?? 5;
+                $expiryIdx   = $headerIndex['expiry_date']  ?? 10;
+
+                $title     = trim((string)($row[$titleIdx]     ?? ''));
+                $unitPrice = trim((string)($row[$unitPriceIdx] ?? ''));
+                $quantity  = trim((string)($row[$quantityIdx]  ?? ''));
+                $expiry    = trim((string)($row[$expiryIdx]    ?? ''));
 
                 if (empty($title)) {
                     $errors[] = "Dòng {$lineNum}: Tên sản phẩm (title) không được để trống.";
@@ -456,13 +466,20 @@ class WarehouseController extends Controller
                 if ($unitPrice !== '' && (!is_numeric($unitPrice) || (float)$unitPrice < 0)) {
                     $errors[] = "Dòng {$lineNum}: Giá nhập (unit_price) phải là số không âm.";
                 }
-                if ($quantity !== '' && (!is_numeric($quantity) || (int)$quantity < 0)) {
-                    $errors[] = "Dòng {$lineNum}: Số lượng (quantity) phải là số nguyên không âm.";
+                // quantity bắt buộc: không được trống và phải là số nguyên không âm
+                if ($quantity === '') {
+                    $errors[] = "Dòng {$lineNum}: Số lượng (quantity) không được để trống và phải là số nguyên không âm.";
+                } elseif (!ctype_digit($quantity) || (int)$quantity < 0) {
+                    $errors[] = "Dòng {$lineNum}: Số lượng (quantity) không được để trống và phải là số nguyên không âm.";
                 }
+                // expiry_date bắt buộc: không được trống, đúng định dạng YYYY-MM-DD
                 if ($expiry === '') {
-                    $errors[] = "Dòng {$lineNum}: HSD (expiry_date) không được để trống, phải nhập đúng định dạng YYYY-MM-DD (ví dụ: 2026-09-15).";
-                } elseif (!\DateTime::createFromFormat('Y-m-d', $expiry)) {
-                    $errors[] = "Dòng {$lineNum}: HSD (expiry_date) phải đúng định dạng YYYY-MM-DD (ví dụ: 2026-09-15).";
+                    $errors[] = "Dòng {$lineNum}: HSD không được để trống (định dạng: YYYY-MM-DD, ví dụ: 2026-09-15).";
+                } else {
+                    $dt = \DateTime::createFromFormat('Y-m-d', $expiry);
+                    if (!$dt || $dt->format('Y-m-d') !== $expiry) {
+                        $errors[] = "Dòng {$lineNum}: HSD không đúng định dạng YYYY-MM-DD (ví dụ: 2026-09-15).";
+                    }
                 }
 
                 // Dừng sau 10 lỗi để tránh spam

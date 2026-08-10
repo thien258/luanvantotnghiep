@@ -56,13 +56,11 @@
     <div class="card-header bg-white py-3 border-bottom-0 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-dark text-uppercase small" style="letter-spacing:1px;">
             <i class="fa-solid fa-chart-bar mr-2 text-muted"></i>
-            Doanh thu theo tháng — năm {{ now()->year }} (Triệu VNĐ)
+            Doanh thu theo tháng — năm {{ now()->year }} (VNĐ)
         </h6>
-        @php
-            $totalMonthly = array_sum($monthlyRevenue);
-        @endphp
+        @php $totalMonthly = array_sum($monthlyRevenue); @endphp
         <span class="small text-muted">
-            Tổng năm: <strong>{{ number_format($totalMonthly, 1) }}M</strong>
+            Tổng năm: <strong>{{ number_format($totalMonthly, 0, ',', '.') }}₫</strong>
         </span>
     </div>
     <div class="card-body">

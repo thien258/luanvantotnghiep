@@ -30,7 +30,9 @@
                 <label class="form-label fw-bold">Giảm giá (%) <span class="text-danger">*</span></label>
                 <input type="number" class="form-control rounded-0" name="discount"
                        value="{{ old('discount') }}"
-                       min="0" max="100"
+                       min="1" max="100" step="any"
+                       oninvalid="this.setCustomValidity('Mức giảm giá phải lớn hơn 0% và không vượt quá 100%.')"
+                       oninput="this.setCustomValidity('')"
                        placeholder="Nhập phần trăm giảm giá, ví dụ: 10, 20...">
             </div>
 

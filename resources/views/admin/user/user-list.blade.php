@@ -137,7 +137,7 @@
                                  thêm option disabled để giữ nguyên trạng thái hiển thị --}}
                             @if(!$currentRoleInAllowed)
                             <option value="{{ $user->role }}" selected disabled>
-                                {{ $roleLabels[$user->role] ?? $user->role }} (không thể đổi)
+                                {{ $roleLabels[$user->role] ?? $user->role }} 
                             </option>
                             @endif
 

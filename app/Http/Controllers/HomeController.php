@@ -252,11 +252,19 @@ class HomeController extends Controller
     public function single_product($id)
     {
         // Load comment để hiển thị đánh giá, concentration để hiển thị thẻ nồng độ
-        $product = Product::with(['comment', 'concentration'])
+        $product = Product::with(['comment', 'concentration', 'brand'])
             ->where('status', 1)
             ->findOrFail($id);
 
-        return view('layout.single_product', compact('product'));
+        // 4 sản phẩm cùng thương hiệu, loại trừ sản phẩm hiện tại
+        $relatedProducts = Product::where('idBrand', $product->idBrand)
+            ->where('id', '!=', $product->id)
+            ->where('status', 1)
+            ->with('festivals')
+            ->take(4)
+            ->get();
+
+        return view('layout.single_product', compact('product', 'relatedProducts'));
     }
 
     // =========================================================================

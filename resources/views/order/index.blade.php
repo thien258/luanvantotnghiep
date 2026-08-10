@@ -8,10 +8,8 @@
     <div class="container" style="max-width: 1140px;">
 
         <div class="mb-5">
-            <h1 class="display-5 fw-normal m-0" style="font-family: 'Playfair Display', serif;">Checkout</h1>
-            <p class="text-muted mt-2 fst-italic" style="font-family: 'Playfair Display', serif; font-size: 1.05rem;">
-                Refining your selection. Every scent is a curated journey, and every detail is handled with the utmost discretion.
-            </p>
+            <h1 class="display-5 fw-normal m-0" style="font-family: 'Playfair Display', serif;">THANH TOÁN</h1>
+            
         </div>
 
         @if($errors->any())
@@ -39,7 +37,7 @@
 
                     {{-- 01. Shipping Information --}}
                     <div class="text-uppercase fw-bold pt-2 pb-3 mb-3 border-bottom text-muted" style="font-size: 0.75rem; letter-spacing: 2px;">
-                        01. Shipping Information
+                        01. Thông tin tài khoản
                     </div>
 
                     {{-- Card hiển thị địa chỉ đang chọn --}}
@@ -65,7 +63,7 @@
 
                     {{-- 02. Shipping Method --}}
                     <div class="text-uppercase fw-bold pt-2 pb-3 mb-3 border-bottom text-muted" style="font-size: 0.75rem; letter-spacing: 2px;">
-                        02. Shipping Method
+                        02. phương thức vận chuyển
                     </div>
                     <div class="d-flex align-items-center justify-content-between p-4 mb-4 border bg-light">
                         <div class="d-flex align-items-center gap-3">
@@ -80,7 +78,7 @@
 
                     {{-- 03. Payment Selection --}}
                     <div class="text-uppercase fw-bold pt-2 pb-3 mb-3 border-bottom text-muted" style="font-size: 0.75rem; letter-spacing: 2px;">
-                        03. Payment Selection
+                        03. thanh toán
                     </div>
                     <div class="row g-3 mb-4">
                     
@@ -103,8 +101,8 @@
                     </div>
 
                     <div class="mb-4">
-                        <label for="note" class="text-uppercase fw-bold text-muted small d-block mb-2" style="font-size:0.7rem; letter-spacing:1px;">Order Note (Optional)</label>
-                        <textarea class="form-control rounded-0 border-secondary-subtle" name="note" id="note" rows="2" placeholder="Write any special requests for shipping..."></textarea>
+                        <label for="note" class="text-uppercase fw-bold text-muted small d-block mb-2" style="font-size:0.7rem; letter-spacing:1px;">GHI CHÚ</label>
+                        <textarea class="form-control rounded-0 border-secondary-subtle" name="note" id="note" rows="2" placeholder="Bạn có thể để lại ghi chú ở đây"></textarea>
                     </div>
 
                 </div>
@@ -112,7 +110,7 @@
                 {{-- CỘT PHẢI --}}
                 <div class="col-lg-5">
                     <div class="card p-5 border-0 rounded-0" style="background-color: #fbfbfb;">
-                        <h3 class="mb-4 pb-2" style="font-family: 'Playfair Display', serif; font-size: 1.8rem;">Order Summary</h3>
+                        <h3 class="mb-4 pb-2" style="font-family: 'Playfair Display', serif; font-size: 1.8rem;text-align: center;">CHI TIẾT</h3>
 
                         <div class="mb-4 checkout-item-list" style="max-height: 400px; overflow-y: auto;">
                             @forelse($orderItems as $item)
@@ -173,12 +171,10 @@
                         </div>
 
                         <button type="submit" id="btn-submit-payment" class="btn btn-dark w-100 rounded-0 py-3 text-uppercase fw-semibold" style="font-size: 0.85rem; letter-spacing: 2px;" {{ $total <= 0 ? 'disabled' : '' }}>
-                            Confirm Payment
+                            Xác nhận
                         </button>
 
-                        <div class="text-center text-muted mt-3 text-uppercase" style="font-size: 0.6rem; letter-spacing: 1px; line-height: 1.5;">
-                            Secure SSL Encryption — Payments are processed<br>via our encrypted gateway.
-                        </div>
+                      
                     </div>
                 </div>
 

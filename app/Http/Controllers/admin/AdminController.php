@@ -89,12 +89,11 @@ class AdminController extends Controller
             ->get()
             ->keyBy('month'); // index bằng số tháng để tra nhanh (1-12)
 
-        // Đảm bảo đủ 12 phần tử, tháng chưa có doanh thu = 0
-        // Đơn vị: triệu VNĐ (chia 1_000_000) để biểu đồ gọn
+        // Build mảng 12 tháng — GIỮ NGUYÊN ĐƠN VỊ VNĐ, để view tự chọn đơn vị hiển thị
         $monthlyRevenue = [];
         for ($m = 1; $m <= 12; $m++) {
             $monthlyRevenue[] = isset($revenueRows[$m])
-                ? round($revenueRows[$m]->revenue / 1000000, 1)
+                ? (float) $revenueRows[$m]->revenue
                 : 0;
         }
 
@@ -318,7 +317,7 @@ class AdminController extends Controller
             ->get()
             ->keyBy('month');
 
-        // Build mảng 12 tháng cho cả 2 chỉ số (đơn vị: triệu VNĐ)
+        // Build mảng 12 tháng — GIỮ NGUYÊN ĐƠN VỊ VNĐ, để JS tự chọn đơn vị
         $monthlyRevenue    = [];
         $monthlyImportCost = [];
         $monthlyProfit     = [];
@@ -327,9 +326,9 @@ class AdminController extends Controller
             $rev  = isset($revenueRows[$m])    ? (float) $revenueRows[$m]->revenue    : 0;
             $cost = isset($importCostRows[$m]) ? (float) $importCostRows[$m]->cost    : 0;
 
-            $monthlyRevenue[]    = round($rev  / 1_000_000, 1);
-            $monthlyImportCost[] = round($cost / 1_000_000, 1);
-            $monthlyProfit[]     = round(($rev - $cost) / 1_000_000, 1);
+            $monthlyRevenue[]    = $rev;
+            $monthlyImportCost[] = $cost;
+            $monthlyProfit[]     = $rev - $cost;
         }
 
         // ── Tổng cả năm ─────────────────────────────────────────────────

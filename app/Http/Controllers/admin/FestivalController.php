@@ -43,16 +43,16 @@ class FestivalController extends Controller
     {
         $request->validate([
             'name'       => 'required|string|max:255',
-            'discount'   => 'required|numeric|min:0|max:100',
+            'discount'   => 'required|numeric|min:1|max:100',
             'status'     => 'required|in:0,1',
             'start_date' => 'required|date',
-            'end_date'   => 'required|date|after_or_equal:start_date',
+            'end_date'   => 'required|date|after:start_date|after_or_equal:today',
         ], [
             'name.required'              => 'Vui lòng nhập tên sự kiện.',
             'name.max'                   => 'Tên sự kiện không được vượt quá 255 ký tự.',
             'discount.required'          => 'Vui lòng nhập mức giảm giá.',
             'discount.numeric'           => 'Mức giảm giá phải là số.',
-            'discount.min'               => 'Mức giảm giá không được nhỏ hơn 0%.',
+            'discount.min'               => 'Mức giảm giá phải lớn hơn 0%.',
             'discount.max'               => 'Mức giảm giá không được vượt quá 100%.',
             'status.required'            => 'Vui lòng chọn trạng thái.',
             'status.in'                  => 'Trạng thái không hợp lệ.',
@@ -60,7 +60,8 @@ class FestivalController extends Controller
             'start_date.date'            => 'Ngày bắt đầu không đúng định dạng.',
             'end_date.required'          => 'Vui lòng chọn ngày kết thúc.',
             'end_date.date'              => 'Ngày kết thúc không đúng định dạng.',
-            'end_date.after_or_equal'    => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+            'end_date.after'             => 'Ngày kết thúc phải sau ngày bắt đầu.',
+            'end_date.after_or_equal'    => 'Ngày kết thúc không được là ngày đã qua.',
         ]);
 
         $festival = Festival::create([
@@ -102,16 +103,16 @@ class FestivalController extends Controller
     {
         $request->validate([
             'name'       => 'required|string|max:255',
-            'discount'   => 'required|numeric|min:0|max:100',
+            'discount'   => 'required|numeric|min:1|max:100',
             'status'     => 'required|in:0,1',
             'start_date' => 'required|date',
-            'end_date'   => 'required|date|after_or_equal:start_date',
+            'end_date'   => 'required|date|after:start_date|after_or_equal:today',
         ], [
             'name.required'              => 'Vui lòng nhập tên sự kiện.',
             'name.max'                   => 'Tên sự kiện không được vượt quá 255 ký tự.',
             'discount.required'          => 'Vui lòng nhập mức giảm giá.',
             'discount.numeric'           => 'Mức giảm giá phải là số.',
-            'discount.min'               => 'Mức giảm giá không được nhỏ hơn 0%.',
+            'discount.min'               => 'Mức giảm giá phải lớn hơn 0%.',
             'discount.max'               => 'Mức giảm giá không được vượt quá 100%.',
             'status.required'            => 'Vui lòng chọn trạng thái.',
             'status.in'                  => 'Trạng thái không hợp lệ.',
@@ -119,7 +120,8 @@ class FestivalController extends Controller
             'start_date.date'            => 'Ngày bắt đầu không đúng định dạng.',
             'end_date.required'          => 'Vui lòng chọn ngày kết thúc.',
             'end_date.date'              => 'Ngày kết thúc không đúng định dạng.',
-            'end_date.after_or_equal'    => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+            'end_date.after'             => 'Ngày kết thúc phải sau ngày bắt đầu.',
+            'end_date.after_or_equal'    => 'Ngày kết thúc không được là ngày đã qua.',
         ]);
 
         $festival = Festival::find($id);

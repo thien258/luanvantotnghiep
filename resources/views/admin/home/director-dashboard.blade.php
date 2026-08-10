@@ -61,7 +61,8 @@
     <div class="card-header bg-white py-3 border-bottom-0 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-dark text-uppercase small" style="letter-spacing:1px;">
             <i class="fa-solid fa-chart-bar mr-2 text-muted"></i>
-            Doanh thu vs Chi phí nhập hàng theo tháng (Triệu VNĐ)
+            Doanh thu vs Chi phí nhập hàng theo tháng
+            (<span id="directorChartUnit">VNĐ</span>)
         </h6>
         <span class="small text-muted">Năm {{ $year }}</span>
     </div>
@@ -100,9 +101,9 @@
                 @endphp
                 @foreach($months as $i => $label)
                 @php
-                    $rev    = $monthlyRevenue[$i]    * 1_000_000;
-                    $cost   = $monthlyImportCost[$i] * 1_000_000;
-                    $profit = $monthlyProfit[$i]      * 1_000_000;
+                    $rev    = $monthlyRevenue[$i];
+                    $cost   = $monthlyImportCost[$i];
+                    $profit = $monthlyProfit[$i];
                     $isEmpty = ($rev == 0 && $cost == 0);
                 @endphp
                 <tr class="{{ $isEmpty ? 'text-muted' : '' }}">
@@ -144,9 +145,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const canvas = document.getElementById('directorBarChart');
     if (!canvas) return;
 
-    const revenue = JSON.parse(canvas.dataset.revenue);
-    const cost    = JSON.parse(canvas.dataset.cost);
-    const profit  = JSON.parse(canvas.dataset.profit);
+    const rawRevenue = JSON.parse(canvas.dataset.revenue);
+    const rawCost    = JSON.parse(canvas.dataset.cost);
+    const rawProfit  = JSON.parse(canvas.dataset.profit);
+
+    // Tự chọn đơn vị dựa trên giá trị lớn nhất
+    const maxVal = Math.max(...rawRevenue, ...rawCost.map(Math.abs), 1);
+    let divisor, unit;
+    if (maxVal >= 1_000_000) {
+        divisor = 1_000_000; unit = 'Triệu ₫';
+    } else if (maxVal >= 1_000) {
+        divisor = 1_000; unit = 'Nghìn ₫';
+    } else {
+        divisor = 1; unit = '₫';
+    }
+
+    const scale = v => Math.round(v / divisor * 10) / 10;
+    const revenue = rawRevenue.map(scale);
+    const cost    = rawCost.map(scale);
+    const profit  = rawProfit.map(scale);
+
+    // Cập nhật tiêu đề biểu đồ
+    const chartTitle = document.getElementById('directorChartUnit');
+    if (chartTitle) chartTitle.textContent = unit;
 
     new Chart(canvas, {
         type: 'bar',
@@ -192,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 legend: { position: 'top', labels: { font: { size: 11 }, boxWidth: 14 } },
                 tooltip: {
                     callbacks: {
-                        label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}M₫`
+                        label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} ${unit}`
                     }
                 }
             },
@@ -201,7 +222,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     beginAtZero: true,
                     ticks: {
                         font: { size: 10 },
-                        callback: v => v + 'M'
+                        callback: v => {
+                            if (divisor === 1_000_000) return v + 'M';
+                            if (divisor === 1_000)     return v + 'K';
+                            return v + '₫';
+                        }
                     },
                     grid: { color: 'rgba(0,0,0,0.05)' }
                 },

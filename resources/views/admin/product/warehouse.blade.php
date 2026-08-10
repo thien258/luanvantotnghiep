@@ -14,7 +14,8 @@
         <div class="card-header bg-white p-0">
             <ul class="nav nav-tabs rounded-0 border-0" id="warehouseTab" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active rounded-0 border-0 fw-bold small text-uppercase px-3 py-3 text-danger"
+                    <a class="nav-link active rounded-0 border-0 fw-bold small text-uppercase px-3 py-3"
+                        style="color:#b45309;"
                         id="bancham-tab" data-toggle="tab" href="#content-bancham" role="tab">
                         <i class="fa-solid fa-triangle-exclamation me-1"></i> Cảnh báo Sale (Bán chậm)
                     </a>
@@ -71,10 +72,17 @@
                                             @forelse($slowProducts as $sp)
                                             <tr>
                                                 <td><span class="fw-bold text-dark">{{ $sp->title }}</span></td>
-                                                <td class="text-center fw-bold text-secondary">{{ $sp->total_import }}</td>
-                                                <td class="text-center fw-bold text-danger">{{ $sp->total_sold }}</td>
+                                                <td class="text-center fw-bold" style="color:#6b7280;">{{ $sp->total_import }}</td>
+                                                <td class="text-center fw-bold" style="color:#92400e;">{{ $sp->total_sold }}</td>
                                                 <td class="text-center">
-                                                    <span class="badge bg-danger rounded-0" style="font-size:0.65rem;">{{ $sp->sale_rate }}%</span>
+                                                    @php $rate = $sp->sale_rate; @endphp
+                                                    @if($rate >= 20)
+                                                        <span class="rounded-0 px-2 py-1" style="font-size:0.65rem;font-weight:600;background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;">{{ $rate }}%</span>
+                                                    @elseif($rate >= 10)
+                                                        <span class="rounded-0 px-2 py-1" style="font-size:0.65rem;font-weight:600;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">{{ $rate }}%</span>
+                                                    @else
+                                                        <span class="rounded-0 px-2 py-1" style="font-size:0.65rem;font-weight:600;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;">{{ $rate }}%</span>
+                                                    @endif
                                                 </td>
                                                 <td class="text-center" style="font-size:0.75rem;">
                                                     @if($sp->last_import_at)
@@ -92,8 +100,8 @@
                                                             </span>
                                                         @endforeach
                                                     @else
-                                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-0 px-2 py-1" style="font-size:0.65rem;">
-                                                            <i class="fa fa-bolt me-1"></i> CẦN GIẢM GIÁ SALE
+                                                        <span class="rounded-0 px-2 py-1 small" style="font-size:0.65rem;font-weight:600;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">
+                                                            ⚡ Chưa có Festival
                                                         </span>
                                                     @endif
                                                 </td>
@@ -129,12 +137,12 @@
                                 <td><span class="fw-bold text-dark">{{ $log->product->title ?? 'Đã xóa' }}</span></td>
                                 <td class="text-center">
                                     @if($log->type == 'import')
-                                    <span class="badge bg-success rounded-0" style="font-size:0.65rem;">Nhập kho</span>
+                                    <span class="rounded-0 px-2 py-1" style="font-size:0.65rem;font-weight:600;background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;">↑ Nhập kho</span>
                                     @else
-                                    <span class="badge bg-primary rounded-0" style="font-size:0.65rem;">Xuất bán</span>
+                                    <span class="rounded-0 px-2 py-1" style="font-size:0.65rem;font-weight:600;background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;">↓ Xuất bán</span>
                                     @endif
                                 </td>
-                                <td class="text-center fw-bold text-success">+{{ $log->quantity }}</td>
+                                <td class="text-center fw-bold" style="color:#059669;">+{{ $log->quantity }}</td>
                                 <td class="text-center fw-bold text-dark bg-light">{{ $log->stock_after }}</td>
                                 <td><span class="text-muted" style="font-size:0.8rem;">{{ $log->reason }}</span></td>
                             </tr>
@@ -320,7 +328,7 @@
                                         </td>
                                         <td class="fw-bold">{{ $sp->title }}</td>
                                         <td class="text-center">
-                                            <span class="badge bg-danger rounded-0">{{ $sp->sale_rate }}%</span>
+                                            <span class="rounded-0 px-2 py-1" style="font-size:0.65rem;font-weight:600;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">{{ $sp->sale_rate }}%</span>
                                         </td>
                                         <td class="text-center">
                                             @if($sp->festivals->isNotEmpty())
