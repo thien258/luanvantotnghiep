@@ -237,8 +237,15 @@ class PurchaseOrderController extends Controller
         $po = PurchaseOrder::with(
             'items.product.category',
             'items.product.brand',
-            'items.product.concentration'
+            'items.product.concentration',
+            'offer.items'
         )->findOrFail($id);
+
+        // Map offer items theo product_name để lấy volume/concentration_text/category_text/brand_text
+        $offerItemMap = collect();
+        if ($po->offer) {
+            $offerItemMap = $po->offer->items->keyBy(fn($i) => strtolower(trim($i->product_name)));
+        }
 
         $filename = 'nhap-kho-' . $po->order_code . '-' . now()->format('Ymd') . '.csv';
 
@@ -248,7 +255,7 @@ class PurchaseOrderController extends Controller
         ];
 
         // Dùng stream để xuất CSV không cần lưu file tạm
-        $callback = function () use ($po) {
+        $callback = function () use ($po, $offerItemMap) {
             $handle = fopen('php://output', 'w');
 
             // BOM UTF-8: giúp Excel mở file và hiển thị đúng tiếng Việt
@@ -262,19 +269,21 @@ class PurchaseOrderController extends Controller
             fputcsv($handle, ['title', 'image', 'decription', 'unit_price', 'sl_order', 'quantity', 'volume', 'category', 'brand', 'concentration', 'expiry_date']);
 
             foreach ($po->items as $item) {
-                $product = $item->product;
+                $product  = $item->product;
+                $offerItem = $offerItemMap->get(strtolower(trim($item->product_name)));
+
                 fputcsv($handle, [
-                    $item->product_name,                          // Tên SP
-                    $product?->image ?? '',                       // URL ảnh
-                    $product?->decription ?? '',                  // Mô tả
-                    $item->unit_price,                            // Giá nhập (từ báo giá NSX)
-                    $item->quantity,                              // SL đã order
-                    '',                                           // SL thực tế - để trống cho NV kho điền
-                    $product?->volume ?? '',                      // Dung tích
-                    $product?->category?->name ?? '',             // Danh mục
-                    $product?->brand?->name ?? '',                // Thương hiệu
-                    $product?->concentration?->concentration ?? '', // Nồng độ
-                    '',                                           // HSD - để trống cho NV kho điền
+                    $item->product_name,
+                    $product?->image ?? $offerItem?->image ?? '',
+                    $product?->decription ?? '',
+                    $item->unit_price,
+                    $item->quantity,
+                    '',   // SL thực tế - NV kho điền
+                    $product?->volume ?? $offerItem?->volume ?? '',
+                    $product?->category?->name ?? $offerItem?->category_text ?? '',
+                    $product?->brand?->name ?? $offerItem?->brand_text ?? '',
+                    $product?->concentration?->concentration ?? $offerItem?->concentration_text ?? '',
+                    '',   // HSD - NV kho điền
                 ]);
             }
 

@@ -171,20 +171,14 @@ class OrderController extends Controller
             DB::commit();
 
             if ($request->payment_method === 'BANK TRANSFER') {
-                // Thử tạo link PayOS nếu đã cấu hình
-                if (env('PAYOS_CLIENT_ID') && env('PAYOS_API_KEY') && env('PAYOS_CHECKSUM_KEY')) {
-                    $checkoutUrl = $this->createPayOSLink($order);
-                    if ($checkoutUrl) {
-                        return redirect($checkoutUrl);
-                    }
+                $checkoutUrl = $this->createPayOSLink($order);
+                if ($checkoutUrl) {
+                    return redirect($checkoutUrl);
                 }
-                // Fallback: trang QR VietQR nếu chưa cấu hình PayOS
+                // PayOS thất bại → fallback trang QR tĩnh
                 return redirect()->route('order.payment', ['id' => $order->id]);
             }
-            $payosUrl = null;
-            if (env('PAYOS_CLIENT_ID') && env('PAYOS_API_KEY') && env('PAYOS_CHECKSUM_KEY')) {
-                $payosUrl = $this->createPayOSLink($order);
-            }
+            $payosUrl = $this->createPayOSLink($order);
             try {
                 $order->load(['details', 'user']);
                 Mail::to($order->user->email)
@@ -438,7 +432,7 @@ class OrderController extends Controller
             ? intval($order->id) * 10000 + (int)(now()->timestamp % 10000)
             : intval($order->id);
         $amount      = intval($order->total_price);
-        $description = 'AROMA DH' . $order->id; // max 25 ký tự theo PayOS
+        $description = 'AROMADH' . $order->id; // max 25 ký tự, KHÔNG có dấu cách (yêu cầu PayOS)
         $returnUrl   = route('payos.success');
         // COD: cancelUrl về trang chủ → bấm "Hủy" trên PayOS chỉ về home, không xóa đơn
         $cancelUrl   = $order->payment_method === 'COD'
@@ -468,7 +462,7 @@ class OrderController extends Controller
             $result = $response->json();
             // code='00' là thành công theo PayOS
             if (isset($result['code']) && $result['code'] === '00') {
-                return $result['data']['checkoutUrl'];
+                return $result['data']['checkoutUrl'] ?? null;
             }
             Log::warning('PayOS response code not 00: ' . json_encode($result));
         } else {
@@ -584,6 +578,30 @@ class OrderController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    // =========================================================================
+    // PAYMENT FORM — Fallback khi PayOS không tạo được link
+    // =========================================================================
+
+    /**
+     * Trang hiển thị thông tin đơn hàng để khách chuyển khoản thủ công.
+     * Được gọi khi PayOS trả về lỗi (vd: 423 ngân hàng từ chối).
+     */
+    public function paymentForm($id)
+    {
+        $order = Order::where('id', $id)
+            ->where('idUser', Auth::id())
+            ->with('details.product')
+            ->firstOrFail();
+
+        $amount  = intval($order->total_price);
+        $addInfo = 'AROMADH' . $order->id;
+        // QR VietQR tĩnh — dùng khi PayOS không tạo được link
+        $qrCodeUrl = "https://img.vietqr.io/image/970418-8889065472-compact2.jpg"
+            . "?amount={$amount}&addInfo=" . urlencode($addInfo) . "&accountName=TRAN+QUANG+THIEN";
+
+        return view('order.order_payment', compact('order', 'amount', 'addInfo', 'qrCodeUrl'));
     }
 
     /**

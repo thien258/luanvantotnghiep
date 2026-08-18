@@ -1,0 +1,294 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1854" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- TITLE -->
+    <mxCell id="title" value="ADMIN — SƠ ĐỒ THỰC THỂ LIÊN KẾT (ERD)" style="text;html=1;strokeColor=none;fillColor=#C0504D;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#ffffff;" vertex="1" parent="1">
+      <mxGeometry x="580" y="10" width="560" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- ===================== ENTITIES ===================== -->
+
+    <!-- users (admin) -->
+    <mxCell id="e_users" value="users" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="820" y="70" width="120" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- products -->
+    <mxCell id="e_prod" value="products" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="430" y="70" width="120" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- categories -->
+    <mxCell id="e_cat" value="categories" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="130" y="70" width="120" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- brands -->
+    <mxCell id="e_brand" value="brands" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="130" y="220" width="120" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- warehouse_imports -->
+    <mxCell id="e_wimp" value="warehouse_imports" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="430" y="270" width="160" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- warehouse_stock_logs -->
+    <mxCell id="e_wslog" value="warehouse_stock_logs" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="130" y="380" width="180" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- orders -->
+    <mxCell id="e_ord" value="orders" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="820" y="270" width="120" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- order_details -->
+    <mxCell id="e_ordd" value="order_details" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="1100" y="270" width="130" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- procurement_requests -->
+    <mxCell id="e_proc" value="procurement_requests" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="820" y="490" width="180" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- supplier_offers -->
+    <mxCell id="e_soffer" value="supplier_offers" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="820" y="680" width="150" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- purchase_orders -->
+    <mxCell id="e_po" value="purchase_orders" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="560" y="680" width="150" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- warehouse_receipts -->
+    <mxCell id="e_wrec" value="warehouse_receipts" style="rounded=0;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#dae8fc;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="560" y="490" width="170" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- ===================== RELATIONSHIPS ===================== -->
+
+    <!-- users — Quản lý SP — products -->
+    <mxCell id="r_manprod" value="Quản lý" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="650" y="68" width="120" height="54" as="geometry" />
+    </mxCell>
+    <mxCell id="l_mp1" style="edgeStyle=none;html=1;" edge="1" source="e_prod" target="r_manprod" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="l_mp2" style="edgeStyle=none;html=1;" edge="1" source="e_users" target="r_manprod" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_mp1" value="N" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_mp1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <mxCell id="c_mp2" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_mp2">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- products — Phân loại — categories -->
+    <mxCell id="r_cat" value="Phân loại" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="290" y="68" width="110" height="54" as="geometry" />
+    </mxCell>
+    <mxCell id="l_cat1" style="edgeStyle=none;html=1;" edge="1" source="e_cat" target="r_cat" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="l_cat2" style="edgeStyle=none;html=1;" edge="1" source="e_prod" target="r_cat" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_cat1" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_cat1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <mxCell id="c_cat2" value="N" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_cat2">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- products — Của — brands -->
+    <mxCell id="r_brand" value="Của" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="290" y="168" width="110" height="54" as="geometry" />
+    </mxCell>
+    <mxCell id="l_br1" style="edgeStyle=none;html=1;" edge="1" source="e_brand" target="r_brand" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="l_br2" style="edgeStyle=none;html=1;" edge="1" source="e_prod" target="r_brand" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_br1" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_br1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <mxCell id="c_br2" value="N" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_br2">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- users — Duyệt nhập — warehouse_imports -->
+    <mxCell id="r_wimp" value="Duyệt nhập" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="640" y="268" width="130" height="54" as="geometry" />
+    </mxCell>
+    <mxCell id="l_wi1" style="edgeStyle=none;html=1;" edge="1" source="e_wimp" target="r_wimp" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="l_wi2" style="edgeStyle=none;html=1;" edge="1" source="e_users" target="r_wimp" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_wi1" value="N" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_wi1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <mxCell id="c_wi2" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_wi2">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- warehouse_imports — Sinh log — warehouse_stock_logs -->
+    <mxCell id="r_wlog" value="Sinh log" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="310" y="310" width="100" height="54" as="geometry" />
+    </mxCell>
+    <mxCell id="l_wl1" style="edgeStyle=none;html=1;" edge="1" source="e_wimp" target="r_wlog" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="l_wl2" style="edgeStyle=none;html=1;" edge="1" source="e_wslog" target="r_wlog" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_wl1" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_wl1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <mxCell id="c_wl2" value="N" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_wl2">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- users — Xử lý đơn — orders -->
+    <mxCell id="r_ordmgr" value="Xử lý đơn" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="950" y="148" width="120" height="54" as="geometry" />
+    </mxCell>
+    <mxCell id="l_om1" style="edgeStyle=none;html=1;" edge="1" source="e_users" target="r_ordmgr" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="l_om2" style="edgeStyle=none;html=1;" edge="1" source="e_ord" target="r_ordmgr" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_om1" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_om1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <mxCell id="c_om2" value="N" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_om2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- orders — Chi tiết — order_details -->
+    <mxCell id="r_ordd" value="Chi tiết" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="980" y="268" width="100" height="54" as="geometry" />
+    </mxCell>
+    <mxCell id="l_od1" style="edgeStyle=none;html=1;" edge="1" source="e_ord" target="r_ordd" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="l_od2" style="edgeStyle=none;html=1;" edge="1" source="e_ordd" target="r_ordd" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_od1" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_od1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <mxCell id="c_od2" value="N" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_od2">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- users — Tạo yêu cầu — procurement_requests -->
+    <mxCell id="r_proc" value="Tạo yêu cầu&#xa;thu mua" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="1040" y="460" width="130" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="l_pr1" style="edgeStyle=none;html=1;" edge="1" source="e_users" target="r_proc" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="l_pr2" style="edgeStyle=none;html=1;" edge="1" source="e_proc" target="r_proc" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_pr1" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_pr1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <mxCell id="c_pr2" value="N" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_pr2">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- procurement_requests — Nhận báo giá — supplier_offers -->
+    <mxCell id="r_soffer" value="Nhận&#xa;báo giá" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="840" y="580" width="110" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="l_so1" style="edgeStyle=none;html=1;" edge="1" source="e_proc" target="r_soffer" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="l_so2" style="edgeStyle=none;html=1;" edge="1" source="e_soffer" target="r_soffer" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_so1" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_so1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <mxCell id="c_so2" value="N" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_so2">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- supplier_offers — Tạo PO — purchase_orders -->
+    <mxCell id="r_po" value="Tạo đơn&#xa;đặt hàng" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="720" y="678" width="110" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="l_po1" style="edgeStyle=none;html=1;" edge="1" source="e_soffer" target="r_po" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="l_po2" style="edgeStyle=none;html=1;" edge="1" source="e_po" target="r_po" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_po1" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_po1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <mxCell id="c_po2" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_po2">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- purchase_orders — Nhập kho — warehouse_receipts -->
+    <mxCell id="r_wrec" value="Nhập kho" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="580" y="580" width="110" height="54" as="geometry" />
+    </mxCell>
+    <mxCell id="l_wr1" style="edgeStyle=none;html=1;" edge="1" source="e_po" target="r_wrec" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="l_wr2" style="edgeStyle=none;html=1;" edge="1" source="e_wrec" target="r_wrec" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_wr1" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_wr1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <mxCell id="c_wr2" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_wr2">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- users — Phân role — users (self: admin quản lý user) -->
+    <mxCell id="r_role" value="Phân role /&#xa;Bật tắt TK" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="1060" y="68" width="130" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="l_role1" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="e_users" target="r_role" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="c_role1" value="1" style="resizable=0;html=1;labelBackgroundColor=none;" connectable="0" vertex="1" parent="l_role1">
+      <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+    <!-- label ghi chú -->
+    <mxCell id="note_role" value="(admin → user)" style="text;html=1;fontSize=10;fontStyle=2;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry x="1060" y="135" width="130" height="20" as="geometry" />
+    </mxCell>
+
+    <!-- ghi chú luồng đơn hàng -->
+    <mxCell id="note_order" value="Luồng: Xác nhận → Xuất kho → In QR → Giao → Hoàn tất" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="1260" y="265" width="280" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="l_note_ord" style="edgeStyle=none;html=1;dashed=1;endArrow=open;endFill=0;" edge="1" source="e_ord" target="note_order" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ghi chú import Excel -->
+    <mxCell id="note_excel" value="Import Excel&#xa;(thêm hàng loạt)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="430" y="160" width="160" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="l_excel" style="edgeStyle=none;html=1;dashed=1;endArrow=open;endFill=0;" edge="1" source="e_prod" target="note_excel" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>

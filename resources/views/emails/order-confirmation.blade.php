@@ -78,7 +78,7 @@
                             <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:28px;">
                                 <thead>
                                     <tr style="background:#1a1a1a;">
-                                        <th colspan="2" style="color:#e8c97a;padding:10px 14px;font-size:12px;text-align:left;font-weight:600;">Sản phẩm</th>
+                                        <th style="color:#e8c97a;padding:10px 14px;font-size:12px;text-align:left;font-weight:600;">Sản phẩm</th>
                                         <th style="color:#e8c97a;padding:10px 14px;font-size:12px;text-align:center;font-weight:600;width:50px;">SL</th>
                                         <th style="color:#e8c97a;padding:10px 14px;font-size:12px;text-align:right;font-weight:600;width:120px;">Thành tiền</th>
                                     </tr>
@@ -86,29 +86,9 @@
                                 <tbody>
                                     @foreach($order->details as $detail)
                                     <tr style="border-bottom:1px solid #f0f0f0;">
-                                        {{-- Ảnh sản phẩm --}}
-                                        <td style="padding:12px 14px;width:64px;">
-                                            @if($detail->product && $detail->product->image)
-                                            @php
-                                                $img = $detail->product->image;
-                                                $imgSrc = str_starts_with($img, 'data:image')
-                                                    ? $img
-                                                    : asset('storage/' . $img);
-                                            @endphp
-                                            <img
-                                                src="{{ $imgSrc }}"
-                                                alt="{{ $detail->name }}"
-                                                width="56"
-                                                height="56"
-                                                style="border-radius:6px;object-fit:cover;display:block;border:1px solid #eee;">
-                                            @else
-                                            <div style="width:56px;height:56px;background:#f0f0f0;border-radius:6px;text-align:center;font-size:24px;line-height:56px;">🧴</div>
-                                            @endif
-                                        </td>
                                         {{-- Tên sản phẩm --}}
-                                        <td style="padding:12px 8px;">
+                                        <td style="padding:12px 14px;">
                                             <div style="font-weight:700;color:#222;font-size:14px;">{{ $detail->name }}</div>
-
                                         </td>
                                         {{-- Số lượng --}}
                                         <td style="padding:12px 14px;text-align:center;color:#555;">x{{ $detail->quantity }}</td>
@@ -121,7 +101,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr style="background:#f9f9f9;border-top:2px solid #1a1a1a;">
-                                        <td colspan="3" style="padding:14px;font-weight:700;font-size:15px;">Tổng cộng</td>
+                                        <td colspan="2" style="padding:14px;font-weight:700;font-size:15px;">Tổng cộng</td>
                                         <td style="padding:14px;text-align:right;font-weight:700;font-size:18px;color:#c0392b;">
                                             {{ number_format($order->total_price, 0, ',', '.') }}₫
                                         </td>

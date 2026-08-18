@@ -161,7 +161,7 @@ class FestivalController extends Controller
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
-        // Nếu là AJAX, hãy lấy tất cả kết quả khớp thay vì paginate(15) 
+        // Nếu là AJAX, hãy lấy tất cả kết quả khớp thay 
         // để người dùng thấy đầy đủ kết quả tìm kiếm ngay lập tức
         if ($request->expectsJson() || $request->header('X-Requested-With') == 'XMLHttpRequest') {
             $products = $query->get(); // Dùng get() thay vì paginate() cho tìm kiếm nhanh

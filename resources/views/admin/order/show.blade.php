@@ -37,16 +37,22 @@
                         <p class="mb-2"><strong>Hình thức:</strong> <span class="text-uppercase badge bg-dark text-white rounded-0 px-2 py-1">{{ $order->payment_method }}</span></p>
                         <p class="mb-2"><strong>Ghi chú:</strong> <span class="text-secondary fst-italic">{{ $order->note ?? 'Không có ghi chú' }}</span></p>
                         <p class="mb-2"><strong>Trạng thái hiện tại:</strong>
-                            @if($order->status == 1)
-                            <span class="badge bg-warning text-dark rounded-0 px-2 py-1">Đang Lấy Hàng</span>
+                            @if($order->status == 0)
+                            <span class="badge bg-warning text-dark rounded-0 px-2 py-1">Chờ Thanh Toán</span>
+                            @elseif($order->status == 1)
+                            <span class="badge bg-info text-dark rounded-0 px-2 py-1">Chờ Xử Lý</span>
                             @elseif($order->status == 3)
                             <span class="badge bg-primary text-white rounded-0 px-2 py-1">Đang Giao Hàng</span>
                             @elseif($order->status == 4)
                             <span class="badge bg-success text-white rounded-0 px-2 py-1">Hoàn Tất</span>
                             @elseif($order->status == 5)
                             <span class="badge bg-secondary text-white rounded-0 px-2 py-1">Hoàn Hàng</span>
+                            @elseif($order->status == 6)
+                            <span class="badge bg-danger text-white rounded-0 px-2 py-1">Hàng Hỏng</span>
+                            @elseif($order->status == -1)
+                            <span class="badge bg-dark text-white rounded-0 px-2 py-1">Đã Hủy</span>
                             @else
-                            <span class="badge bg-danger text-white rounded-0 px-2 py-1">Không xác định</span>
+                            <span class="badge bg-secondary text-white rounded-0 px-2 py-1">Không xác định</span>
                             @endif
                         </p>
                     </div>
@@ -83,7 +89,8 @@
                             data-fullname="{{ $order->fullname }}"
                             data-phone="{{ $order->phone }}"
                             data-address="{{ $order->address }}"
-                            data-cod="{{ $order->payment_method === 'COD' ? number_format($order->total_price).'đ' : '0đ (Đã chuyển khoản)' }}">
+                            data-cod="{{ $order->payment_method === 'COD' ? number_format($order->total_price).'đ' : '0đ (Đã chuyển khoản)' }}"
+                            data-items="{{ json_encode($orderdetail->map(fn($d) => ['name' => ($d->product?->title ?? 'Sản phẩm đã xóa') . ($d->product?->volume ? ' ('.$d->product->volume.')' : ''), 'qty' => $d->quantity])) }}">
                         <i class="fa fa-print me-2"></i> In mã QR dán thùng hàng
                     </button>
 

@@ -127,8 +127,8 @@ class AdminController extends Controller
 
         // Chuyển về format cũ để view dùng được
         $slowProducts = array_slice(array_map(function ($item) {
-            $p = $item->product;
-            $p->sold_30 = $item->sold_after;
+            $p = $item->product;  // lấy object Product
+            $p->sold_30 = $item->sold_after;// gắn thêm thuộc tính: số lượng bán được trong 30 ngày
             $p->stock   = $item->imported_qty > 0
                 ? $item->imported_qty        // SP đã nhập kho → dùng qty nhập
                 : (int) $item->product->quantity; // fallback → dùng tồn kho hiện tại
@@ -142,13 +142,13 @@ class AdminController extends Controller
         $todayStr  = now()->toDateString();
         $today365  = now()->addDays(365)->toDateString();
 
-        $expiringBatches = WarehouseStockLog::where('type', 'import')
-            ->whereNotNull('expiry_date')
-            ->whereDate('expiry_date', '>=', $todayStr)
-            ->whereDate('expiry_date', '<=', $today365)
+        $expiringBatches = WarehouseStockLog::where('type', 'import')// chỉ lấy log nhập kho
+            ->whereNotNull('expiry_date')// phải có ngày hết hạn
+            ->whereDate('expiry_date', '>=', $todayStr) // chưa hết hạn
+            ->whereDate('expiry_date', '<=', $today365)// chưa hết hạn
             ->selectRaw('product_id, expiry_date, SUM(quantity) as total_import')
-            ->groupBy('product_id', 'expiry_date')
-            ->orderBy('expiry_date', 'asc')
+            ->groupBy('product_id', 'expiry_date')// gom nhóm theo SP + ngày HH
+            ->orderBy('expiry_date', 'asc')  // sắp xếp gần hết hạn lên trước
             ->get()
             ->map(function ($row) {
                 $product = Product::find($row->product_id);

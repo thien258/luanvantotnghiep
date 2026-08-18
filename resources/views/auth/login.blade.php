@@ -27,6 +27,13 @@
                 Truy cập tài khoản và khám phá bộ sưu tập của bạn.
             </p>
 
+            {{-- Thông báo xác minh email thành công --}}
+            @if (session('status'))
+                <div class="alert alert-success rounded-0 small py-2">
+                    <i class="bi bi-check-circle me-1"></i> {{ session('status') }}
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('login') }}">
                 @csrf
 

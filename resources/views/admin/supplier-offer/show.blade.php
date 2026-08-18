@@ -77,8 +77,8 @@
                     <th class="text-center py-2">Giá chào</th>
                     <th class="text-center py-2">Dung tích</th>
                     <th class="py-2">Nồng độ</th>
-                    <th class="py-2">Category</th>
-                    <th class="py-2">Brand</th>
+                    <th class="py-2">Danh mục</th>
+                    <th class="py-2">Thương hiệu</th>
                     <th class="text-center py-2" style="width:12%">Số lượng đặt</th>
                 </tr>
             </thead>
@@ -98,8 +98,9 @@
                                value="{{ $item->unit_price }}" class="field-unit-price" disabled>
                     </td>
                     <td class="py-2 text-center">
-                        @if($p?->image)
-                            <img src="{{ $p->image }}" style="width:36px;height:36px;object-fit:cover;" class="border rounded">
+                        @php $imgSrc = $item->image ?? $p?->image ?? null; @endphp
+                        @if($imgSrc)
+                            <img src="{{ $imgSrc }}" style="width:36px;height:36px;object-fit:cover;" class="border rounded">
                         @else
                             <span class="text-muted" style="font-size:0.7rem;">—</span>
                         @endif
@@ -108,10 +109,10 @@
                     <td class="text-center py-2 text-success font-weight-bold">
                         {{ number_format($item->unit_price, 0, ',', '.') }}₫
                     </td>
-                    <td class="text-center py-2 text-muted">{{ $p?->volume ?? '—' }}</td>
-                    <td class="py-2 text-muted">{{ $p?->concentration?->concentration ?? '—' }}</td>
-                    <td class="py-2 text-muted">{{ $p?->category?->name ?? '—' }}</td>
-                    <td class="py-2 text-muted">{{ $p?->brand?->name ?? '—' }}</td>
+                    <td class="text-center py-2 text-muted">{{ $item->volume ?? $p?->volume ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $item->concentration_text ?? $p?->concentration?->concentration ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $item->category_text ?? $p?->category?->name ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $item->brand_text ?? $p?->brand?->name ?? '—' }}</td>
                     <td class="text-center py-2">
                         <input type="number" name="items[{{ $loop->index }}][quantity]"
                                class="form-control form-control-sm rounded-0 text-center qty-input"
@@ -156,18 +157,19 @@
                 @php $p = $item->product; @endphp
                 <tr>
                     <td class="py-2 text-center">
-                        @if($p?->image)
-                            <img src="{{ $p->image }}" style="width:36px;height:36px;object-fit:cover;" class="border rounded">
+                        @php $imgSrc = $item->image ?? $p?->image ?? null; @endphp
+                        @if($imgSrc)
+                            <img src="{{ $imgSrc }}" style="width:36px;height:36px;object-fit:cover;" class="border rounded">
                         @else
                             <span class="text-muted" style="font-size:0.7rem;">—</span>
                         @endif
                     </td>
                     <td class="py-2 font-weight-bold">{{ $item->product_name }}</td>
                     <td class="text-center py-2 text-success font-weight-bold">{{ number_format($item->unit_price, 0, ',', '.') }}₫</td>
-                    <td class="text-center py-2 text-muted">{{ $p?->volume ?? '—' }}</td>
-                    <td class="py-2 text-muted">{{ $p?->concentration?->concentration ?? '—' }}</td>
-                    <td class="py-2 text-muted">{{ $p?->category?->name ?? '—' }}</td>
-                    <td class="py-2 text-muted">{{ $p?->brand?->name ?? '—' }}</td>
+                    <td class="text-center py-2 text-muted">{{ $item->volume ?? $p?->volume ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $item->concentration_text ?? $p?->concentration?->concentration ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $item->category_text ?? $p?->category?->name ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $item->brand_text ?? $p?->brand?->name ?? '—' }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -201,8 +203,9 @@
                 @php $p = $item->product; @endphp
                 <tr>
                     <td class="py-2 text-center">
-                        @if($p?->image)
-                            <img src="{{ $p->image }}" style="width:36px;height:36px;object-fit:cover;" class="border rounded">
+                        @php $imgSrc = $item->image ?? $p?->image ?? null; @endphp
+                        @if($imgSrc)
+                            <img src="{{ $imgSrc }}" style="width:36px;height:36px;object-fit:cover;" class="border rounded">
                         @else
                             <span class="text-muted" style="font-size:0.7rem;">—</span>
                         @endif
@@ -211,10 +214,10 @@
                     <td class="text-center py-2 text-success font-weight-bold">
                         {{ number_format($item->unit_price, 0, ',', '.') }}₫
                     </td>
-                    <td class="text-center py-2 text-muted">{{ $p?->volume ?? '—' }}</td>
-                    <td class="py-2 text-muted">{{ $p?->concentration?->concentration ?? '—' }}</td>
-                    <td class="py-2 text-muted">{{ $p?->category?->name ?? '—' }}</td>
-                    <td class="py-2 text-muted">{{ $p?->brand?->name ?? '—' }}</td>
+                    <td class="text-center py-2 text-muted">{{ $item->volume ?? $p?->volume ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $item->concentration_text ?? $p?->concentration?->concentration ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $item->category_text ?? $p?->category?->name ?? '—' }}</td>
+                    <td class="py-2 text-muted">{{ $item->brand_text ?? $p?->brand?->name ?? '—' }}</td>
                 </tr>
                 @endforeach
             </tbody>

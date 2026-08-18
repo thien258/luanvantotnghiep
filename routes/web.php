@@ -55,8 +55,6 @@ Route::post('/api/payos-webhook', [OrderController::class, 'payosWebhook'])->nam
 // =========================================================================
 
 Route::get('/',                   [HomeController::class, 'index'])->name('welcome');
-Route::get('/gucci-demo',         [HomeController::class, 'showGucciProduct'])->name('gucci.demo');
-Route::get('/manufacturer-demo',  [HomeController::class, 'showManufacturerProducts'])->name('manufacturer.demo');
 Route::get('/search',             [HomeController::class, 'search'])->name('home.search');
 Route::get('/search-suggest',     [HomeController::class, 'suggest'])->name('search.suggest');    // AJAX gợi ý
 Route::get('/show-products',      [ProductShowController::class, 'showProducts'])->name('show_products');
@@ -73,6 +71,12 @@ Route::get('/login', fn() => view('login'))->name('login');
 
 // Đăng nhập / đăng ký / xác minh email (tự generate bởi Auth::routes)
 Auth::routes(['verify' => true]);
+
+// Xác minh email trực tiếp — không cần session, mở được trên mọi thiết bị
+// (dùng id + hash embed trong URL, không phụ thuộc cookie trình duyệt)
+Route::get('/email/verify-direct/{id}/{hash}', [App\Http\Controllers\Auth\VerifyEmailDirectController::class, '__invoke'])
+    ->middleware(['signed'])
+    ->name('verification.verify.direct');
 
 // Đăng xuất qua GET (override route mặc định POST của Laravel)
 Route::get('logout', [HomeController::class, 'logout'])->name('logout');
@@ -94,8 +98,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Giỏ hàng
     Route::resource('carts', CartController::class);
 
-    // Bình luận sản phẩm
-    Route::resource('comments', App\Http\Controllers\CommentController::class);
+    // Bình luận sản phẩm — chỉ cho phép xóa (destroy)
+    Route::resource('comments', App\Http\Controllers\CommentController::class)->only(['destroy']);
 
     // ── Luồng đặt hàng ───────────────────────────────────────────────
     // Gửi đánh giá sản phẩm từ trang lịch sử đơn hàng
@@ -109,14 +113,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/order/place', [OrderController::class, 'placeOrder'])->name('order.place');
 
     // Lịch sử đơn hàng
-    Route::get('/order/history',      [OrderController::class, 'history'])->name('order.history');
+    Route::get('/order/history', [OrderController::class, 'history'])->name('order.history');
     Route::get('/order/history/{id}', [OrderController::class, 'historyDetail'])->name('order.history.detail');
 
-    // Trang QR VietQR (fallback khi PayOS chưa config)
+    // Trang fallback khi PayOS lỗi — hiển thị thông tin chuyển khoản thủ công
     Route::get('/order/{id}/payment', [OrderController::class, 'paymentForm'])->name('order.payment');
-
-    // Khách xác nhận đã chuyển khoản thủ công
-    Route::post('/order/{id}/confirm-paid', [OrderController::class, 'confirmPaid'])->name('order.confirmPaid');
 
     // Tạo lại link PayOS cho đơn COD
     Route::post('/order/{id}/repay', [OrderController::class, 'repay'])->name('order.repay');
@@ -198,9 +199,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse
     // ── Nhà Sản Xuất (NSX) ──────────────────────────────────────────
 
     // Báo giá NSX: upload file → xem → tick SP → đặt hàng
-    Route::resource('supplier-offers', SupplierOfferController::class)->only(['index', 'show']);
+    // QUAN TRỌNG: Route cụ thể phải đặt TRƯỚC Route::resource để tránh bị show({id}) bắt nhầm
+    Route::get('supplier-offers/template',      [SupplierOfferController::class, 'downloadTemplate'])->name('supplier-offers.template');
     Route::post('supplier-offers/upload',       [SupplierOfferController::class, 'upload'])->name('supplier-offers.upload');
     Route::post('supplier-offers/{id}/reject',  [SupplierOfferController::class, 'reject'])->name('supplier-offers.reject');
+    Route::resource('supplier-offers', SupplierOfferController::class)->only(['index', 'show']);
 
     /*
      * Luồng yêu cầu thu mua:
@@ -228,8 +231,4 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','role:admin,warehouse
         ->middleware('role:director')  // chỉ director, không cho root vào xem log của chính mình
         ->name('activity-log.index');
 
-    // ── Test page — lấy data từ Concentration, không cần controller riêng ──
-    Route::get('test-page', fn() => view('admin.test-page.index', [
-        'concentrations' => \App\Models\Concentration::orderBy('id', 'desc')->get(),
-    ]))->name('test-page.index');
 });

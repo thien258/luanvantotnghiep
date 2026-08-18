@@ -59,10 +59,16 @@
                 </div>
             </div>
         </form>
-        <div class="small text-muted mt-1">
-            <i class="fa-solid fa-circle-info mr-1"></i>
-            Format file: dòng đầu là tiêu đề, từ dòng 2 là dữ liệu.
-            Cột 1: Tên sản phẩm &nbsp;|&nbsp; Cột 2: Giá chào (số) &nbsp;|&nbsp; Cột 3: Ghi chú (tuỳ chọn)
+        <div class="d-flex align-items-center justify-content-between mt-2">
+            <div class="small text-muted">
+                <i class="fa-solid fa-circle-info mr-1"></i>
+                Format file: dòng đầu là tiêu đề, từ dòng 2 là dữ liệu.
+                Cột 1: Tên sản phẩm &nbsp;|&nbsp; Cột 2: Giá chào (số) &nbsp;|&nbsp; Cột 3: Ghi chú (tuỳ chọn)
+            </div>
+            <a href="{{ route('admin.supplier-offers.template') }}"
+               class="btn btn-outline-secondary btn-sm rounded-0 flex-shrink-0 ml-3">
+                <i class="fa-solid fa-file-arrow-down mr-1"></i> Tải mẫu chào giá
+            </a>
         </div>
     </div>
 </div>

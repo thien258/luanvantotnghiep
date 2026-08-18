@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\Title;
 use App\Models\Footer;
 use App\Models\Contact;
+use App\Notifications\VerifyEmailNotification;
 
 /**
  * User — Tài khoản người dùng trong hệ thống.
@@ -57,6 +58,14 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * Gửi email xác minh tài khoản bằng tiếng Việt.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification());
+    }
 
     /**
      * Các cột được phép gán hàng loạt (mass assignment).

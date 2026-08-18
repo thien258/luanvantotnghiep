@@ -47,11 +47,16 @@ class SupplierOfferItem extends Model
 
     // Các cột được phép gán hàng loạt
     protected $fillable = [
-        "offer_id",     // FK → supplier_offers (thuộc phiếu báo giá nào)
-        "product_id",   // FK → products (nullable — SP có thể chưa có trong hệ thống)
-        "product_name", // Tên SP NSX tự ghi (fallback khi product_id = null)
-        "unit_price",   // Giá NSX chào cho SP này (đơn vị: ₫)
-        "note",         // Ghi chú riêng của NSX cho dòng SP này (VD: còn hàng, hết hàng...)
+        "offer_id",
+        "product_id",
+        "product_name",
+        "unit_price",
+        "note",
+        "image",
+        "volume",
+        "concentration_text",
+        "category_text",
+        "brand_text",
     ];
 
     /**

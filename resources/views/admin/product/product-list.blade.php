@@ -180,6 +180,7 @@
                             <label class="small font-weight-bold">Hạn chót NSX chào giá</label>
                             <input type="date" name="deadline"
                                    value="{{ now()->addDays(7)->format('Y-m-d') }}"
+                                   min="{{ now()->format('Y-m-d') }}"
                                    class="form-control form-control-sm rounded-0">
                         </div>
                         <div class="form-group col-md-6 mb-2">

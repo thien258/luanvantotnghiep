@@ -294,7 +294,16 @@
                                 <div class="dropdown-header small text-muted px-3 py-2 border-bottom">
                                     <i class="fa-regular fa-circle-user me-1"></i>
                                     {{ Auth::user()->name }}
-                                    <span class="badge bg-dark rounded-0 ms-1" style="font-size:0.6rem;">{{ Auth::user()->role }}</span>
+                                    @php
+                                        $roleColors = [
+                                            'admin'     => 'background:#c0392b;color:#fff;',
+                                            'director'  => 'background:#8e44ad;color:#fff;',
+                                            'warehouse' => 'background:#2980b9;color:#fff;',
+                                            'staff'     => 'background:#27ae60;color:#fff;',
+                                        ];
+                                        $roleStyle = $roleColors[strtolower(Auth::user()->role)] ?? 'background:#555;color:#fff;';
+                                    @endphp
+                                    <span class="badge rounded-0 ms-1 text-uppercase" style="font-size:0.65rem; letter-spacing:0.05em; {{ $roleStyle }}">{{ Auth::user()->role }}</span>
                                 </div>
                                 <a class="dropdown-item text-dark py-2" href="{{ route('profile.index') }}">
                                     <i class="fa-solid fa-user-pen fa-sm fa-fw mr-2 text-muted"></i>
@@ -326,15 +335,15 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content rounded-0 border-0 shadow">
                 <div class="modal-header border-bottom">
-                    <h5 class="modal-title text-dark font-weight-normal" id="exampleModalLabel">Ready to Leave?</h5>
+                    <h5 class="modal-title text-dark font-weight-normal" id="exampleModalLabel">Bạn muốn đăng xuất?</h5>
                     <button class="close text-dark" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div class="modal-body text-dark">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-body text-dark">Chọn "Đăng xuất" bên dưới nếu bạn muốn kết thúc phiên làm việc hiện tại.</div>
                 <div class="modal-footer border-top-0">
-                    <button class="btn btn-light border rounded-0 text-dark" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-dark rounded-0" href="{{ route('logout') }}">Logout</a>
+                    <button class="btn btn-light border rounded-0 text-dark" type="button" data-dismiss="modal">Hủy</button>
+                    <a class="btn btn-dark rounded-0" href="{{ route('logout') }}">Đăng xuất</a>
                 </div>
             </div>
         </div>

@@ -42,10 +42,6 @@
                 <span class="text-muted">Ngày đặt:</span><br>
                 <strong>{{ $purchaseOrder->created_at->format('d/m/Y') }}</strong>
             </div>
-            <div class="col-md-2">
-                <span class="text-muted">Dự kiến nhận:</span><br>
-                <strong>{{ $purchaseOrder->expected_date ? \Carbon\Carbon::parse($purchaseOrder->expected_date)->format('d/m/Y') : '—' }}</strong>
-            </div>
         </div>
         @if($purchaseOrder->note)
         <div class="mt-2 small text-muted">Ghi chú: {{ $purchaseOrder->note }}</div>

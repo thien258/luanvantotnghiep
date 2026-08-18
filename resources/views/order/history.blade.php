@@ -64,8 +64,10 @@
                                 @php
                                     // Kiểm tra còn sản phẩm nào chưa đánh giá không
                                     $hasUnreviewed = $order->details->contains(fn($d) => $d->comments->isEmpty());
+                                    // Không hiện nút đánh giá nếu đã ghi nhận [REVIEWED]
+                                    $alreadyReviewed = str_contains((string) $order->note, '[REVIEWED]');
                                 @endphp
-                                @if($hasUnreviewed)
+                                @if($hasUnreviewed && !$alreadyReviewed)
                                 @php
                                     // Chuẩn bị data sản phẩm chưa đánh giá cho modal
                                     $unreviewedDetails = $order->details->filter(fn($d) => $d->comments->isEmpty())->map(fn($d) => [
@@ -86,7 +88,9 @@
                                 @endif
                                 @endif
 
-                                @if($order->status == 4 && $order->updated_at->diffInDays(now()) <= 3)
+                                @if($order->status == 4 && $order->updated_at->diffInDays(now()) <= 3
+                                    && !str_contains((string) $order->note, '[RETURN_REJECTED]')
+                                    && !str_contains((string) $order->note, '[REVIEWED]'))
                                 <button type="button" 
                                         class="btn btn-outline-secondary btn-sm rounded-0 text-uppercase fw-semibold btn-trigger-return" 
                                         data-bs-toggle="modal" 

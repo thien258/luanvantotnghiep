@@ -286,6 +286,9 @@ class OrderAdminController extends Controller
             ? ' | Admin từ chối hoàn: ' . $rejectNote
             : ' | Admin từ chối yêu cầu hoàn hàng.';
 
+        // Ghi marker [RETURN_REJECTED] để chặn user gửi lại yêu cầu hoàn
+        $noteAppend .= ' [RETURN_REJECTED]';
+
         $order->update([
             'status' => 4, // Trả về "Giao hàng thành công"
             'note'   => $order->note . $noteAppend,

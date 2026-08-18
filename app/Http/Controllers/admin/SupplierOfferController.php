@@ -66,6 +66,63 @@ class SupplierOfferController extends Controller
     }
 
     // =========================================================================
+    // DOWNLOAD TEMPLATE — Trả về file CSV mẫu để NSX điền
+    // =========================================================================
+
+    public function downloadTemplate()
+    {
+        // Lấy sản phẩm thực từ DB kèm relations để NSX thấy đầy đủ thông tin
+        $products = \App\Models\Product::with(['category', 'brand', 'concentration'])
+            ->select('id', 'title', 'volume', 'image', 'idCategory', 'idBrand', 'idConcentration')
+            ->limit(3)
+            ->get();
+
+        $filename = 'mau-chao-gia.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($products) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+
+            // Dòng 1: header — cột bắt buộc + cột NSX tự điền
+            fputcsv($handle, [
+                'product_name',   // [BẮT BUỘC] Tên sản phẩm
+                'unit_price',     // [BẮT BUỘC] Giá chào (VND, chỉ số)
+                'image',          // [TUỲ CHỌN] URL hoặc base64 ảnh
+                'volume',         // [TUỲ CHỌN] Dung tích (VD: 50ml, 100ml)
+                'concentration',  // [TUỲ CHỌN] Nồng độ (VD: EDP, EDT)
+                'category',       // [TUỲ CHỌN] Danh mục (VD: Nam, Nữ)
+                'brand',          // [TUỲ CHỌN] Thương hiệu (VD: CHANEL)
+            ]);
+
+            if ($products->isEmpty()) {
+                fputcsv($handle, ['Tên sản phẩm 1', '100000', '', '50ml', 'EDP', 'Nam', 'BRAND']);
+                fputcsv($handle, ['Tên sản phẩm 2', '200000', '', '100ml', 'EDT', 'Nữ', 'BRAND']);
+            } else {
+                foreach ($products as $p) {
+                    fputcsv($handle, [
+                        $p->title,
+                        '',   // NSX điền giá vào đây
+                        $p->image ?? '',
+                        $p->volume ?? '',
+                        $p->concentration?->concentration ?? '',
+                        $p->category?->name ?? '',
+                        $p->brand?->name ?? '',
+                    ]);
+                }
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    // =========================================================================
     // UPLOAD — Nhận file Excel/CSV từ NSX → tạo báo giá trong DB
     // =========================================================================
 
@@ -121,12 +178,26 @@ class SupplierOfferController extends Controller
             // Đọc ghi chú từ cột 'decription' (typo trong file gốc) hoặc 'note'
             $note = trim($row['decription'] ?? $row['description'] ?? $row['note'] ?? '');
 
+            // Đọc ảnh từ cột 'image' (base64 hoặc URL)
+            $image = trim($row['image'] ?? '');
+
+            // Đọc thông tin SP NSX tự cung cấp
+            $volume            = trim($row['volume'] ?? '');
+            $concentrationText = trim($row['concentration'] ?? $row['concentration_text'] ?? '');
+            $categoryText      = trim($row['category'] ?? $row['category_text'] ?? '');
+            $brandText         = trim($row['brand'] ?? $row['brand_text'] ?? '');
+
             SupplierOfferItem::create([
-                'offer_id'     => $offer->id,
-                'product_id'   => $product?->id, // null nếu SP chưa có trong hệ thống
-                'product_name' => $productName,
-                'unit_price'   => $unitPrice,
-                'note'         => $note,
+                'offer_id'           => $offer->id,
+                'product_id'         => $product?->id,
+                'product_name'       => $productName,
+                'unit_price'         => $unitPrice,
+                'note'               => $note,
+                'image'              => $image ?: null,
+                'volume'             => $volume ?: null,
+                'concentration_text' => $concentrationText ?: null,
+                'category_text'      => $categoryText ?: null,
+                'brand_text'         => $brandText ?: null,
             ]);
         }
 
@@ -198,8 +269,9 @@ class SupplierOfferController extends Controller
 
             while (($line = fgetcsv($handle)) !== false) {
                 if ($isHeader) {
-                    // Dòng đầu tiên là tên cột → chuẩn hóa thành lowercase, trim khoảng trắng
-                    $headers  = array_map(fn($h) => strtolower(trim($h)), $line);
+                    // Strip BOM UTF-8 khỏi header đầu tiên nếu có
+                    // fgetcsv không tự xử lý BOM → key đầu tiên sẽ là "\xEF\xBB\xBFproduct_name"
+                    $headers = array_map(fn($h) => strtolower(trim(str_replace("\xEF\xBB\xBF", '', $h))), $line);
                     $isHeader = false;
                     continue;
                 }

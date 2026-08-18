@@ -80,12 +80,15 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFive();
 
         // ── 5. FOOTER CHO MỌI VIEW ────────────────────────────────────────────
-        // View Composer: chạy mỗi khi bất kỳ view nào được render ('*' = tất cả)
-        // Dùng Composer thay vì View::share vì footer ít thay đổi, chỉ cần lazy load
-        View::composer('*', function ($view) {
-            // Lấy bản ghi footer đầu tiên (hệ thống chỉ có 1 footer)
-            $view->with('footer', Footer::first());
-        });
+        // View Composer: chỉ inject $footer vào các view thực sự dùng nó
+        // Tránh inject vào mail templates gây render JSON thừa
+        View::composer(
+            ['layout.home', 'admin.footer.footer-list'],
+            function ($view) {
+                // Lấy bản ghi footer đầu tiên (hệ thống chỉ có 1 footer)
+                $view->with('footer', Footer::first());
+            }
+        );
 
         // ── 6. OVERRIDE EMAIL RESET PASSWORD SANG TIẾNG VIỆT ─────────────────
         ResetPassword::toMailUsing(function ($notifiable, $token) {

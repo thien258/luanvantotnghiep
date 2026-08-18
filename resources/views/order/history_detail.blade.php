@@ -45,53 +45,46 @@
                         &#9203; Trạng thái đơn hàng
                     </p>
 
-                    {{-- Hàng 1: dot + line --}}
-                    <div class="d-flex align-items-center">
-                        @foreach($timelineSteps as $step)
-                            <div class="rounded-circle d-flex align-items-center justify-content-center border {{ $step['dotClass'] }} flex-shrink-0"
-                                 style="width:34px; height:34px;">
-                                <i class="fas {{ $step['icon'] }}" style="font-size:0.8rem;"></i>
-                            </div>
-                            @if(!$loop->last)
-                                <div class="flex-grow-1 {{ $step['lineClass'] }}" style="height:2px;"></div>
-                            @endif
-                        @endforeach
+                    <div class="d-flex align-items-start w-100">
 
-                        @if($isReturn)
-                            <div class="flex-grow-1 bg-dark" style="height:2px; min-width:30px;"></div>
-                            <div class="rounded-circle d-flex align-items-center justify-content-center border bg-danger text-white border-danger flex-shrink-0"
-                                 style="width:34px; height:34px;">
-                                <i class="fas fa-undo" style="font-size:0.8rem;"></i>
-                            </div>
-                        @endif
-                    </div>
-
-                    {{-- Hàng 2: label căn dưới mỗi dot --}}
-                    <div class="d-flex align-items-start mt-2">
                         @foreach($timelineSteps as $step)
-                            {{-- Label của dot này --}}
-                            <div class="text-center flex-shrink-0" style="width:34px;">
-                                <div class="{{ $step['textClass'] }}" style="font-size:0.7rem; white-space:nowrap; transform:translateX(-50%); margin-left:17px;">
+                            {{-- Mỗi step: dot + label --}}
+                            <div class="d-flex flex-column align-items-center text-center flex-shrink-0" style="min-width:64px;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center border {{ $step['dotClass'] }}"
+                                     style="width:34px; height:34px;">
+                                    <i class="fas {{ $step['icon'] }}" style="font-size:0.8rem;"></i>
+                                </div>
+                                <div class="mt-2 {{ $step['textClass'] }}" style="font-size:0.68rem; line-height:1.3;">
                                     {{ $step['label'] }}<br>
-                                    <span class="text-muted" style="font-size:0.62rem;">
+                                    <span class="text-muted" style="font-size:0.6rem;">
                                         {{ $step['isDone'] ? $order->updated_at->format('d/m/Y') : '—' }}
                                     </span>
                                 </div>
                             </div>
+
+                            {{-- Đường nối giữa các step --}}
                             @if(!$loop->last)
-                                <div class="flex-grow-1"></div>
+                                <div class="flex-grow-1 {{ $step['lineClass'] }}" style="height:2px; margin-top:17px;"></div>
                             @endif
                         @endforeach
 
                         @if($isReturn)
-                            <div class="flex-grow-1"></div>
-                            <div class="text-center flex-shrink-0" style="width:34px;">
-                                <div class="text-danger fw-semibold" style="font-size:0.7rem; white-space:nowrap; transform:translateX(-50%); margin-left:17px;">
+                            {{-- Đường nối tới step hoàn hàng --}}
+                            <div class="flex-grow-1 bg-dark" style="height:2px; margin-top:17px;"></div>
+
+                            {{-- Step hoàn hàng --}}
+                            <div class="d-flex flex-column align-items-center text-center flex-shrink-0" style="min-width:72px;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center border bg-danger text-white border-danger"
+                                     style="width:34px; height:34px;">
+                                    <i class="fas fa-undo" style="font-size:0.8rem;"></i>
+                                </div>
+                                <div class="mt-2 text-danger fw-semibold" style="font-size:0.68rem; line-height:1.3;">
                                     {{ $currentStatus == 5 ? 'Yêu cầu hoàn hàng' : 'Hàng hỏng' }}<br>
-                                    <span class="text-muted" style="font-size:0.62rem;">{{ $order->updated_at->format('d/m/Y') }}</span>
+                                    <span class="text-muted" style="font-size:0.6rem;">{{ $order->updated_at->format('d/m/Y') }}</span>
                                 </div>
                             </div>
                         @endif
+
                     </div>
                 </div>
                 {{-- END TIMELINE --}}
@@ -106,7 +99,18 @@
                     <div class="col-md-6 text-md-end">
                         <div class="text-uppercase fw-bold text-muted mb-2" style="font-size:0.7rem; letter-spacing:1px;">Thông tin thanh toán</div>
                         Phương thức: <strong class="text-uppercase">{{ $order->payment_method }}</strong><br>
-                        Ghi chú đơn: <span class="text-secondary">{{ $order->note ?? 'Không có ghi chú' }}</span>
+                        @php
+                            $rawNote = $order->note ?? '';
+                            // Tách phần "Admin từ chối hoàn: ..." và xóa tag [RETURN_REJECTED]
+                            $displayNote = preg_replace('/\s*\[RETURN_REJECTED\]/i', '', $rawNote);
+                            // Xóa dấu " | " trước "Admin từ chối hoàn" và xuống hàng
+                            $displayNote = preg_replace('/\s*\|\s*(Admin từ chối hoàn:)/i', '<br>$1', $displayNote);
+                        @endphp
+                        @if($displayNote)
+                            Ghi chú đơn: <span class="text-secondary">{!! $displayNote !!}</span>
+                        @else
+                            Ghi chú đơn: <span class="text-secondary">Không có ghi chú</span>
+                        @endif
                     </div>
                 </div>
 
