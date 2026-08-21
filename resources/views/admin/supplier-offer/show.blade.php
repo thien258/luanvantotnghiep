@@ -186,6 +186,13 @@
         <span class="small font-weight-bold text-uppercase text-muted">Sản phẩm NSX chào giá</span>
     </div>
     <div class="card-body p-0">
+        @php
+            // Map product_name → số lượng đã đặt trong PO (nếu có)
+            $orderedQtyMap = collect();
+            if ($offer->purchaseOrder) {
+                $orderedQtyMap = $offer->purchaseOrder->items->keyBy(fn($i) => mb_strtolower(trim($i->product_name)));
+            }
+        @endphp
         <table class="table table-sm mb-0 small table-hover">
             <thead class="table-light">
                 <tr>
@@ -196,11 +203,18 @@
                     <th class="py-2">Nồng độ</th>
                     <th class="py-2">Category</th>
                     <th class="py-2">Brand</th>
+                    @if($offer->purchaseOrder)
+                    <th class="text-center py-2">Đã đặt (SL)</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
                 @foreach($offer->items as $item)
-                @php $p = $item->product; @endphp
+                @php
+                    $p = $item->product;
+                    $key = mb_strtolower(trim($item->product_name));
+                    $poItem = $orderedQtyMap->get($key);
+                @endphp
                 <tr>
                     <td class="py-2 text-center">
                         @php $imgSrc = $item->image ?? $p?->image ?? null; @endphp
@@ -218,6 +232,15 @@
                     <td class="py-2 text-muted">{{ $item->concentration_text ?? $p?->concentration?->concentration ?? '—' }}</td>
                     <td class="py-2 text-muted">{{ $item->category_text ?? $p?->category?->name ?? '—' }}</td>
                     <td class="py-2 text-muted">{{ $item->brand_text ?? $p?->brand?->name ?? '—' }}</td>
+                    @if($offer->purchaseOrder)
+                    <td class="text-center py-2">
+                        @if($poItem)
+                            <span class="badge badge-success rounded-0 px-2">{{ $poItem->quantity }}</span>
+                        @else
+                            <span class="text-muted">—</span>
+                        @endif
+                    </td>
+                    @endif
                 </tr>
                 @endforeach
             </tbody>

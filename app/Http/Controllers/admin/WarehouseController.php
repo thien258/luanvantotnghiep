@@ -396,20 +396,32 @@ class WarehouseController extends Controller
 
             if ($ext === 'csv') {
                 $content = file_get_contents($file->getRealPath());
-                $enc     = mb_detect_encoding($content, ['UTF-8', 'GBK', 'ISO-8859-1'], true);
-                if ($enc && $enc !== 'UTF-8') {
-                    $content = mb_convert_encoding($content, 'UTF-8', $enc);
+
+                // Strip BOM trước khi detect encoding (tránh detect sai)
+                // Hỗ trợ cả BOM gốc (EF BB BF) lẫn BOM bị double-encode (C3AF C2BB C2BF)
+                if (str_starts_with($content, "\xEF\xBB\xBF")) {
+                    $content = substr($content, 3);
+                } elseif (str_starts_with($content, "\xC3\xAF\xC2\xBB\xC2\xBF")) {
+                    $content = substr($content, 6);
                 }
+
+                // Chỉ convert nếu thực sự không phải UTF-8
+                if (!mb_check_encoding($content, 'UTF-8')) {
+                    $enc = mb_detect_encoding($content, ['GBK', 'ISO-8859-1'], true);
+                    if ($enc) {
+                        $content = mb_convert_encoding($content, 'UTF-8', $enc);
+                    }
+                }
+
                 $stream = fopen('php://memory', 'r+');
+                fwrite($stream, $content);
+                rewind($stream);
                 fwrite($stream, $content);
                 rewind($stream);
 
                 // Bỏ dòng metadata # supplier nếu có
                 $firstRow = fgetcsv($stream, 0, ',');
-                if ($firstRow && !empty($firstRow[0])) {
-                    $firstRow[0] = ltrim($firstRow[0], "\xEF\xBB\xBF");
-                }
-                if ($firstRow && str_starts_with(trim($firstRow[0]), '# supplier')) {
+                if ($firstRow && str_starts_with(trim($firstRow[0] ?? ''), '# supplier')) {
                     $firstRow = fgetcsv($stream, 0, ','); // đọc header thật
                 }
                 $header = array_map(fn($h) => strtolower(trim($h)), $firstRow ?? []);
@@ -461,24 +473,24 @@ class WarehouseController extends Controller
                 $expiry    = trim((string)($row[$expiryIdx]    ?? ''));
 
                 if (empty($title)) {
-                    $errors[] = "Dòng {$lineNum}: Tên sản phẩm (title) không được để trống.";
+                    $errors[] = "Tên sản phẩm (title) không được để trống.";
                 }
                 if ($unitPrice !== '' && (!is_numeric($unitPrice) || (float)$unitPrice < 0)) {
-                    $errors[] = "Dòng {$lineNum}: Giá nhập (unit_price) phải là số không âm.";
+                    $errors[] = "Giá nhập (unit_price) phải là số không âm.";
                 }
                 // quantity bắt buộc: không được trống và phải là số nguyên không âm
                 if ($quantity === '') {
-                    $errors[] = "Dòng {$lineNum}: Số lượng (quantity) không được để trống và phải là số nguyên không âm.";
+                    $errors[] = "Số lượng (quantity) không được để trống và phải là số nguyên không âm.";
                 } elseif (!ctype_digit($quantity) || (int)$quantity < 0) {
-                    $errors[] = "Dòng {$lineNum}: Số lượng (quantity) không được để trống và phải là số nguyên không âm.";
+                    $errors[] = "Số lượng (quantity) không được để trống và phải là số nguyên không âm.";
                 }
                 // expiry_date bắt buộc: không được trống, đúng định dạng YYYY-MM-DD
                 if ($expiry === '') {
-                    $errors[] = "Dòng {$lineNum}: HSD không được để trống (định dạng: YYYY-MM-DD, ví dụ: 2026-09-15).";
+                    $errors[] = "HSD không được để trống (định dạng: YYYY-MM-DD, ví dụ: 2026-09-15).";
                 } else {
                     $dt = \DateTime::createFromFormat('Y-m-d', $expiry);
                     if (!$dt || $dt->format('Y-m-d') !== $expiry) {
-                        $errors[] = "Dòng {$lineNum}: HSD không đúng định dạng YYYY-MM-DD (ví dụ: 2026-09-15).";
+                        $errors[] = "HSD không đúng định dạng YYYY-MM-DD (ví dụ: 2026-09-15).";
                     }
                 }
 
@@ -511,9 +523,19 @@ class WarehouseController extends Controller
         if ($ext === 'csv') {
             $fileContent = file_get_contents($filePath);
 
-            $enc = mb_detect_encoding($fileContent, ['UTF-8', 'GBK', 'ISO-8859-1'], true);
-            if ($enc && $enc !== 'UTF-8') {
-                $fileContent = mb_convert_encoding($fileContent, 'UTF-8', $enc);
+            // Strip BOM trước (tránh mb_detect_encoding detect sai)
+            if (str_starts_with($fileContent, "\xEF\xBB\xBF")) {
+                $fileContent = substr($fileContent, 3);
+            } elseif (str_starts_with($fileContent, "\xC3\xAF\xC2\xBB\xC2\xBF")) {
+                $fileContent = substr($fileContent, 6);
+            }
+
+            // Chỉ convert nếu thực sự không phải UTF-8
+            if (!mb_check_encoding($fileContent, 'UTF-8')) {
+                $enc = mb_detect_encoding($fileContent, ['GBK', 'ISO-8859-1'], true);
+                if ($enc) {
+                    $fileContent = mb_convert_encoding($fileContent, 'UTF-8', $enc);
+                }
             }
 
             $stream = fopen('php://memory', 'r+');
@@ -521,11 +543,6 @@ class WarehouseController extends Controller
             rewind($stream);
 
             $headerLine = fgetcsv($stream, 0, ',');
-
-            // Bỏ BOM UTF-8 nếu có ở đầu dòng
-            if (!empty($headerLine[0])) {
-                $headerLine[0] = ltrim($headerLine[0], "\xEF\xBB\xBF");
-            }
 
             // Nếu dòng đầu là metadata "# supplier,...", bỏ qua và đọc header thật
             if (!empty($headerLine[0]) && str_starts_with(trim($headerLine[0]), '# supplier')) {
@@ -536,9 +553,6 @@ class WarehouseController extends Controller
             if ($delimiter === ';') {
                 rewind($stream);
                 $firstLine = fgetcsv($stream, 0, ';');
-                if (!empty($firstLine[0])) {
-                    $firstLine[0] = ltrim($firstLine[0], "\xEF\xBB\xBF");
-                }
                 if (!empty($firstLine[0]) && str_starts_with(trim($firstLine[0]), '# supplier')) {
                     fgetcsv($stream, 0, ';');
                 }

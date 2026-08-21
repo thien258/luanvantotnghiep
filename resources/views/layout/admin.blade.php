@@ -11,6 +11,13 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
+    <style>
+        .badge-role-admin     { background: #c0392b; color: #fff; }
+        .badge-role-director  { background: #8e44ad; color: #fff; }
+        .badge-role-warehouse { background: #2980b9; color: #fff; }
+        .badge-role-staff     { background: #27ae60; color: #fff; }
+        .badge-role-default   { background: #555;    color: #fff; }
+    </style>
 </head>
 
 <body id="page-top" class="bg-white">
@@ -295,15 +302,14 @@
                                     <i class="fa-regular fa-circle-user me-1"></i>
                                     {{ Auth::user()->name }}
                                     @php
-                                        $roleColors = [
-                                            'admin'     => 'background:#c0392b;color:#fff;',
-                                            'director'  => 'background:#8e44ad;color:#fff;',
-                                            'warehouse' => 'background:#2980b9;color:#fff;',
-                                            'staff'     => 'background:#27ae60;color:#fff;',
-                                        ];
-                                        $roleStyle = $roleColors[strtolower(Auth::user()->role)] ?? 'background:#555;color:#fff;';
+                                        $roleClass = [
+                                            'admin'     => 'badge-role-admin',
+                                            'director'  => 'badge-role-director',
+                                            'warehouse' => 'badge-role-warehouse',
+                                            'staff'     => 'badge-role-staff',
+                                        ][strtolower(Auth::user()->role)] ?? 'badge-role-default';
                                     @endphp
-                                    <span class="badge rounded-0 ms-1 text-uppercase" style="font-size:0.65rem; letter-spacing:0.05em; {{ $roleStyle }}">{{ Auth::user()->role }}</span>
+                                    <span class="badge rounded-0 ms-1 text-uppercase {{ $roleClass }}" style="font-size:0.65rem; letter-spacing:0.05em;">{{ Auth::user()->role }}</span>
                                 </div>
                                 <a class="dropdown-item text-dark py-2" href="{{ route('profile.index') }}">
                                     <i class="fa-solid fa-user-pen fa-sm fa-fw mr-2 text-muted"></i>

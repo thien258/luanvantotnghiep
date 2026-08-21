@@ -1,144 +1,296 @@
 @extends('layout/admin')
 @section('body')
-<div class="card-footer small text-muted">
-    <h3>Quản lý Sản phẩm</h3>
 
-    <div class="mb-3 d-flex align-items-center gap-2">
-        <a href="{{ route('admin.product.create') }}" class="btn btn-warning">
-            <i class="fas fa-plus"></i> Thêm Sản phẩm
-        </a>
-        <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#lowStockModal">
-            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Đăng yêu cầu nhập hàng
-        </button>
-    </div>
+<style>
+/* ── Product List Styles ──────────────────────────── */
+.product-list-header {
+    background: #fff;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1.25rem 1.5rem 1rem;
+    margin-bottom: 0;
+}
+.product-list-header h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 0.75rem;
+}
+.product-table-wrap {
+    padding: 0 1.5rem 1.5rem;
+    background: #fff;
+}
+/* Description cell — fixed width, 3 lines clamp */
+.desc-cell {
+    min-width: 220px;
+    max-width: 300px;
+}
+.desc-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.82rem;
+    color: #495057;
+    line-height: 1.5;
+    cursor: default;
+}
+/* Product name cell */
+.product-name-cell {
+    min-width: 160px;
+    max-width: 200px;
+}
+.product-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #212529;
+    word-break: break-word;
+}
+/* Image */
+.product-thumb {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+/* Table tweaks */
+#product-table thead th {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #6c757d;
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 10px 12px;
+}
+#product-table tbody td {
+    vertical-align: middle;
+    padding: 10px 12px;
+    font-size: 0.875rem;
+}
+/* Status icons */
+.status-badge-on  { color: #198754; font-size: 1.1rem; }
+.status-badge-off { color: #adb5bd; font-size: 1.1rem; }
+/* Stock cell */
+.stock-cell { min-width: 80px; }
+/* Expiry sub-text */
+.expiry-text { font-size: 0.65rem; display: block; margin-top: 2px; }
+/* Festival badges wrap nicely */
+.festival-cell { min-width: 160px; max-width: 220px; }
+</style>
 
-    <div class="position-relative mb-3" style="width: 350px;">
-        <input type="text" id="admin-search-input" class="form-control shadow-none" placeholder="Lọc nhanh tên sản phẩm..." autocomplete="off">
-        <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="top: 50%; right: 15px; transform: translateY(-50%);"></i>
+<div class="product-list-header">
+    <h3><i class="fa-solid fa-spray-can-sparkles me-2 text-warning"></i>Quản lý Sản phẩm</h3>
+
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ route('admin.product.create') }}" class="btn btn-warning btn-sm px-3">
+                <i class="fas fa-plus me-1"></i> Thêm sản phẩm
+            </a>
+            <button type="button" class="btn btn-outline-danger btn-sm px-3" data-toggle="modal" data-target="#lowStockModal">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i> Đăng yêu cầu nhập hàng
+            </button>
+        </div>
+
+        <div class="position-relative" style="width: 300px;">
+            <input type="text" id="admin-search-input" class="form-control form-control-sm shadow-none pe-4"
+                   placeholder="Lọc nhanh tên sản phẩm..." autocomplete="off">
+            <i class="fa-solid fa-magnifying-glass position-absolute text-muted"
+               style="top:50%; right:10px; transform:translateY(-50%); pointer-events:none;"></i>
+        </div>
     </div>
 
     @if(session('success'))
-    <div class="alert alert-success mt-2">{{ session('success') }}</div>
+    <div class="alert alert-success alert-dismissible fade show mt-3 mb-0 py-2" role="alert">
+        <i class="fa-solid fa-circle-check me-1"></i> {{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+    </div>
     @endif
     @if(session('error'))
-    <div class="alert alert-danger mt-2">{{ session('error') }}</div>
+    <div class="alert alert-danger alert-dismissible fade show mt-3 mb-0 py-2" role="alert">
+        <i class="fa-solid fa-circle-xmark me-1"></i> {{ session('error') }}
+        <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+    </div>
     @endif
 </div>
-<table class="table table-bordered table-hover align-middle">
-    <thead class="table-light">
+
+<div class="product-table-wrap">
+<div class="table-responsive">
+<table class="table table-bordered table-hover align-middle mb-0" id="product-table">
+    <thead>
         <tr>
-            <th scope="col">Tên</th>
-            <th scope="col">Mô tả</th>
-            <th scope="col">Danh mục</th>
-            <th scope="col">Thương hiệu</th>
-            <th scope="col">Hình ảnh</th>
-            <th scope="col">Giá bán</th>
-            <th scope="col">Dung tích</th>
-            <th scope="col">Nồng độ</th>
-            <th scope="col">Kho hàng</th>
-            <th scope="col">Sự kiện</th>
-            <th scope="col">Trạng thái</th>
-            <th scope="col">Lựa chọn</th>
+            <th>#</th>
+            <th class="text-center">Hình ảnh</th>
+            <th>Tên sản phẩm</th>
+            <th>Mô tả</th>
+            <th>Danh mục</th>
+            <th>Thương hiệu</th>
+            <th>Giá bán</th>
+            <th>Dung tích</th>
+            <th>Nồng độ</th>
+            <th class="text-center">Kho</th>
+            <th>Sự kiện</th>
+            <th class="text-center">Trạng thái</th>
+            <th class="text-center">Thao tác</th>
         </tr>
     </thead>
     <tbody>
-        @forelse($products as $object)
+        @forelse($products as $index => $object)
         @php
             $expiry   = $expiryMap[$object->id] ?? null;
             $daysLeft = $expiry ? $expiry['days_left'] : null;
         @endphp
-        <tr class="@if($object->quantity < 5) table-danger @elseif($object->quantity < 10) table-warning @endif @if($daysLeft !== null && $daysLeft <= 30) border-left-danger @elseif($daysLeft !== null && $daysLeft <= 90) border-left-warning @endif">
-            <td class="fw-bold">{{$object->title}}</td>
-            <td>{{$object->decription}}</td>
-            <td>{{$object->category?->name ?? 'Trống'}}</td>
-            <td>{{$object->brand?->name ?? 'Trống'}}</td>
-            <td><img src="{{ $object->image }}" width="80" alt="" class="img-thumbnail"></td>
-
-            {{-- Hiển thị giá tiền trực tiếp từ bảng products --}}
-            <td class="text-danger fw-bold text-nowrap">
-                {{ $object->price > 0 ? number_format($object->price) . ' đ' : 'Chưa có giá' }}
+        <tr class="
+            @if($object->quantity < 5) table-danger
+            @elseif($object->quantity < 10) table-warning
+            @endif
+            @if($daysLeft !== null && $daysLeft <= 30) border-left-danger
+            @elseif($daysLeft !== null && $daysLeft <= 90) border-left-warning
+            @endif
+        ">
+            {{-- # --}}
+            <td class="text-muted text-center" style="width:40px; font-size:0.78rem;">
+                {{ $products->firstItem() + $index }}
             </td>
 
-            {{-- Hiển thị dung tích cố định dạng Badge --}}
-            <td>
-                @if($object->volume)
-                <span class="badge text-white mb-1" style="background-color: #6c757d; font-size: 13px; padding: 5px 8px;">
-                    {{ $object->volume }}
+            {{-- Hình ảnh --}}
+            <td class="text-center" style="width:80px;">
+                <img src="{{ $object->image }}" alt="{{ $object->title }}" class="product-thumb">
+            </td>
+
+            {{-- Tên sản phẩm --}}
+            <td class="product-name-cell">
+                <span class="product-name">{{ $object->title }}</span>
+            </td>
+
+            {{-- Mô tả — truncate 3 dòng, tooltip full text --}}
+            <td class="desc-cell">
+                @if($object->decription)
+                <span class="desc-text"
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      title="{{ $object->decription }}">
+                    {{ $object->decription }}
                 </span>
                 @else
-                <span class="text-muted small">Trống</span>
+                <span class="text-muted small fst-italic">Chưa có mô tả</span>
                 @endif
             </td>
 
-            <td>{{ $object->concentration?->concentration ?? 'Trống' }}</td>
+            {{-- Danh mục --}}
+            <td class="small text-center">{{ $object->category?->name ?? '—' }}</td>
 
-            {{-- Hiển thị số lượng kho — đỏ nếu < 5, vàng nếu < 10, bình thường nếu >= 10 --}}
-            <td class="text-center fw-bold
-                @if($object->quantity < 5) bg-danger text-white
-                @elseif($object->quantity < 10) bg-warning
-                @else text-dark @endif">
-                {{ $object->quantity }}
+            {{-- Thương hiệu --}}
+            <td class="text-center">
+                <span class="fw-semibold text-secondary small">
+                    {{ $object->brand?->name ?? '—' }}
+                </span>
+            </td>
+
+            {{-- Giá bán --}}
+            <td class="text-nowrap">
+                @if($object->price > 0)
+                <span class="fw-bold" style="color:#dc3545;">
+                    {{ number_format($object->price) }}&nbsp;đ
+                </span>
+                @else
+                <span class="text-muted small fst-italic">Chưa có giá</span>
+                @endif
+            </td>
+
+            {{-- Dung tích --}}
+            <td>
+                @if($object->volume)
+                <span class="badge text-white" style="background:#6c757d; font-size:0.8rem; padding:4px 9px;">
+                    {{ $object->volume }}
+                </span>
+                @else
+                <span class="text-muted small">—</span>
+                @endif
+            </td>
+
+            {{-- Nồng độ --}}
+            <td class="text-nowrap small">
+                {{ $object->concentration?->concentration ?? '—' }}
+            </td>
+
+            {{-- Kho hàng --}}
+            <td class="text-center stock-cell">
+                <span class="fw-bold d-block
+                    @if($object->quantity < 5) text-danger
+                    @elseif($object->quantity < 10) text-warning
+                    @else text-dark @endif"
+                    style="font-size:1rem;">
+                    {{ $object->quantity }}
+                </span>
                 @if($expiry)
-                <br><small class="fw-normal @if($daysLeft <= 30) text-danger @elseif($daysLeft <= 90) text-warning @else text-muted @endif"
-                    style="font-size:0.65rem;">
+                <small class="expiry-text
+                    @if($daysLeft <= 30) text-danger
+                    @elseif($daysLeft <= 90) text-warning
+                    @else text-muted @endif">
                     ⏰ {{ \Carbon\Carbon::parse($expiry['date'])->format('d/m/Y') }}
                 </small>
                 @endif
             </td>
 
-            <td>
+            {{-- Sự kiện --}}
+            <td class="festival-cell">
                 <div class="d-flex flex-wrap gap-1">
                     @forelse($object->festivals as $festival)
-                    @if($festival->status == 1)
-                    <span class="badge bg-success text-white p-2 small" title="Đang diễn ra">
-                        <i class="fa-solid fa-gift me-1"></i> {{ $festival->name }}
-                        <strong class="ms-1">(-{{ $festival->discount }}%)</strong>
-                    </span>
-                    @else
-                    <span class="badge bg-secondary text-white p-2 small" title="Đã tắt hoặc hết hạn">
-                        <i class="fa-solid fa-circle-minus me-1"></i> {{ $festival->name }}
-                    </span>
-                    @endif
+                        @if($festival->status == 1)
+                        <span class="badge bg-success text-white p-1" style="font-size:0.72rem;" title="Đang diễn ra">
+                            <i class="fa-solid fa-gift me-1"></i>{{ $festival->name }}
+                            <strong>(-{{ $festival->discount }}%)</strong>
+                        </span>
+                        @else
+                        <span class="badge bg-secondary text-white p-1" style="font-size:0.72rem;" title="Đã tắt">
+                            <i class="fa-solid fa-circle-minus me-1"></i>{{ $festival->name }}
+                        </span>
+                        @endif
                     @empty
-                    <span class="text-muted small"><em>Không áp dụng</em></span>
+                        <span class="text-muted small fst-italic">Không áp dụng</span>
                     @endforelse
                 </div>
             </td>
+
+            {{-- Trạng thái --}}
             <td class="text-center">
-                @if($object->status==1)
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check-circle" viewBox="0 0 16 16">
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                    <path d="m10.97 4.97-.02.022-3.473 4.425-2.093-2.094a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05" />
-                </svg>
+                @if($object->status == 1)
+                    <i class="fa-solid fa-circle-check status-badge-on" title="Đang bán"></i>
                 @else
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                    <path d="m10.97 4.97-.02.022-3.473 4.425-2.093-2.094a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05" />
-                </svg>
+                    <i class="fa-solid fa-circle-xmark status-badge-off" title="Ngừng bán"></i>
                 @endif
             </td>
 
+            {{-- Thao tác --}}
             <td class="text-center">
                 <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle shadow-none" type="button" id="dropdownMenu{{ $object->id }}" data-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle shadow-none"
+                            type="button"
+                            id="dropdownMenu{{ $object->id }}"
+                            data-toggle="dropdown"
+                            aria-expanded="false">
                         Tùy chọn
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right shadow-sm" aria-labelledby="dropdownMenu{{ $object->id }}">
                         <li>
-                            <a class="dropdown-item" href="{{ route('admin.product.edit',['product' =>$object->id]) }}">
+                            <a class="dropdown-item" href="{{ route('admin.product.edit',['product' => $object->id]) }}">
                                 <i class="fa-solid fa-pen-to-square text-warning me-2"></i> Chỉnh sửa
                             </a>
                         </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <a class="dropdown-item text-danger" href="#" onclick="event.preventDefault(); if(confirm('Bạn có chắc chắn muốn xóa sản phẩm: {{ $object->title }}?')) { document.getElementById('product-delete-{{ $object->id }}').submit(); }">
+                            <a class="dropdown-item text-danger" href="#"
+                               onclick="event.preventDefault(); if(confirm('Bạn có chắc chắn muốn xóa sản phẩm: {{ addslashes($object->title) }}?')) { document.getElementById('product-delete-{{ $object->id }}').submit(); }">
                                 <i class="far fa-trash-alt me-2"></i> Xóa
                             </a>
-                            <form action="{{ route('admin.product.destroy', ['product' => $object->id]) }}" method="post" id="product-delete-{{ $object->id }}" class="d-none">
-                                {{ csrf_field() }}
-                                {{ method_field('delete') }}
+                            <form action="{{ route('admin.product.destroy', ['product' => $object->id]) }}"
+                                  method="post" id="product-delete-{{ $object->id }}" class="d-none">
+                                @csrf
+                                @method('DELETE')
                             </form>
                         </li>
                     </ul>
@@ -147,12 +299,17 @@
         </tr>
         @empty
         <tr>
-            <td colspan="12" class="text-center py-4 text-muted">Không tìm thấy sản phẩm nào.</td>
+            <td colspan="13" class="text-center py-5 text-muted">
+                <i class="fa-solid fa-box-open fa-2x mb-2 d-block opacity-50"></i>
+                Không tìm thấy sản phẩm nào.
+            </td>
         </tr>
         @endforelse
     </tbody>
 </table>
-<div class="d-flex justify-content-center mt-3">
+</div>
+
+<div class="d-flex justify-content-center mt-4">
     {{ $products->links() }}
 </div>
 </div>
@@ -313,4 +470,10 @@
 @section('script')
 <script src="{{ asset('js/admin/adminProduct_search.js') }}"></script>
 <script src="{{ asset('js/admin/product-list.js') }}"></script>
+<script>
+    // Init Bootstrap tooltips for description cells
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip({ html: false, trigger: 'hover' });
+    });
+</script>
 @endsection

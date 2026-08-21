@@ -145,11 +145,24 @@ class PurchaseOrderController extends Controller
             // Bước 4: Đánh dấu báo giá đã được chấp nhận
             $offer->update(['status' => 'accepted']);
 
-            // Bước 5: Tự động đóng yêu cầu nhập hàng (nếu có)
+            // Bước 5: Đóng yêu cầu nhập hàng nếu tất cả sản phẩm đã có đơn đặt hàng
             if ($offer->request_id) {
-                $procRequest = ProcurementRequest::find($offer->request_id);
+                $procRequest = ProcurementRequest::with('items.product')->find($offer->request_id);
                 if ($procRequest && $procRequest->status !== 'closed') {
-                    $procRequest->update(['status' => 'closed']);
+                    // Lấy tất cả offer_items đã được đặt hàng (có PO) trong yêu cầu này
+                    $allOfferIds = $procRequest->offers()->pluck('id');
+                    $orderedProductIds = PurchaseOrderItem::whereHas('order', function ($q) use ($allOfferIds) {
+                        $q->whereIn('offer_id', $allOfferIds);
+                    })->pluck('product_id')->filter()->unique()->values();
+
+                    // Lấy tất cả product_id trong yêu cầu
+                    $requestedProductIds = collect($procRequest->items)->pluck('product_id')->filter()->unique()->values();
+
+                    // Chỉ đóng nếu tất cả SP đã có đơn đặt hàng
+                    $allOrdered = $requestedProductIds->every(fn($pid) => $orderedProductIds->contains($pid));
+                    if ($allOrdered) {
+                        $procRequest->update(['status' => 'closed']);
+                    }
                 }
             }
         });

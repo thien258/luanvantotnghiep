@@ -217,7 +217,7 @@ class SupplierOfferController extends Controller
             'items.product.category',
             'items.product.brand',
             'items.product.concentration',
-            'purchaseOrder'
+            'purchaseOrder.items'
         ])->findOrFail($id);
 
         // manufacturer chỉ xem offer của mình

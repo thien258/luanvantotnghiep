@@ -198,28 +198,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 const conc      = cols[9]?.trim();
                 const expiry    = cols[10]?.trim().replace(/\r/g, '');
 
-                if (!title)     errors.push(`Dòng ${lineNum}: Tên sản phẩm (title) không được để trống.`);
+                if (!title)     errors.push(`Tên sản phẩm (title) không được để trống.`);
                 if (!unitPrice || isNaN(unitPrice) || parseFloat(unitPrice) < 0)
-                    errors.push(`Dòng ${lineNum}: Giá nhập (unit_price) không được để trống và phải là số không âm.`);
+                    errors.push(`Giá nhập (unit_price) không được để trống và phải là số không âm.`);
                 if (!slOrder || isNaN(slOrder) || parseInt(slOrder) < 0)
-                    errors.push(`Dòng ${lineNum}: SL order (sl_order) không được để trống và phải là số nguyên không âm.`);
+                    errors.push(`SL order (sl_order) không được để trống và phải là số nguyên không âm.`);
                 if (!quantity || isNaN(quantity) || parseInt(quantity) < 0)
-                    errors.push(`Dòng ${lineNum}: Số lượng (quantity) không được để trống và phải là số nguyên không âm.`);
-                if (!volume)    errors.push(`Dòng ${lineNum}: Dung tích (volume) không được để trống.`);
-                if (!category)  errors.push(`Dòng ${lineNum}: Danh mục (category) không được để trống.`);
-                if (!brand)     errors.push(`Dòng ${lineNum}: Thương hiệu (brand) không được để trống.`);
-                if (!conc)      errors.push(`Dòng ${lineNum}: Nồng độ (concentration) không được để trống.`);
+                    errors.push(`Số lượng (quantity) không được để trống và phải là số nguyên không âm.`);
+                if (!volume)    errors.push(`Dung tích (volume) không được để trống.`);
+                if (!category)  errors.push(`Danh mục (category) không được để trống.`);
+                if (!brand)     errors.push(`Thương hiệu (brand) không được để trống.`);
+                if (!conc)      errors.push(`Nồng độ (concentration) không được để trống.`);
                 if (!expiry)
-                    errors.push(`Dòng ${lineNum}: HSD không được để trống (định dạng: YYYY-MM-DD, ví dụ: 2026-09-15).`);
+                    errors.push(`HSD không được để trống (định dạng: YYYY-MM-DD, ví dụ: 2026-09-15).`);
                 else if (!dateRegex.test(expiry))
-                    errors.push(`Dòng ${lineNum}: HSD "${expiry}" sai định dạng, phải là YYYY-MM-DD (ví dụ: 2026-09-15).`);
+                    errors.push(`HSD "${expiry}" sai định dạng, phải là YYYY-MM-DD (ví dụ: 2026-09-15).`);
 
                 if (errors.length >= 10) { errors.push('... (còn nhiều lỗi, vui lòng kiểm tra lại file)'); break; }
             }
 
             if (errors.length > 0) {
+                const uniqueErrors = [...new Set(errors)];
                 let html = '<strong><i class="fa fa-exclamation-triangle me-1"></i>File có lỗi, vui lòng kiểm tra:</strong><ul class="mb-0 mt-1">';
-                errors.forEach(e => html += `<li>${e}</li>`);
+                uniqueErrors.forEach(e => html += `<li>${e}</li>`);
                 html += '</ul>';
                 validationBox.innerHTML = html;
                 validationBox.style.display = 'block';

@@ -39,13 +39,13 @@ class UserAddressController extends Controller
     {
         $request->validate([
             'name'    => 'required|string|max:100',
-            'phone'   => 'required|string|max:20',
+            'phone'   => ['required', 'regex:/^0\d{9}$/'],
             'address' => 'required|string|max:255',
         ], [
             'name.required'    => 'Vui lòng nhập họ tên người nhận.',
             'name.max'         => 'Họ tên không được vượt quá 100 ký tự.',
             'phone.required'   => 'Vui lòng nhập số điện thoại.',
-            'phone.max'        => 'Số điện thoại không được vượt quá 20 ký tự.',
+            'phone.regex'      => 'Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0.',
             'address.required' => 'Vui lòng nhập địa chỉ.',
             'address.max'      => 'Địa chỉ không được vượt quá 255 ký tự.',
         ]);
@@ -72,13 +72,13 @@ class UserAddressController extends Controller
 
         $request->validate([
             'name'    => 'required|string|max:100',
-            'phone'   => 'required|string|max:20',
+            'phone'   => ['required', 'regex:/^0\d{9}$/'],
             'address' => 'required|string|max:255',
         ], [
             'name.required'    => 'Vui lòng nhập họ tên người nhận.',
             'name.max'         => 'Họ tên không được vượt quá 100 ký tự.',
             'phone.required'   => 'Vui lòng nhập số điện thoại.',
-            'phone.max'        => 'Số điện thoại không được vượt quá 20 ký tự.',
+            'phone.regex'      => 'Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0.',
             'address.required' => 'Vui lòng nhập địa chỉ.',
             'address.max'      => 'Địa chỉ không được vượt quá 255 ký tự.',
         ]);

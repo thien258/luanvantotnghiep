@@ -101,9 +101,12 @@
                         Phương thức: <strong class="text-uppercase">{{ $order->payment_method }}</strong><br>
                         @php
                             $rawNote = $order->note ?? '';
-                            // Tách phần "Admin từ chối hoàn: ..." và xóa tag [RETURN_REJECTED]
+                            // Tách phần "Admin từ chối hoàn: ..." và xóa tag [RETURN_REJECTED] và [REVIEWED]
                             $displayNote = preg_replace('/\s*\[RETURN_REJECTED\]/i', '', $rawNote);
-                            // Xóa dấu " | " trước "Admin từ chối hoàn" và xuống hàng
+                            $displayNote = preg_replace('/\s*\|\s*\[REVIEWED\]/i', '', $displayNote);
+                            $displayNote = preg_replace('/\s*\[REVIEWED\]/i', '', $displayNote);
+                            // Xuống hàng trước "Lý do hoàn:" và "Admin từ chối hoàn:"
+                            $displayNote = preg_replace('/\s*\|\s*(Lý do hoàn:)/i', '<br>$1', $displayNote);
                             $displayNote = preg_replace('/\s*\|\s*(Admin từ chối hoàn:)/i', '<br>$1', $displayNote);
                         @endphp
                         @if($displayNote)

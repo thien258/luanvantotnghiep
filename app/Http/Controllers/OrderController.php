@@ -161,7 +161,8 @@ class OrderController extends Controller
                     'quantity'  => $cart->quantity,
                     'price'     => $cart->product->getDiscountedPrice(), // snapshot giá lúc mua
                 ]);
-                // Tồn kho KHÔNG trừ ở đây — trừ khi admin xuất kho
+                // $cart->product->decrement('quantity', $cart->quantity);
+
             }
 
             // Xóa cart items đã được đặt hàng
@@ -337,11 +338,17 @@ class OrderController extends Controller
                     'product_id' => $detail->idProduct,
                     'quantity'   => $detail->quantity,
                 ]);
+
+                // $product = Product::find($detail->idProduct);
+                // if ($product) {
+                //     $product->increment('quantity', $detail->quantity);
+                // }
             }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('cancelOrder error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Có lỗi xảy ra khi hủy đơn hàng. Vui lòng thử lại.');
         }
 
         return redirect()->route('order.history')
